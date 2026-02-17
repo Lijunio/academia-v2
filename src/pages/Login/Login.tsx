@@ -39,10 +39,13 @@ const Login: React.FC = () => {
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-accent-red to-accent-purple 
-            flex items-center justify-center shadow-2xl">
-            <i className="fas fa-heartbeat text-3xl text-white"></i>
-          </div>
+        <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
+          <img 
+            src="/logo512.png" 
+            alt="Logo" 
+            className="w-34 h-34 object-contain animate-float"
+          />
+        </div>
           <h1 className="text-3xl font-black text-white font-montserrat">
             TREINOS DO <span className="bg-gradient-to-r from-accent-red to-accent-purple bg-clip-text text-transparent">ELIJUNIO</span>
           </h1>

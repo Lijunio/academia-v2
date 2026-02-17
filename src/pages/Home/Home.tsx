@@ -179,13 +179,15 @@ const Home: React.FC = () => {
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
         
         {/* HEADER COM ESTATÍSTICAS RÁPIDAS */}
-        <div className="mb-12">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-red to-accent-purple 
-                flex items-center justify-center shadow-2xl shadow-accent-red/30 animate-float">
-                <i className="fas fa-heartbeat text-3xl text-white"></i>
-              </div>
+   <div className="mb-12">
+  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
+    <div className="flex items-center gap-4">
+      {/* Imagem sem fundo, apenas animação */}
+      <img 
+        src="/logo512.png" 
+        alt="Logo" 
+        className="w-20 h-20 md:w-24 md:h-24 animate-float"
+      />
               <div>
                 <h1 className="text-3xl md:text-4xl font-black text-white font-montserrat 
                   bg-gradient-to-r from-white via-white to-accent-red bg-clip-text text-transparent">
@@ -193,7 +195,7 @@ const Home: React.FC = () => {
                 </h1>
                 <p className="text-text-secondary/80 text-sm flex items-center gap-2">
                   <i className="fas fa-chart-line text-accent-green"></i>
-                  Acompanhe sua evolução em tempo real
+                  Sua evolução em tempo real
                 </p>
               </div>
             </div>
