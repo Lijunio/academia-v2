@@ -1,0 +1,1 @@
+export {}; // <-- OU ADICIONE ISSO NO FINAL

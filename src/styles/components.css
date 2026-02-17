@@ -1,0 +1,230 @@
+/* ========== ESTILOS ESPECÍFICOS PARA COMPONENTES ========== */
+
+/* ExerciseCard em telas muito pequenas */
+@media (max-width: 375px) {
+  .exercise-card-mobile {
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+    border-radius: 0.75rem !important;
+  }
+  
+  .exercise-image-mobile {
+    height: 9rem !important;
+  }
+}
+
+/* RestOverlay em mobile */
+@media (max-width: 480px) {
+  .rest-overlay-mobile {
+    padding: 1rem !important;
+    max-width: 95% !important;
+  }
+}
+
+/* Timer em mobile */
+@media (max-width: 480px) {
+  .timer-mobile {
+    padding: 1rem !important;
+  }
+  
+  .timer-display-mobile {
+    font-size: 2.5rem !important;
+  }
+}
+
+/* ========== EXERCISE CARD - RESPONSIVIDADE COMPLETA ========== */
+
+/* iPhone SE / Small Phones (320px - 375px) */
+@media (max-width: 375px) {
+  /* Container principal */
+  .exercise-card-container {
+    padding: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+    border-radius: 0.625rem !important;
+  }
+  
+  /* Número do exercício */
+  .exercise-number-badge {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+    font-size: 0.75rem !important;
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+  
+  /* Título do exercício */
+  .exercise-title {
+    font-size: 0.9375rem !important; /* 15px */
+    line-height: 1.3 !important;
+    padding-right: 2.5rem !important;
+  }
+  
+  /* Badges de status */
+  .exercise-status-badge {
+    font-size: 0.625rem !important; /* 10px */
+    padding: 0.125rem 0.375rem !important;
+  }
+  
+  /* Badge de séries */
+  .exercise-sets-badge {
+    font-size: 0.6875rem !important; /* 11px */
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  /* Descrição do exercício */
+  .exercise-description {
+    font-size: 0.8125rem !important; /* 13px */
+    line-height: 1.4 !important;
+    margin-top: 0.5rem !important;
+  }
+  
+  /* Container da imagem */
+  .exercise-image-container {
+    margin-top: 0.75rem !important;
+    width: 100% !important;
+  }
+  
+  /* Imagem em si */
+  .exercise-image {
+    height: 8rem !important;
+    padding: 0.25rem !important;
+  }
+  
+  /* Botões de navegação da imagem */
+  .image-nav-button {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    font-size: 0.5rem !important;
+  }
+  
+  /* Dots de navegação */
+  .image-dot {
+    width: 0.375rem !important;
+    height: 0.375rem !important;
+  }
+  
+  /* Botões de ação (Concluir/Não fazer) */
+  .exercise-action-button {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.75rem !important;
+    min-height: 2.5rem !important;
+  }
+  
+  .exercise-action-button i {
+    font-size: 0.75rem !important;
+  }
+  
+  /* Grid de botões */
+  .exercise-buttons-grid {
+    gap: 0.5rem !important;
+  }
+  
+  /* Modal de pular exercício */
+  .skip-modal-container {
+    padding: 1rem !important;
+  }
+  
+  .skip-modal-title {
+    font-size: 1.125rem !important;
+  }
+  
+  .skip-modal-textarea {
+    height: 5rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+/* Phones médios (376px - 480px) */
+@media (min-width: 376px) and (max-width: 480px) {
+  .exercise-card-container {
+    padding: 1rem !important;
+  }
+  
+  .exercise-title {
+    font-size: 1rem !important;
+  }
+  
+  .exercise-sets-badge {
+    font-size: 0.75rem !important;
+    padding: 0.375rem 0.75rem !important;
+  }
+  
+  .exercise-image {
+    height: 10rem !important;
+  }
+  
+  .exercise-action-button {
+    padding: 0.625rem !important;
+    font-size: 0.8125rem !important;
+  }
+}
+
+/* Tablets pequenos (481px - 640px) */
+@media (min-width: 481px) and (max-width: 640px) {
+  .exercise-card-container {
+    padding: 1.25rem !important;
+  }
+  
+  .exercise-title {
+    font-size: 1.0625rem !important;
+  }
+  
+  .exercise-image {
+    height: 12rem !important;
+  }
+}
+
+/* ========== QUEBRA DE TEXTO E OVERFLOW ========== */
+
+/* Forçar quebra de palavras longas */
+.exercise-title,
+.exercise-description,
+.exercise-skip-reason {
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  hyphens: auto !important;
+}
+
+/* Limitar linhas de texto */
+.exercise-description {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+/* ========== LAYOUT FLEXÍVEL PARA IMAGENS ========== */
+
+@media (max-width: 768px) {
+  /* Em telas menores, imagem fica em cima do conteúdo */
+  .exercise-card-flex {
+    flex-direction: column !important;
+  }
+  
+  .exercise-image-container {
+    order: -1 !important; /* Imagem antes do conteúdo */
+    margin-bottom: 1rem !important;
+  }
+}
+
+/* ========== BOTÕES TOUCH-FRIENDLY ========== */
+
+.exercise-action-button,
+.image-nav-button,
+.image-dot-button {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  touch-action: manipulation !important;
+}
+
+/* ========== AJUSTES ESPECÍFICOS PARA iOS ========== */
+
+@supports (-webkit-touch-callout: none) {
+  .exercise-action-button {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .exercise-image {
+    -webkit-user-drag: none !important;
+  }
+}

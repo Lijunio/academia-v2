@@ -1,0 +1,267 @@
+// src/components/common/Modal/WorkoutFullReportModal.tsx
+import React from 'react';
+
+// Usando a mesma interface do YearCalendar (copiei daqui para garantir)
+interface Workout {
+  id: string;
+  type: 'academia' | 'natacao' | 'pilates';
+  date: string;
+  duration: number;
+  calories: number;
+  heart_rate: number;
+  details?: any;
+  notes?: string;
+}
+
+interface WorkoutFullReportModalProps {
+  workout: Workout;
+  onClose: () => void;
+}
+
+const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout, onClose }) => {
+  
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getWorkoutTypeName = (type: string) => {
+    switch(type) {
+      case 'academia': return 'Treino de Academia';
+      case 'natacao': return 'Natação';
+      case 'pilates': return 'Pilates';
+      default: return type;
+    }
+  };
+
+  const getWorkoutSubType = (workout: Workout): string => {
+    if (workout.type !== 'academia') return '';
+    
+    const notes = workout.notes?.toLowerCase() || '';
+    const details = workout.details || {};
+    
+    if (notes.includes('treino a') || details.workoutType === 'A') return ' - Treino A';
+    if (notes.includes('treino b') || details.workoutType === 'B') return ' - Treino B';
+    return '';
+  };
+
+  const renderAcademiaDetails = () => {
+    const exercises = workout.details?.exercises || [];
+    const executionData = workout.details?.executionData || {};
+    
+    const completedExercises = exercises.filter((ex: any) => ex.completed).length;
+    const totalExercises = exercises.length;
+    
+    if (exercises.length === 0) {
+      return (
+        <div className="bg-blue-500/10 rounded-xl p-6 text-center">
+          <p className="text-blue-300">Detalhes dos exercícios não disponíveis</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-4">
+        <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/20">
+          <h4 className="text-blue-300 font-bold mb-3">📊 ESTATÍSTICAS DO TREINO</h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-text-secondary text-xs">Exercícios</p>
+              <p className="text-white font-bold">{completedExercises}/{totalExercises}</p>
+            </div>
+            <div>
+              <p className="text-text-secondary text-xs">Conclusão</p>
+              <p className="text-accent-green font-bold">{Math.round((completedExercises/totalExercises)*100)}%</p>
+            </div>
+          </div>
+        </div>
+
+        <h4 className="text-white font-bold mt-4 mb-2">📝 EXERCÍCIOS REALIZADOS:</h4>
+        
+        {exercises.map((ex: any, index: number) => {
+          const execution = executionData[ex.id];
+          const isCompleted = ex.completed;
+          const skipReason = ex.skipReason;
+          
+          return (
+            <div key={ex.id} className="bg-white/5 rounded-xl p-4 border border-white/10">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-white font-bold">
+                    {index + 1}. {ex.name}
+                  </p>
+                  {isCompleted && execution && (
+                    <div className="mt-2 space-y-1">
+                      <p className="text-accent-green text-sm">✅ Peso: {execution.weight} kg</p>
+                      {execution.variationName && (
+                        <p className="text-text-secondary text-xs">Variação: {execution.variationName}</p>
+                      )}
+                      {execution.observations && (
+                        <p className="text-text-secondary text-xs italic">Obs: {execution.observations}</p>
+                      )}
+                    </div>
+                  )}
+                  {skipReason && (
+                    <div className="mt-2">
+                      <p className="text-yellow-500 text-sm">⏭️ Pulado: {skipReason}</p>
+                    </div>
+                  )}
+                </div>
+                {isCompleted && (
+                  <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs">Concluído</span>
+                )}
+                {skipReason && (
+                  <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs">Pulado</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderNatacaoDetails = () => {
+    const details = workout.details || {};
+    
+    if (!details.distance || !details.poolLength) {
+      return (
+        <div className="bg-blue-500/10 rounded-xl p-6 text-center">
+          <p className="text-blue-300">Detalhes da natação não disponíveis</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-4">
+        <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/20">
+          <h4 className="text-blue-300 font-bold mb-3">🏊‍♂️ DETALHES DA NATAÇÃO</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-text-secondary text-xs">Distância</p>
+              <p className="text-white font-bold text-xl">{details.distance}m</p>
+            </div>
+            <div>
+              <p className="text-text-secondary text-xs">Piscina</p>
+              <p className="text-white font-bold text-xl">{details.poolLength}m</p>
+            </div>
+          </div>
+          <div className="mt-3">
+            <p className="text-text-secondary text-xs">Piscinas</p>
+            <p className="text-white font-bold">{Math.round(details.distance / details.poolLength)}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderPilatesDetails = () => {
+    const details = workout.details || {};
+    
+    return (
+      <div className="space-y-4">
+        <div className="bg-green-500/10 rounded-xl p-4 border border-green-500/20">
+          <h4 className="text-green-300 font-bold mb-3">🧘‍♀️ DETALHES DO PILATES</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-text-secondary text-xs">Foco</p>
+              <p className="text-white font-bold capitalize">{details.focusArea || 'Core'}</p>
+            </div>
+            <div>
+              <p className="text-text-secondary text-xs">Dificuldade</p>
+              <p className="text-white font-bold">{details.difficulty || 3}/5</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+      <div className="bg-gradient-to-br from-secondary-dark to-black rounded-2xl p-8 
+        max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
+        
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-6 sticky top-0 bg-gradient-to-br from-secondary-dark to-black py-2">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+            <i className="fas fa-file-alt text-accent-red"></i>
+            Relatório Completo do Treino
+          </h2>
+          <button
+            onClick={onClose}
+            className="w-10 h-10 rounded-xl bg-white/5 text-white 
+              hover:bg-white/10 transition-all"
+          >
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
+
+        {/* INFO PRINCIPAL */}
+        <div className="bg-white/5 rounded-xl p-6 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-text-secondary text-xs mb-1">Tipo</p>
+              <p className="text-white font-bold capitalize">
+                {getWorkoutTypeName(workout.type)}
+                {getWorkoutSubType(workout)}
+              </p>
+            </div>
+            <div>
+              <p className="text-text-secondary text-xs mb-1">Data</p>
+              <p className="text-white font-bold">
+                {new Date(workout.date).toLocaleDateString('pt-BR')}
+              </p>
+            </div>
+            <div>
+              <p className="text-text-secondary text-xs mb-1">Duração</p>
+              <p className="text-white font-bold">
+                {formatDuration(workout.duration)}
+              </p>
+            </div>
+            <div>
+              <p className="text-text-secondary text-xs mb-1">Calorias</p>
+              <p className="text-accent-green font-bold">{workout.calories} kcal</p>
+            </div>
+          </div>
+        </div>
+
+        {/* DETALHES ESPECÍFICOS */}
+        {workout.type === 'academia' && renderAcademiaDetails()}
+        {workout.type === 'natacao' && renderNatacaoDetails()}
+        {workout.type === 'pilates' && renderPilatesDetails()}
+
+        {/* RESUMO */}
+        <div className="mt-6 pt-4 border-t border-white/10">
+          <h4 className="text-white font-bold mb-3">📈 RESUMO</h4>
+          <div className="bg-gradient-to-br from-accent-red/10 to-accent-purple/10 rounded-xl p-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-text-secondary text-xs">FC Média</p>
+                <p className="text-white font-bold">{workout.heart_rate} bpm</p>
+              </div>
+              <div>
+                <p className="text-text-secondary text-xs">Intensidade</p>
+                <p className="text-white font-bold">
+                  {workout.heart_rate < 100 ? 'Leve' : 
+                   workout.heart_rate < 130 ? 'Moderada' : 
+                   workout.heart_rate < 160 ? 'Alta' : 'Máxima'}
+                </p>
+              </div>
+            </div>
+            {workout.notes && (
+              <div className="mt-3">
+                <p className="text-text-secondary text-xs mb-1">Observações</p>
+                <p className="text-white italic">"{workout.notes}"</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default WorkoutFullReportModal;
