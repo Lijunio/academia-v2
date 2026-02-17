@@ -329,17 +329,89 @@ const History: React.FC = () => {
     ]
   };
 
-  const countChart = {
-    labels: chartData.labels,
-    datasets: [
-      {
-        label: 'Número de Treinos',
-        data: chartData.count,
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        borderRadius: 8
-      }
-    ]
+  // NOVO GRÁFICO DE FREQUÊNCIA COM CORES POR TIPO
+  const prepareFrequencyChartData = () => {
+    const last30Days = [...Array(30)].map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return d.toLocaleDateString();
+    }).reverse();
+
+    // Contar treinos por tipo em cada dia
+    const treinoAData = last30Days.map(date => 
+      filteredWorkouts.filter(w => 
+        new Date(w.date).toLocaleDateString() === date && 
+        w.type === 'academia' && 
+        (w.notes?.toLowerCase().includes('treino a') || w.details?.workoutType === 'A')
+      ).length
+    );
+
+    const treinoBData = last30Days.map(date => 
+      filteredWorkouts.filter(w => 
+        new Date(w.date).toLocaleDateString() === date && 
+        w.type === 'academia' && 
+        (w.notes?.toLowerCase().includes('treino b') || w.details?.workoutType === 'B')
+      ).length
+    );
+
+    const natacaoData = last30Days.map(date => 
+      filteredWorkouts.filter(w => 
+        new Date(w.date).toLocaleDateString() === date && 
+        w.type === 'natacao'
+      ).length
+    );
+
+    const pilatesData = last30Days.map(date => 
+      filteredWorkouts.filter(w => 
+        new Date(w.date).toLocaleDateString() === date && 
+        w.type === 'pilates'
+      ).length
+    );
+
+    return {
+      labels: last30Days,
+      datasets: [
+        {
+          label: 'Treino A',
+          data: treinoAData,
+          backgroundColor: 'rgba(59, 130, 246, 0.8)', // Azul
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1,
+          borderRadius: 4,
+          stack: 'stack0',
+        },
+        {
+          label: 'Treino B',
+          data: treinoBData,
+          backgroundColor: 'rgba(239, 68, 68, 0.8)', // Vermelho
+          borderColor: 'rgba(239, 68, 68, 1)',
+          borderWidth: 1,
+          borderRadius: 4,
+          stack: 'stack0',
+        },
+        {
+          label: 'Natação',
+          data: natacaoData,
+          backgroundColor: 'rgba(16, 185, 129, 0.8)', // Verde Esmeralda
+          borderColor: 'rgba(16, 185, 129, 1)',
+          borderWidth: 1,
+          borderRadius: 4,
+          stack: 'stack0',
+        },
+        {
+          label: 'Pilates',
+          data: pilatesData,
+          backgroundColor: 'rgba(245, 158, 11, 0.8)', // Laranja/Âmbar
+          borderColor: 'rgba(245, 158, 11, 1)',
+          borderWidth: 1,
+          borderRadius: 4,
+          stack: 'stack0',
+        }
+      ]
+    };
   };
+
+  const frequencyChartData = prepareFrequencyChartData();
 
   // GRÁFICO DE DISTRIBUIÇÃO COM CORES ATUALIZADAS
   const typeDistribution = {
@@ -407,9 +479,9 @@ const History: React.FC = () => {
               <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
             </Link>
             <div>
-              <h1 className="text-3xl md:text-4xl font-black text-white font-montserrat">
-                Histórico <span className="bg-gradient-to-r from-accent-red to-accent-purple bg-clip-text text-transparent">Completo</span>
-              </h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white font-montserrat whitespace-nowrap overflow-hidden text-ellipsis">
+              Histórico <span className="bg-gradient-to-r from-accent-red to-accent-purple bg-clip-text text-transparent">Completo</span>
+            </h1>
               <p className="text-text-secondary">
                 {filteredWorkouts.length} treinos encontrados
               </p>
@@ -514,7 +586,7 @@ const History: React.FC = () => {
             </div>
           </div>
 
-          {/* Gráfico de Frequência */}
+          {/* Gráfico de Frequência - NOVO COM CORES */}
           <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
             border border-white/10 h-full">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -524,22 +596,80 @@ const History: React.FC = () => {
             <div className="h-64">
               <Bar 
                 key="frequency-chart"
-                data={countChart}
+                data={frequencyChartData}
                 options={{
                   responsive: true,
                   maintainAspectRatio: false,
                   scales: {
                     y: {
                       grid: { color: 'rgba(255,255,255,0.1)' },
-                      ticks: { color: 'white', stepSize: 1 }
+                      ticks: { color: 'white', stepSize: 1 },
+                      stacked: true,
                     },
                     x: {
                       grid: { display: false },
-                      ticks: { color: 'white', maxRotation: 45, maxTicksLimit: 5 }
+                      ticks: { color: 'white', maxRotation: 45, maxTicksLimit: 5 },
+                      stacked: true,
                     }
                   },
                   plugins: {
-                    legend: { display: false }
+                    legend: {
+                      position: 'top',
+                      labels: { 
+                        color: 'white',
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                      }
+                    },
+                    tooltip: {
+                      backgroundColor: '#1A1F2E',
+                      callbacks: {
+                        label: (context) => {
+                          const label = context.dataset.label || '';
+                          const value = context.raw as number;
+                          return `${label}: ${value} treino(s)`;
+                        }
+                      }
+                    }
+                  },
+                  onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                      const element = elements[0];
+                      const datasetIndex = element.datasetIndex;
+                      const dataIndex = element.index;
+                      
+                      // Pega a data correspondente
+                      const date = frequencyChartData.labels[dataIndex];
+                      
+                      // Filtra os treinos dessa data do tipo correspondente
+                      let typeFilter = '';
+                      if (datasetIndex === 0) typeFilter = 'treino a';
+                      else if (datasetIndex === 1) typeFilter = 'treino b';
+                      else if (datasetIndex === 2) typeFilter = 'natacao';
+                      else if (datasetIndex === 3) typeFilter = 'pilates';
+                      
+                      const workoutsOnDate = filteredWorkouts.filter(w => {
+                        const workoutDate = new Date(w.date).toLocaleDateString();
+                        if (workoutDate !== date) return false;
+                        
+                        if (datasetIndex === 0) {
+                          return w.type === 'academia' && 
+                            (w.notes?.toLowerCase().includes('treino a') || w.details?.workoutType === 'A');
+                        } else if (datasetIndex === 1) {
+                          return w.type === 'academia' && 
+                            (w.notes?.toLowerCase().includes('treino b') || w.details?.workoutType === 'B');
+                        } else if (datasetIndex === 2) {
+                          return w.type === 'natacao';
+                        } else if (datasetIndex === 3) {
+                          return w.type === 'pilates';
+                        }
+                        return false;
+                      });
+                      
+                      if (workoutsOnDate.length > 0) {
+                        setSelectedWorkout(workoutsOnDate[0]);
+                      }
+                    }
                   }
                 }}
               />
@@ -564,6 +694,21 @@ const History: React.FC = () => {
                     legend: {
                       position: 'bottom',
                       labels: { color: 'white' }
+                    }
+                  },
+                  onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                      const element = elements[0];
+                      const index = element.index;
+                      
+                      let typeFilter = '';
+                      if (index === 0) typeFilter = 'academia';
+                      else if (index === 1) typeFilter = 'natacao';
+                      else if (index === 2) typeFilter = 'pilates';
+                      
+                      // Aplica o filtro e rola para a lista
+                      setFilter(typeFilter as any);
+                      document.getElementById('workouts-list')?.scrollIntoView({ behavior: 'smooth' });
                     }
                   }
                 }}
@@ -803,9 +948,9 @@ const History: React.FC = () => {
                           rounded-xl hover:bg-red-500/30 
                           transition-all 
                           flex items-center justify-center
-                          w-10 h-10 md:w-auto md:h-auto  /* Tamanho fixo em mobile */
-                          opacity-100 md:opacity-0        /* Sempre visível em mobile, invisível em desktop */
-                          md:group-hover:opacity-100      /* Aparece no hover em desktop */
+                          w-10 h-10 md:w-auto md:h-auto
+                          opacity-100 md:opacity-0
+                          md:group-hover:opacity-100
                         `}
                         title="Excluir treino"
                       >

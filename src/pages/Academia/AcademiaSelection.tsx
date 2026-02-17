@@ -269,10 +269,7 @@ const Home: React.FC = () => {
           border-t border-white/5">
           <p className="text-text-muted/70 text-xs md:text-sm 
             font-inter tracking-wide uppercase">
-            ACADEMIA ELIJUNIO © 2024 • 
-            <span className="text-accent-red mx-2">Foco</span> • 
-            <span className="text-accent-blue mx-2">Disciplina</span> • 
-            <span className="text-accent-green mx-2">Resultados</span>
+            ACADEMIA ELIJUNIO © 2026
           </p>
         </footer>
       </div>

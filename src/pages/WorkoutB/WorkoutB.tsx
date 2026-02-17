@@ -55,8 +55,6 @@ const WorkoutB: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [exerciseOptions, setExerciseOptions] = useState<{ name: string; group: string }[]>([]);
   const [showResetModal, setShowResetModal] = useState(false);
-  const [showReportModal, setShowReportModal] = useState(false);
-  const [workoutReport, setWorkoutReport] = useState<any>(null);
 
   useEffect(() => {
     console.log('📊 WorkoutB - Estado atual:', {
@@ -442,11 +440,15 @@ const WorkoutB: React.FC = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
+              {/* BOTÃO RESETAR - SÓ ATIVO QUANDO TREINO INICIADO */}
               <button 
                 onClick={() => setShowResetModal(true)}
-                className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 
-                  text-white font-bold rounded-xl transition-all hover:scale-105 
-                  flex items-center gap-3 shadow-lg hover:shadow-orange-500/30"
+                disabled={!session.workoutStarted}
+                className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-3
+                  ${session.workoutStarted 
+                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white hover:scale-105 shadow-lg hover:shadow-orange-500/30' 
+                    : 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+                  }`}
               >
                 <i className="fas fa-undo"></i>
                 Resetar Treino
@@ -516,17 +518,6 @@ const WorkoutB: React.FC = () => {
         }}
         onCancel={() => setShowResetModal(false)}
       />
-
-      {workoutReport && (
-        <WorkoutReport
-          report={workoutReport}
-          onSend={async () => {
-            // Implementar envio se necessário
-          }}
-          onClose={() => setShowReportModal(false)}
-          sending={false}
-        />
-      )}
     </>
   );
 };

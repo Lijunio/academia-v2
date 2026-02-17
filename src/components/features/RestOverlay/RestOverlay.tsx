@@ -20,7 +20,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
   exerciseOptions = []
 }) => {
   const [timeLeft, setTimeLeft] = useState(restTime);
-  const [isTimerRunning, _setIsTimerRunning] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -53,9 +52,9 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
     };
   }, [isVisible]);
 
-  // Configurar e gerenciar o timer - NÃO PODE SER PAUSADO
+  // Configurar e gerenciar o timer
   useEffect(() => {
-    if (isVisible && isTimerRunning) {
+    if (isVisible) {
       // Resetar timer
       setTimeLeft(restTime);
       
@@ -69,7 +68,7 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
         }
       }
 
-      // Iniciar timer - NÃO PODE SER INTERROMPIDO
+      // Iniciar timer
       timerRef.current = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
@@ -99,9 +98,9 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
         timerRef.current = null;
       }
     };
-  }, [isVisible, restTime, onClose, isTimerRunning]);
+  }, [isVisible, restTime, onClose]);
 
-  // Pular descanso - ÚNICA FORMA DE PARAR O TIMER
+  // Pular descanso
   const handleSkip = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -128,8 +127,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
 
   // Botão X no canto superior direito
   const handleClose = () => {
-    // Quando clicar no X, apenas fecha - o timer continua rodando em background
-    // Mas como o modal fecha, o efeito cleanup vai parar o timer
     onClose();
   };
 
@@ -183,7 +180,7 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
             </div>
           </div>
           
-          {/* PRÓXIMO EXERCÍCIO COM OPÇÕES */}
+          {/* PRÓXIMO EXERCÍCIO */}
           <div className="bg-white/5 rounded-lg p-2 sm:p-3 border border-white/10 mb-4">
             <p className="text-text-secondary text-xs sm:text-sm mb-0.5 sm:mb-1">Próximo exercício:</p>
             <p 
@@ -193,11 +190,10 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
             >
               {nextExerciseName}
             </p>
-            
           </div>
         </div>
 
-        {/* TIMER VISUAL - SEM CONTROLES DE PAUSA */}
+        {/* TIMER VISUAL */}
         <div className="relative w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 mx-auto mb-4 sm:mb-5 md:mb-6">
           {/* ANEL DE FUNDO */}
           <svg className="absolute inset-0 w-full h-full transform -rotate-90">

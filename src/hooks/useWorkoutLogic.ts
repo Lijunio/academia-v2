@@ -247,8 +247,13 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     return options;
   }, [session.workoutStarted, session.currentGroupIndex, groups, exercises]);
 
-  const showRestTimerWithOptions = useCallback((type: 'exercise' | 'group', currentExerciseId?: number) => {
+  const showRestTimerWithOptions = useCallback((type: 'exercise' | 'group', currentExerciseId?: number, wasSkipped: boolean = false) => {
     if (!session.workoutStarted) return;
+    
+    // Se foi pulado, não mostra descanso
+    if (wasSkipped) {
+      return;
+    }
     
     const options = getNextExerciseOptions(currentExerciseId);
     
@@ -371,7 +376,7 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     setCurrentExerciseForWeight(null);
     
     setTimeout(() => {
-      showRestTimerWithOptions('exercise', currentExerciseForWeight.id);
+      showRestTimerWithOptions('exercise', currentExerciseForWeight.id, false);
     }, 500);
     
     saveProgress();
@@ -415,7 +420,8 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     saveProgress();
     
     setTimeout(() => {
-      showRestTimerWithOptions('exercise', exerciseId);
+      // NÃO mostra descanso quando pula exercício
+      showRestTimerWithOptions('exercise', exerciseId, true);
     }, 500);
     
     setTimeout(() => {
@@ -570,7 +576,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     return exercises.every(ex => ex.completed || ex.skipReason);
   }, [exercises]);
 
-  // FUNÇÃO ATUALIZADA - Agora recebe heartRate
   const finalizeWorkout = useCallback(async (calories: number, heartRate?: number) => {
     setIsSendingReport(true);
     
@@ -625,7 +630,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     }
   }, [workoutType, exercises, executionData, resetWorkout]);
 
-  // FUNÇÃO ATUALIZADA - Inclui heartRate no relatório
   const sendTelegramReport = async (report: EnhancedWorkoutReport): Promise<boolean> => {
     try {
       const formatDuration = (seconds: number): string => {
@@ -638,15 +642,18 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
       const formattedTime = report.date.toLocaleTimeString('pt-BR');
       
       const completedExercises = report.exercises.filter(e => e.completed).length;
+      const skippedExercises = report.exercises.filter(e => e.skipReason).length;
       const totalExercises = report.exercises.length;
       const completedPercentage = Math.round((completedExercises / totalExercises) * 100);
       
       const completedExercisesData = report.exercises.filter(e => e.completed);
+      const skippedExercisesData = report.exercises.filter(e => e.skipReason);
+      
       const totalWeight = completedExercisesData.reduce((sum, ex) => sum + (ex.weight || 0), 0);
       const avgWeight = completedExercisesData.length > 0 ? totalWeight / completedExercisesData.length : 0;
       
-      // MENSAGEM ATUALIZADA COM FREQUÊNCIA CARDÍACA
-      const reportMessage = `
+      // MENSAGEM ATUALIZADA COM EXERCÍCIOS PULADOS
+      let reportMessage = `
 🏋️‍♂️ *RELATÓRIO DE TREINO - ${workoutType.toUpperCase()}* 🏋️‍♂️
 
 📅 *Data:* ${formattedDate}
@@ -655,17 +662,34 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
 
 📊 *ESTATÍSTICAS:*
 ├ ✅ Exercícios completados: ${completedExercises}/${totalExercises} (${completedPercentage}%)
+├ ⏭️ Exercícios pulados: ${skippedExercises}
 ├ 🔥 Calorias gastas: ${report.totalCalories} kcal
 ${report.heartRate ? `├ 💓 Frequência cardíaca média: ${report.heartRate} bpm` : ''}
 └ 💪 Peso total movimentado: ${totalWeight.toFixed(1)} kg
 
 📝 *EXERCÍCIOS REALIZADOS:*
-${completedExercisesData.map((ex, index) => `
+`;
+
+      completedExercisesData.forEach((ex, index) => {
+        reportMessage += `
 ${index + 1}. *${ex.name}*
    ├ Peso: ${ex.weight} kg
    ├ Variação: ${ex.variation || 'Padrão'}
    ${ex.observations ? `└ Obs: ${ex.observations}` : '└ Obs: -'}
-`).join('')}
+`;
+      });
+
+      if (skippedExercisesData.length > 0) {
+        reportMessage += `
+⏭️ *EXERCÍCIOS NÃO REALIZADOS:*`;
+        skippedExercisesData.forEach((ex, index) => {
+          reportMessage += `
+${completedExercisesData.length + index + 1}. *${ex.name}*
+   └ Motivo: ${ex.skipReason || 'Não informado'}`;
+        });
+      }
+
+      reportMessage += `
 
 🏆 *RESUMO:*
 Peso médio por exercício: ${avgWeight.toFixed(1)} kg
@@ -680,6 +704,11 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
       
       const TELEGRAM_BOT_TOKEN = process.env.REACT_APP_TELEGRAM_BOT_TOKEN || '';
       const TELEGRAM_CHAT_ID = process.env.REACT_APP_TELEGRAM_CHAT_ID || '';
+      
+      if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+        console.warn('Token ou Chat ID do Telegram não configurados');
+        return false;
+      }
       
       const response = await fetch(
         `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
@@ -814,7 +843,6 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
     setShowCaloriesModal(false);
   }, []);
 
-  // FUNÇÃO NOVA: Obter tempo decorrido
   const getElapsedWorkoutTime = useCallback((): number => {
     if (!workoutStartTimeRef.current) {
       console.log('⏱️ getElapsedWorkoutTime: workoutStartTimeRef.current é NULL');

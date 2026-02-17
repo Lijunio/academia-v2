@@ -58,7 +58,7 @@ const Login: React.FC = () => {
             <div>
               <label className="block text-white mb-2 text-sm">Email</label>
               <div className="relative">
-                <i className="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary"></i>
+                <i className="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary hidden md:block"></i>
                 <input
                   type="email"
                   value={email}
@@ -75,7 +75,7 @@ const Login: React.FC = () => {
             <div>
               <label className="block text-white mb-2 text-sm">Senha</label>
               <div className="relative">
-                <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary"></i>
+                <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary hidden md:block"></i>
                 <input
                   type="password"
                   value={password}
