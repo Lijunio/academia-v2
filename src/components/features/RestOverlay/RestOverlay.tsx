@@ -20,7 +20,7 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
   exerciseOptions = []
 }) => {
   const [timeLeft, setTimeLeft] = useState(restTime);
-  const [isTimerRunning, setIsTimerRunning] = useState(true); // Sempre true, não pode ser pausado
+  const [isTimerRunning, _setIsTimerRunning] = useState(true);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 

@@ -97,8 +97,8 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
 
       `.trim();
 
-      const TELEGRAM_BOT_TOKEN = '8161835192:AAFubpl3R2sgO5GfbnrRXrlNt5KNOtMn2nA';
-      const TELEGRAM_CHAT_ID = '-1003838510525';
+      const TELEGRAM_BOT_TOKEN = process.env.REACT_APP_TELEGRAM_BOT_TOKEN || '';
+      const TELEGRAM_CHAT_ID = process.env.REACT_APP_TELEGRAM_CHAT_ID || '';
 
       const response = await fetch(
         `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
