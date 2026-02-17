@@ -27,7 +27,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-dark via-secondary-dark to-black 
+    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-primary-dark via-secondary-dark to-black 
       flex items-center justify-center p-4">
       
       {/* Background Effects */}
@@ -36,7 +36,7 @@ const Login: React.FC = () => {
         <div className="absolute bottom-20 right-20 w-72 h-72 bg-accent-blue/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-md">
+      <div className="relative z-10 w-full max-w-md max-h-full overflow-hidden">
         {/* Logo */}
         <div className="text-center mb-8">
         <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
