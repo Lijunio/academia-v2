@@ -47,7 +47,6 @@ const WorkoutReport: React.FC<WorkoutReportProps> = ({
           </button>
         </div>
 
-        {/* CABEÇALHO DO RELATÓRIO */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
             <div className="text-center">
@@ -77,7 +76,6 @@ const WorkoutReport: React.FC<WorkoutReportProps> = ({
           </div>
         </div>
 
-        {/* LISTA DE EXERCÍCIOS */}
         <div className="mb-8">
           <h4 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
             <i className="fas fa-dumbbell"></i>
@@ -157,7 +155,6 @@ const WorkoutReport: React.FC<WorkoutReportProps> = ({
           </div>
         </div>
 
-        {/* BOTÕES DE AÇÃO */}
         <div className="flex gap-3 pt-6 border-t border-white/10">
           <button
             onClick={onClose}

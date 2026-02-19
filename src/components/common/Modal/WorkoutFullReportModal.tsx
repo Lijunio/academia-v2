@@ -1,7 +1,5 @@
-// src/components/common/Modal/WorkoutFullReportModal.tsx
 import React from 'react';
 
-// Usando a mesma interface do YearCalendar (copiei daqui para garantir)
 interface Workout {
   id: string;
   type: 'academia' | 'natacao' | 'pilates';
@@ -183,7 +181,6 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
       <div className="bg-gradient-to-br from-secondary-dark to-black rounded-2xl p-8 
         max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
         
-        {/* HEADER */}
         <div className="flex items-center justify-between mb-6 sticky top-0 bg-gradient-to-br from-secondary-dark to-black py-2">
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
             <i className="fas fa-file-alt text-accent-red"></i>
@@ -198,7 +195,6 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
           </button>
         </div>
 
-        {/* INFO PRINCIPAL */}
         <div className="bg-white/5 rounded-xl p-6 mb-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
@@ -227,12 +223,10 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
           </div>
         </div>
 
-        {/* DETALHES ESPECÍFICOS */}
         {workout.type === 'academia' && renderAcademiaDetails()}
         {workout.type === 'natacao' && renderNatacaoDetails()}
         {workout.type === 'pilates' && renderPilatesDetails()}
 
-        {/* RESUMO */}
         <div className="mt-6 pt-4 border-t border-white/10">
           <h4 className="text-white font-bold mb-3">📈 RESUMO</h4>
           <div className="bg-gradient-to-br from-accent-red/10 to-accent-purple/10 rounded-xl p-4">

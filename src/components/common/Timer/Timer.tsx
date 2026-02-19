@@ -1,22 +1,21 @@
-// components/common/Timer/Timer.tsx - VERSÃO CORRIGIDA
 import React, { useState, useEffect, useRef } from 'react';
 
 interface TimerProps {
   totalTime: number;
   onTimeUp?: () => void;
-  workoutStarted: boolean; // ← AGORA O HOOK CONTROLA SE O TIMER INICIOU
+  workoutStarted: boolean;
   exerciseStarted: boolean;
-  onStartWorkout?: () => void; // ← APENAS MOSTRAR MODAL
-  onResetTimer?: () => void; // ← NOVA PROP PARA RESETAR TIMER
+  onStartWorkout?: () => void;
+  onResetTimer?: () => void;
 }
 
 const Timer: React.FC<TimerProps> = ({ 
   totalTime, 
   onTimeUp,
-  workoutStarted, // ← RECEBE DO HOOK
+  workoutStarted,
   exerciseStarted,
   onStartWorkout,
-  onResetTimer // ← NOVA PROP
+  onResetTimer
 }) => {
   const [timeLeft, setTimeLeft] = useState(totalTime);
   const [isRunning, setIsRunning] = useState(false);
@@ -24,18 +23,12 @@ const Timer: React.FC<TimerProps> = ({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  // EFEITO PARA SINCRONIZAR COM workoutStarted DO HOOK
   useEffect(() => {
-    // console.log('⏰ Timer - workoutStarted mudou para:', workoutStarted);
-    
     if (workoutStarted) {
-      // O HOOK DIZ QUE O TREINO INICIOU (usuário confirmou smartwatch)
       setHasStarted(true);
       setIsRunning(true);
       startTimeRef.current = Date.now() - (totalTime - timeLeft) * 1000;
-       //console.log('✅ Timer iniciado pelo hook');
     } else {
-      // O HOOK DIZ QUE O TREINO NÃO INICIOU (usuário cancelou)
       setHasStarted(false);
       setIsRunning(false);
       setTimeLeft(totalTime);
@@ -43,7 +36,6 @@ const Timer: React.FC<TimerProps> = ({
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
-       //console.log('❌ Timer resetado pelo hook');
     }
   }, [workoutStarted, totalTime]);
 
@@ -53,25 +45,18 @@ const Timer: React.FC<TimerProps> = ({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // BOTÃO "INICIAR TREINO" - APENAS MOSTRA MODAL SMARTWATCH
   const startTimer = () => {
-     //console.log('🔄 Timer - Botão "Iniciar Treino" clicado');
-    
     if (!hasStarted) {
-       //console.log('📱 Mostrando modal smartwatch...');
       if (onStartWorkout) {
-        onStartWorkout(); // ← APENAS MOSTRA MODAL
+        onStartWorkout();
       }
     } else {
-      // Se já iniciou e está pausado, continua
-       //console.log('▶️ Continuando timer...');
       setIsRunning(true);
       startTimeRef.current = Date.now() - (totalTime - timeLeft) * 1000;
     }
   };
 
   const pauseTimer = () => {
-     //console.log('⏸️ Pausando timer...');
     setIsRunning(false);
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -80,7 +65,6 @@ const Timer: React.FC<TimerProps> = ({
   };
 
   const resetTimer = () => {
-     //console.log('🔄 Resetando timer...');
     setIsRunning(false);
     setHasStarted(false);
     setTimeLeft(totalTime);
@@ -89,13 +73,11 @@ const Timer: React.FC<TimerProps> = ({
       timerRef.current = null;
     }
     
-    // Chama a função de reset do hook
     if (onResetTimer) {
       onResetTimer();
     }
   };
 
-  // Efeito para o timer rodar
   useEffect(() => {
     if (isRunning && timeLeft > 0) {
       timerRef.current = setInterval(() => {
@@ -131,20 +113,12 @@ const Timer: React.FC<TimerProps> = ({
     return '#00d26a';
   };
 
-  // console.log('⏰ Timer - Estado atual:', {
-  //   workoutStartedFromHook: workoutStarted,
-  //   hasStartedInternal: hasStarted,
-  //   isRunning,
-  //   timeLeft
-  // });
-
   return (
     <div className="bg-gradient-to-r from-secondary-dark to-black 
       rounded-[clamp(0.75rem,2vw,1.5rem)] 
       p-[clamp(0.75rem,2vw,1.5rem)] sm:p-[clamp(1rem,3vw,2rem)]
       border border-gray-800 shadow-xl">
       
-      {/* TIMER DISPLAY */}
       <div className="text-center mb-[clamp(1rem,2vw,1.5rem)]">
         <h3 className="text-[clamp(0.75rem,1.5vw,1.125rem)] text-text-secondary 
           uppercase tracking-wider mb-[clamp(0.25rem,0.5vw,0.5rem)]">
@@ -165,7 +139,6 @@ const Timer: React.FC<TimerProps> = ({
         </div>
       </div>
 
-      {/* BARRA DE PROGRESSO */}
       <div className="mb-[clamp(1rem,2vw,1.5rem)]">
         <div className="flex justify-between mb-[clamp(0.25rem,0.5vw,0.5rem)]">
           <span className="text-text-secondary text-[clamp(0.75rem,1.25vw,0.875rem)]">
@@ -185,11 +158,8 @@ const Timer: React.FC<TimerProps> = ({
         </div>
       </div>
 
-      {/* CONTROLES SIMPLIFICADOS */}
       <div className="flex flex-col sm:flex-row gap-[clamp(0.5rem,1vw,0.75rem)] justify-center">
-        {/* BOTÕES CONDICIONAIS */}
         {!hasStarted ? (
-          // BOTÃO "INICIAR TREINO" - SÓ APARECE SE NÃO INICIOU
           <button
             onClick={startTimer}
             className={`
@@ -204,7 +174,6 @@ const Timer: React.FC<TimerProps> = ({
             Iniciar Treino
           </button>
         ) : (
-          // BOTÕES "CONTINUAR/PAUSAR" E "REINICIAR" - SÓ APARECEM APÓS INICIAR
           <>
             {isRunning ? (
               <button
@@ -235,7 +204,6 @@ const Timer: React.FC<TimerProps> = ({
               </button>
             )}
             
-            {/* BOTÃO RESETAR */}
             <button
               onClick={resetTimer}
               className={`
@@ -253,7 +221,6 @@ const Timer: React.FC<TimerProps> = ({
         )}
       </div>
 
-      {/* STATUS DO TIMER */}
       <div className="mt-[clamp(1rem,2vw,1.5rem)] text-center">
         <div className="inline-flex items-center gap-[clamp(0.5rem,1vw,0.75rem)] 
           px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.375rem,0.75vw,0.5rem)]
@@ -271,7 +238,6 @@ const Timer: React.FC<TimerProps> = ({
         </div>
       </div>
 
-      {/* DICA DO TIMER */}
       {timeLeft <= 300 && timeLeft > 0 && (
         <div className="mt-[clamp(0.75rem,1.5vw,1rem)] p-[clamp(0.5rem,1vw,0.75rem)] 
           bg-accent-red/10 border border-accent-red/20 rounded-lg">

@@ -27,7 +27,6 @@ const GROUP_DISPLAY_NAMES: Record<MuscleGroup, string> = {
   posterior: 'Perna Posterior'
 };
 
-// Interface atualizada do WorkoutReport
 interface EnhancedWorkoutReport extends Omit<WorkoutReport, 'heartRate'> {
   heartRate?: number;
 }
@@ -250,7 +249,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
   const showRestTimerWithOptions = useCallback((type: 'exercise' | 'group', currentExerciseId?: number, wasSkipped: boolean = false) => {
     if (!session.workoutStarted) return;
     
-    // Se foi pulado, não mostra descanso
     if (wasSkipped) {
       return;
     }
@@ -279,7 +277,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
 
   const completeExercise = useCallback((exerciseId: number) => {
     if (!session.workoutStarted) {
-      alert('Você precisa iniciar o treino primeiro!');
       return;
     }
 
@@ -384,7 +381,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
 
   const skipExercise = useCallback((exerciseId: number, reason: string) => {
     if (!session.workoutStarted) {
-      alert('Você precisa iniciar o treino primeiro!');
       return;
     }
 
@@ -420,7 +416,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     saveProgress();
     
     setTimeout(() => {
-      // NÃO mostra descanso quando pula exercício
       showRestTimerWithOptions('exercise', exerciseId, true);
     }, 500);
     
@@ -565,7 +560,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     const canFinish = exercises.every(ex => ex.completed || ex.skipReason);
     
     if (!canFinish) {
-      alert('Complete ou justifique todos os exercícios antes de finalizar!');
       return;
     }
     
@@ -652,7 +646,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
       const totalWeight = completedExercisesData.reduce((sum, ex) => sum + (ex.weight || 0), 0);
       const avgWeight = completedExercisesData.length > 0 ? totalWeight / completedExercisesData.length : 0;
       
-      // MENSAGEM ATUALIZADA COM EXERCÍCIOS PULADOS
       let reportMessage = `
 🏋️‍♂️ *RELATÓRIO DE TREINO - ${workoutType.toUpperCase()}* 🏋️‍♂️
 

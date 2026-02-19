@@ -10,14 +10,12 @@ export interface TelegramMessage {
   parse_mode?: 'HTML' | 'Markdown';
 }
 
-// Função para formatar tempo
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-// Função para salvar relatório com falha (simulação)
 const saveFailedReport = (report: WorkoutReport) => {
   try {
     const failedReports = JSON.parse(localStorage.getItem('failed-telegram-reports') || '[]');
@@ -33,7 +31,7 @@ const saveFailedReport = (report: WorkoutReport) => {
 
 export const sendWorkoutReport = async (report: WorkoutReport): Promise<boolean> => {
   try {
-    // Verificar se temos token e chat ID
+
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
       console.warn('Token ou Chat ID do Telegram não configurados');
       saveFailedReport(report);
@@ -94,7 +92,6 @@ const formatReportForTelegram = (report: WorkoutReport): string => {
   return message;
 };
 
-// Função para retentar envios com falha
 export const retryFailedReports = async (): Promise<number> => {
   try {
     const failedReports = JSON.parse(localStorage.getItem('failed-telegram-reports') || '[]');
@@ -105,7 +102,6 @@ export const retryFailedReports = async (): Promise<number> => {
       if (success) successCount++;
     }
     
-    // Remover relatórios enviados com sucesso
     if (successCount > 0) {
       const remainingReports = failedReports.slice(successCount);
       localStorage.setItem('failed-telegram-reports', JSON.stringify(remainingReports));

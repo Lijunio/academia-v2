@@ -1,7 +1,6 @@
 // src/components/YearCalendar.tsx
 import React, { useState } from 'react';
 
-// Interface exportada para ser usada no History
 export interface Workout {
   id: string;
   type: 'academia' | 'natacao' | 'pilates';
@@ -34,7 +33,6 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
     'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
   ];
 
-  // Função para identificar se é Treino A ou B
   const getWorkoutVariant = (workout: Workout): string => {
     if (workout.type !== 'academia') return workout.type;
     
@@ -43,10 +41,9 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
     
     if (notes.includes('treino a') || details.workoutType === 'A') return 'Treino A';
     if (notes.includes('treino b') || details.workoutType === 'B') return 'Treino B';
-    return 'Treino A'; // Default para academia
+    return 'Treino A';
   };
 
-  // Agrupar treinos por data
   const workoutsByDate = workouts.reduce((acc: Record<string, DayData>, workout: Workout) => {
     const date = new Date(workout.date).toLocaleDateString();
     if (!acc[date]) {
@@ -60,41 +57,34 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
     return acc;
   }, {});
 
-  // Navegar para o mês anterior
   const goToPreviousMonth = () => {
     setSelectedDate(new Date(currentYear, currentMonth - 1, 1));
   };
 
-  // Navegar para o próximo mês
   const goToNextMonth = () => {
     setSelectedDate(new Date(currentYear, currentMonth + 1, 1));
   };
 
-  // Verificar se pode navegar para o próximo mês (não além do mês atual)
   const canGoToNextMonth = () => {
     const today = new Date();
     return currentYear < today.getFullYear() || 
            (currentYear === today.getFullYear() && currentMonth < today.getMonth());
   };
 
-  // Gerar dias do mês
   const getDaysInMonth = (year: number, month: number): number => {
     return new Date(year, month + 1, 0).getDate();
   };
 
-  // Obter primeiro dia do mês (0 = domingo, 1 = segunda, etc)
   const getFirstDayOfMonth = (year: number, month: number): number => {
     return new Date(year, month, 1).getDay();
   };
 
-  // Verificar se a data é futura
   const isFutureDate = (year: number, month: number, day: number): boolean => {
     const today = new Date();
     const date = new Date(year, month, day);
     return date > today;
   };
 
-  // CORES ACESSÍVEIS PARA DALTÔNICOS
   const getDayColor = (year: number, month: number, day: number): { bg: string, border: string } => {
     const dateStr = new Date(year, month, day).toLocaleDateString();
     const dayData = workoutsByDate[dateStr];
@@ -109,33 +99,30 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
     const workout = dayData.workouts[0];
     const variant = getWorkoutVariant(workout);
     
-    // Cores de alto contraste - agora diferenciando Treino A e B
     if (workout.type === 'academia') {
       if (variant === 'Treino A') {
         return { 
-          bg: 'bg-blue-600/30', // Azul para Treino A
+          bg: 'bg-blue-600/30',
           border: 'border-blue-500/50' 
         };
       } else {
         return { 
-          bg: 'bg-orange-600/30', // Laranja para Treino B
+          bg: 'bg-orange-600/30',
           border: 'border-orange-500/50' 
         };
       }
     }
     
-    // Natação
     if (workout.type === 'natacao') {
       return { 
-        bg: 'bg-emerald-600/30', // Verde para Natação
+        bg: 'bg-emerald-600/30',
         border: 'border-emerald-500/50' 
       };
     }
     
-    // Pilates
     if (workout.type === 'pilates') {
       return { 
-        bg: 'bg-purple-600/30', // Roxo para Pilates
+        bg: 'bg-purple-600/30',
         border: 'border-purple-500/50' 
       };
     }
@@ -150,20 +137,16 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
   const days: React.ReactNode[] = [];
 
-  // Dias vazios no início do mês
   for (let i = 0; i < firstDay; i++) {
     days.push(<div key={`empty-${i}`} className="aspect-square"></div>);
   }
 
-  // Dias do mês
   for (let day = 1; day <= daysInMonth; day++) {
     const dateStr = new Date(currentYear, currentMonth, day).toLocaleDateString();
     const dayData = workoutsByDate[dateStr];
     
-    // Verificar se é data futura
     const future = isFutureDate(currentYear, currentMonth, day);
     
-    // Cores do dia
     const colors = getDayColor(currentYear, currentMonth, day);
     const hasWorkout = !!dayData;
 
@@ -172,8 +155,6 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
         key={day}
         onClick={() => {
           if (!future && dayData) {
-            // Se tiver múltiplos treinos no mesmo dia, abre o primeiro
-            // Idealmente você mostraria uma lista, mas por enquanto vai abrir o primeiro
             onWorkoutClick(dayData.workouts[0]);
           }
         }}
@@ -191,7 +172,6 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
           {day}
         </span>
         
-        {/* Indicador visual para múltiplos treinos */}
         {dayData && dayData.workouts.length > 1 && (
           <div className="flex gap-0.5 mt-1">
             {dayData.workouts.map((workout, index) => {
@@ -213,7 +193,6 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
           </div>
         )}
         
-        {/* Tooltip com informações */}
         {dayData && (
           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 
             bg-gray-900/95 backdrop-blur-xl rounded-lg p-2 text-xs
@@ -241,7 +220,6 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
     <div className="bg-gradient-to-br from-secondary-dark/30 to-black/30 
       rounded-xl p-6 border border-white/10">
       
-      {/* Cabeçalho com navegação de meses */}
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={goToPreviousMonth}
@@ -270,7 +248,6 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
         </button>
       </div>
 
-      {/* Dias da semana */}
       <div className="grid grid-cols-7 gap-1 mb-2">
         {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day, index) => (
           <div key={index} className="text-center text-text-secondary text-xs font-medium">
@@ -279,12 +256,10 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
         ))}
       </div>
 
-      {/* Dias do mês */}
       <div className="grid grid-cols-7 gap-1">
         {days}
       </div>
 
-      {/* Legenda - Agora apenas Treino A, Treino B, Natação, Pilates */}
       <div className="flex flex-wrap items-center justify-center gap-4 mt-6 pt-4 
         border-t border-white/10">
         <div className="flex items-center gap-2">
@@ -292,7 +267,7 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
           <span className="text-text-secondary text-xs">Treino A</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-red-600/50 border border-red-500"></div>
+          <div className="w-4 h-4 rounded bg-orange-600/50 border border-orange-500"></div>
           <span className="text-text-secondary text-xs">Treino B</span>
         </div>
         <div className="flex items-center gap-2">
@@ -300,7 +275,7 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
           <span className="text-text-secondary text-xs">Natação</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-amber-600/50 border border-amber-500"></div>
+          <div className="w-4 h-4 rounded bg-purple-600/50 border border-purple-500"></div>
           <span className="text-text-secondary text-xs">Pilates</span>
         </div>
         <div className="flex items-center gap-2">

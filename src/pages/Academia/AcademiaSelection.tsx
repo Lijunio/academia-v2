@@ -7,33 +7,27 @@ const Home: React.FC = () => {
     <div className="min-h-screen bg-primary-dark overflow-x-hidden">
       <div className="container mx-auto px-4 py-6 md:py-8 max-w-6xl">
         
-        {/* HEADER - IMPRESSIONANTE (MANTIDO) */}
         <header className="text-center py-8 md:py-12 px-4 md:px-6 
           bg-gradient-to-br from-secondary-dark via-black to-secondary-dark 
           rounded-3xl border border-white/5 
           shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] 
           mb-10 md:mb-12 relative overflow-hidden group">
           
-          {/* EFEITO DE LUZ ATRÁS */}
           <div className="absolute -inset-[100px] bg-gradient-to-r from-accent-red/5 via-transparent to-accent-blue/5 
             group-hover:from-accent-red/10 group-hover:to-accent-blue/10 
             transition-all duration-1000 blur-3xl" />
           
-          {/* LINHA SUPERIOR ANIMADA */}
           <div className="absolute top-0 left-0 right-0 h-[3px] 
             bg-gradient-to-r from-transparent via-accent-red via-50% to-transparent 
             animate-shimmer bg-[length:200%_auto]" />
           
-          {/* CONTEÚDO */}
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-4 md:mb-6">
-              {/* ÍCONE FLUTUANTE */}
               <div className="text-4xl md:text-5xl text-accent-red 
                 animate-float filter drop-shadow-[0_0_15px_rgba(255,71,87,0.5)]">
                 <i className="fas fa-dumbbell"></i>
               </div>
               
-              {/* TÍTULO COM GRADIENTE DINÂMICO */}
               <h1 className="text-3xl md:text-5xl lg:text-6xl 
                 font-montserrat font-black text-white 
                 bg-clip-text text-transparent 
@@ -45,7 +39,6 @@ const Home: React.FC = () => {
               </h1>
             </div>
             
-            {/* SUBTÍTULO ELEGANTE */}
             <p className="text-text-secondary/90 text-base md:text-lg 
               font-inter font-light tracking-wide 
               bg-gradient-to-r from-text-secondary to-white 
@@ -56,7 +49,6 @@ const Home: React.FC = () => {
           </div>
         </header>
 
-        {/* SEÇÃO HERO - REFINADA (MANTIDO) */}
         <section className="text-center py-6 md:py-8 px-4 md:px-6 
           bg-gradient-to-b from-white/5 to-transparent 
           backdrop-blur-xl rounded-2xl 
@@ -81,7 +73,6 @@ const Home: React.FC = () => {
           </p>
         </section>
 
-        {/* CARDS - MARAVILHOSOS (ATUALIZADO COM IMAGENS E MAIS INFO) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12 md:mb-16">
           {workoutsData.map((workout) => {
             const isWorkoutA = workout.id === 'A';
@@ -99,7 +90,6 @@ const Home: React.FC = () => {
                   ${isWorkoutA ? 'hover:shadow-glow-red' : 'hover:shadow-glow-blue'}
                   active:scale-95`}
               >
-                {/* === NOVO: IMAGEM DE FUNDO DO CARD === */}
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                   style={{
@@ -108,17 +98,14 @@ const Home: React.FC = () => {
                   }}
                 />
                 
-                {/* === NOVO: OVERLAY GRADIENTE SOBRE A IMAGEM === */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent" />
                 
-                {/* BACKGROUND GRADIENTE DINÂMICO (MANTIDO) */}
                 <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 
                   transition-opacity duration-500 
                   bg-gradient-to-br ${isWorkoutA 
                     ? 'from-accent-red/10 via-transparent to-accent-purple/5' 
                     : 'from-accent-blue/10 via-transparent to-accent-purple/5'}`} />
                 
-                {/* BADGE PERFEITO (RESPONSIVO) - MANTIDO */}
                 <div className={`absolute top-4 right-4 md:top-6 md:right-6 
                   w-10 h-10 md:w-14 md:h-14 
                   rounded-full flex items-center justify-center 
@@ -136,9 +123,7 @@ const Home: React.FC = () => {
                   {workout.id}
                 </div>
                 
-                {/* CONTEÚDO */}
                 <div className="relative z-10 p-6 md:p-8 min-h-[320px] flex flex-col justify-end">
-                  {/* TÍTULO (MANTIDO) */}
                   <div className="mb-4 md:mb-6">
                     <h3 className={`text-2xl md:text-3xl 
                       font-montserrat font-bold mb-2
@@ -151,9 +136,7 @@ const Home: React.FC = () => {
                     </p>
                   </div>
                   
-                  {/* === NOVO: ESTATÍSTICAS COMPLETAS (3 COLUNAS) === */}
                   <div className="grid grid-cols-3 gap-3 mb-6">
-                    {/* COLUNA 1: EXERCÍCIOS */}
                     <div className={`text-center p-3 rounded-xl backdrop-blur-sm
                       ${isWorkoutA ? 'bg-accent-red/20' : 'bg-accent-blue/20'}
                       border ${isWorkoutA ? 'border-accent-red/30' : 'border-accent-blue/30'}
@@ -170,7 +153,6 @@ const Home: React.FC = () => {
                       </div>
                     </div>
                     
-                    {/* COLUNA 2: SÉRIES */}
                     <div className={`text-center p-3 rounded-xl backdrop-blur-sm
                       ${isWorkoutA ? 'bg-accent-red/20' : 'bg-accent-blue/20'}
                       border ${isWorkoutA ? 'border-accent-red/30' : 'border-accent-blue/30'}
@@ -187,7 +169,6 @@ const Home: React.FC = () => {
                       </div>
                     </div>
                     
-                    {/* COLUNA 3: DURAÇÃO */}
                     <div className={`text-center p-3 rounded-xl backdrop-blur-sm
                       ${isWorkoutA ? 'bg-accent-red/20' : 'bg-accent-blue/20'}
                       border ${isWorkoutA ? 'border-accent-red/30' : 'border-accent-blue/30'}
@@ -205,7 +186,6 @@ const Home: React.FC = () => {
                     </div>
                   </div>
                   
-                  {/* BOTÃO DE AÇÃO (MANTIDO) */}
                   <div className="flex items-center justify-between pt-6 
                     border-t border-white/10">
                     <span className={`font-montserrat font-bold 
@@ -226,7 +206,6 @@ const Home: React.FC = () => {
           })}
         </div>
 
-        {/* DICA ELEGANTE (MANTIDO) */}
         <div className="relative overflow-hidden rounded-2xl mb-12 md:mb-16 
           bg-gradient-to-br from-accent-red/5 via-accent-purple/5 to-accent-blue/5
           border border-white/10 
@@ -264,7 +243,6 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        {/* FOOTER MINIMALISTA (MANTIDO) */}
         <footer className="text-center py-6 md:py-8 
           border-t border-white/5">
           <p className="text-text-muted/70 text-xs md:text-sm 

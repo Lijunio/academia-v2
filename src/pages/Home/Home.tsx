@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { workoutService } from '../../services/supabase.service';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Interface para o tipo Workout
 interface Workout {
   id: string;
   type: 'academia' | 'natacao' | 'pilates';
@@ -33,7 +32,7 @@ interface Stats {
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const [workouts, setWorkouts] = useState<Workout[]>([]); // NOVO STATE
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentWorkouts, setRecentWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,9 +44,8 @@ const Home: React.FC = () => {
   const loadStats = async () => {
     try {
       const data = await workoutService.getAll();
-      setWorkouts(data); // SALVAR TODOS OS TREINOS
+      setWorkouts(data);
       
-      // Calcular estatísticas
       const totalWorkouts = data.length;
       const totalCalories = data.reduce((sum: number, w: Workout) => sum + w.calories, 0);
       const avgHeartRate = data.length > 0 
@@ -61,7 +59,6 @@ const Home: React.FC = () => {
         pilates: data.filter((w: Workout) => w.type === 'pilates').length
       };
 
-      // CORREÇÃO AQUI - streak com array normal
       const dateStrings = data.map((w: Workout) => new Date(w.date).toLocaleDateString());
       const uniqueDates = dateStrings.filter((value, index, self) => self.indexOf(value) === index);
       uniqueDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
@@ -75,7 +72,6 @@ const Home: React.FC = () => {
         else break;
       }
 
-      // Melhor dia (mais calorias)
       const caloriesByDate = data.reduce((acc: any, w: Workout) => {
         const date = new Date(w.date).toLocaleDateString();
         acc[date] = (acc[date] || 0) + w.calories;
@@ -97,7 +93,6 @@ const Home: React.FC = () => {
         bestDay
       });
 
-      // Últimos 5 treinos
       setRecentWorkouts(data.slice(0, 5));
       
     } catch (error) {
@@ -151,7 +146,6 @@ const Home: React.FC = () => {
     navigate(path);
   };
 
-  // Função para pegar o tipo específico do treino (Treino A, Treino B, etc)
   const getWorkoutTypeDisplay = (workout: Workout): string => {
     if (workout.type === 'academia') {
       const notes = workout.notes?.toLowerCase() || '';
@@ -169,7 +163,6 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0F1C] via-[#1A1F2E] to-[#0D0F1A]">
       
-      {/* BACKGROUND EFECTS */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 -left-4 w-96 h-96 bg-accent-red/20 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-0 -right-4 w-96 h-96 bg-accent-blue/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -178,16 +171,14 @@ const Home: React.FC = () => {
 
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
         
-        {/* HEADER COM ESTATÍSTICAS RÁPIDAS */}
-   <div className="mb-12">
-  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
-    <div className="flex items-center gap-4">
-      {/* Imagem sem fundo, apenas animação */}
-      <img 
-        src="/logo512.png" 
-        alt="Logo" 
-        className="w-20 h-20 md:w-24 md:h-24 animate-float"
-      />
+        <div className="mb-12">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
+            <div className="flex items-center gap-4">
+              <img 
+                src="/logo512.png" 
+                alt="Logo" 
+                className="w-20 h-20 md:w-24 md:h-24 animate-float"
+              />
               <div>
                 <h1 className="text-3xl md:text-4xl font-black text-white font-montserrat 
                   bg-gradient-to-r from-white via-white to-accent-red bg-clip-text text-transparent">
@@ -201,7 +192,6 @@ const Home: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Email do usuário */}
               {user && (
                 <span className="text-text-secondary text-sm hidden md:block">
                   <i className="fas fa-user-circle mr-1"></i>
@@ -235,7 +225,6 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        {/* WELCOME SECTION - VERSÃO COMPLETA */}
         {workouts.length > 0 && (
           <div className="relative mb-12 overflow-hidden rounded-3xl">
             <div className="absolute inset-0 bg-gradient-to-r from-accent-red/20 via-accent-purple/20 to-accent-blue/20 
@@ -243,23 +232,20 @@ const Home: React.FC = () => {
             <div className="relative bg-gradient-to-br from-white/5 to-white/0 backdrop-blur-xl 
               rounded-3xl p-8 border border-white/10">
               
-              {/* Hora do dia */}
               <div className="flex items-center gap-3 mb-4">
-                <i className="fas fa-sun text-yellow-400 text-3xl md:text-4xl animate-spin-slow"></i> {/* Ícone maior */}
-                <span className="text-white/80 text-xl md:text-2xl font-medium"> {/* Texto maior */}
+                <i className="fas fa-sun text-yellow-400 text-3xl md:text-4xl animate-spin-slow"></i>
+                <span className="text-white/80 text-xl md:text-2xl font-medium">
                   {new Date().getHours() < 12 ? 'Bom dia!' : 
                   new Date().getHours() < 18 ? 'Boa tarde!' : 'Boa noite!'}
                 </span>
               </div>
                     
-              {/* Melhor dia com informações completas */}
               <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-              <p className="text-text-secondary text-base md:text-lg mb-4 flex items-center gap-2"> {/* Aumentado de text-sm para text-base */}
-                <i className="fas fa-trophy text-yellow-500 text-xl md:text-2xl"></i> {/* Ícone maior */}
-                SEU MELHOR DESEMPENHO
-              </p>
+                <p className="text-text-secondary text-base md:text-lg mb-4 flex items-center gap-2">
+                  <i className="fas fa-trophy text-yellow-500 text-xl md:text-2xl"></i>
+                  SEU MELHOR DESEMPENHO
+                </p>
                 
-                {/* Encontrar o treino com mais calorias */}
                 {(() => {
                   const bestWorkout = workouts.reduce((best: Workout, current: Workout) => {
                     return (current.calories > (best?.calories || 0)) ? current : best;
@@ -306,7 +292,6 @@ const Home: React.FC = () => {
           </div>
         )}
 
-        {/* ATIVIDADES PRINCIPAIS */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-white flex items-center gap-3">
@@ -339,7 +324,6 @@ const Home: React.FC = () => {
                   transform: 'translateY(20px)'
                 }}
               >
-                {/* BACKGROUND ANIMADO */}
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 
                   transition-opacity duration-700"
                   style={{
@@ -347,9 +331,7 @@ const Home: React.FC = () => {
                   }}
                 />
 
-                {/* CONTEÚDO */}
                 <div className="relative p-6">
-                  {/* BADGE DE CONTAGEM */}
                   <div className="absolute top-4 right-4">
                     <div className="relative">
                       <div className="absolute inset-0 bg-white/20 rounded-full blur-md"></div>
@@ -360,7 +342,6 @@ const Home: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* ÍCONE COM ANIMAÇÃO */}
                   <div className="relative mb-6">
                     <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent 
                       rounded-2xl blur-xl group-hover:blur-2xl transition-all"
@@ -376,7 +357,6 @@ const Home: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* TEXTO */}
                   <h3 className="text-2xl font-bold text-white mb-2 group-hover:translate-x-1 transition-transform">
                     {activity.title}
                   </h3>
@@ -384,7 +364,6 @@ const Home: React.FC = () => {
                     {activity.description}
                   </p>
 
-                  {/* STATS LIST */}
                   <ul className="space-y-2 mb-6">
                     {activity.stats.map((stat, idx) => (
                       <li key={idx} className="flex items-center gap-2 text-text-secondary/80 text-sm">
@@ -394,7 +373,6 @@ const Home: React.FC = () => {
                     ))}
                   </ul>
 
-                  {/* BOTÃO */}
                   <div className="relative">
                     <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 
                       translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"
@@ -419,7 +397,6 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        {/* ÚLTIMOS TRABALHOS */}
         {recentWorkouts.length > 0 && (
           <div className="bg-gradient-to-br from-secondary-dark/30 to-black/30 
             rounded-2xl p-6 border border-white/10">
@@ -436,11 +413,10 @@ const Home: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              {recentWorkouts.map((workout, idx) => (
+              {recentWorkouts.map((workout) => (
                 <div key={workout.id} 
                   className="flex items-center justify-between p-4 bg-white/5 rounded-xl
                     hover:bg-white/10 transition-all group cursor-pointer"
-                  onClick={() => {/* Poderia abrir detalhes */}}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center

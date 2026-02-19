@@ -2,8 +2,8 @@ import React from 'react';
 
 interface SmartwatchConfirmModalProps {
   isVisible: boolean;
-  onConfirm: () => void; // ← Envia WhatsApp E inicia timer
-  onCancel: () => void;  // ← Volta para tela, NÃO faz nada
+  onConfirm: () => void;
+  onCancel: () => void; 
   workoutName: string;
 }
 
@@ -17,7 +17,7 @@ const SmartwatchConfirmModal: React.FC<SmartwatchConfirmModalProps> = ({
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
-      onCancel(); // Clicar fora = cancelar
+      onCancel();
     }
   };
 

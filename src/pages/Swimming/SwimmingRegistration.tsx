@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SwimmingActivity } from '../../types/activities.types';
-import { workoutService } from '../../services/supabase.service'; // <-- NOVO IMPORT
+import { workoutService } from '../../services/supabase.service';
 
 const SwimmingRegistration: React.FC = () => {
   const navigate = useNavigate();
@@ -16,13 +16,11 @@ const SwimmingRegistration: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async () => {
-    // ADICIONE poolLength NA VALIDAÇÃO
+
     if (!duration || !heartRate || !calories || !distance || !poolLength) {
-      alert('Preencha todos os campos obrigatórios');
       return;
     }
 
-    // Agora poolLength não é mais undefined
     const activity: SwimmingActivity = {
       id: `swimming-${Date.now()}`,
       type: 'natacao',
@@ -32,18 +30,16 @@ const SwimmingRegistration: React.FC = () => {
       heartRate: parseInt(heartRate),
       distance: parseInt(distance),
       style: 'crawl',
-      poolLength: poolLength, // Agora é seguro, pois validamos acima
+      poolLength: poolLength, 
       notes: notes || undefined
     } as SwimmingActivity;
 
     setIsLoading(true);
     
     try {
-      // 1. Salvar no LOCALSTORAGE (como já fazia)
       const existing = JSON.parse(localStorage.getItem('swimming-activities') || '[]');
       localStorage.setItem('swimming-activities', JSON.stringify([...existing, activity]));
       
-      // 2. Salvar no SUPABASE (NOVO - na nuvem)
       await workoutService.save({
         type: 'natacao',
         date: new Date(),
@@ -57,15 +53,12 @@ const SwimmingRegistration: React.FC = () => {
         notes: notes || undefined
       });
       
-      // 3. Enviar para TELEGRAM (como já fazia)
       await sendTelegramReport(activity);
       
-      alert('Treino de natação registrado com sucesso!');
       navigate('/');
       
     } catch (error) {
       console.error('Erro:', error);
-      alert('Erro ao salvar. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +99,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
 • Aumentar distância gradualmente
 • Manter respiração controlada
 
-#Natação #Aquático #Performance
       `.trim();
 
       const TELEGRAM_BOT_TOKEN = process.env.REACT_APP_TELEGRAM_BOT_TOKEN || '';
@@ -138,7 +130,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
     <div className="min-h-screen bg-gradient-to-b from-blue-900/20 to-black">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         
-        {/* HEADER */}
         <div className="mb-10">
           <button
             onClick={() => navigate('/')}
@@ -160,13 +151,11 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
           </div>
         </div>
 
-        {/* FORM */}
         <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
           border border-white/10 mb-8">
           
           <h2 className="text-xl font-bold text-white mb-6">📋 Dados do Treino</h2>
           
-          {/* DURAÇÃO */}
           <div className="mb-4">
             <label className="block text-white mb-2">
               Duração (minutos) *
@@ -184,7 +173,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             />
           </div>
 
-          {/* DISTÂNCIA */}
           <div className="mb-4">
             <label className="block text-white mb-2">
               Metros nadados *
@@ -217,13 +205,11 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
               step="25"
               required
             />
-            {/* LINHA 203 CORRIGIDA: Adicione verificação para poolLength */}
             <p className="text-blue-300 text-xs mt-2">
               ⚡ {distance && poolLength ? `${Math.round(parseInt(distance) / poolLength)} piscinas de ${poolLength}m` : 'Selecione o tamanho da piscina'}
             </p>
           </div>
 
-          {/* TAMANHO DA PISCINA */}
           <div className="mb-4">
             <label className="block text-white mb-2">
               Tamanho da piscina *
@@ -246,7 +232,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             </div>
           </div>
 
-          {/* FREQUÊNCIA CARDÍACA */}
           <div className="mb-4">
             <label className="block text-white mb-2">
               Frequência cardíaca média (bpm) *
@@ -264,7 +249,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             />
           </div>
 
-          {/* CALORIAS */}
           <div className="mb-6">
             <label className="block text-white mb-2">
               Calorias perdidas (kcal) *
@@ -282,7 +266,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             />
           </div>
 
-          {/* OBSERVAÇÕES */}
           <div className="mb-8">
             <label className="block text-white mb-2">
               Observações (opcional)
@@ -298,7 +281,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             />
           </div>
 
-          {/* BOTÕES - Atualize o disabled para incluir poolLength */}
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/')}
@@ -321,7 +303,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
           </div>
         </div>
 
-        {/* CALCULADORA - LINHA 321 CORRIGIDA: Adicione verificação */}
         {duration && distance && poolLength && (
           <div className="bg-blue-500/10 rounded-2xl p-6 border border-blue-500/20">
             <h3 className="text-lg font-bold text-white mb-4">

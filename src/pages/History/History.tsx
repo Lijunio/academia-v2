@@ -20,7 +20,6 @@ import YearCalendar, { Workout } from '../../components/YearCalendar';
 import WorkoutFullReportModal from '../../components/common/Modal/WorkoutFullReportModal';
 import ChartCarousel from '../../components/ChartCarousel';
 
-// Registrar componentes do Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -65,7 +64,6 @@ const History: React.FC = () => {
   useEffect(() => {
     loadWorkouts();
     
-    // Detectar se é mobile para filtros
     const checkMobile = () => {
       setIsMobileFilters(window.innerWidth < 768);
     };
@@ -95,12 +93,10 @@ const History: React.FC = () => {
   const filterAndSortWorkouts = () => {
     let filtered = [...workouts];
 
-    // Filtro por tipo
     if (filter !== 'all') {
       filtered = filtered.filter(w => w.type === filter);
     }
 
-    // Filtro por período
     const now = new Date();
     if (timeRange !== 'all') {
       const cutoff = new Date();
@@ -111,7 +107,6 @@ const History: React.FC = () => {
       filtered = filtered.filter(w => new Date(w.date) >= cutoff);
     }
 
-    // Busca por texto
     if (searchTerm) {
       filtered = filtered.filter(w => 
         w.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -119,7 +114,6 @@ const History: React.FC = () => {
       );
     }
 
-    // Ordenação
     filtered.sort((a, b) => {
       let comparison = 0;
       if (sortBy === 'date') {
@@ -171,13 +165,11 @@ const History: React.FC = () => {
     const totalCalories = data.reduce((sum, w) => sum + w.calories, 0);
     const avgHeartRate = Math.round(data.reduce((sum, w) => sum + w.heart_rate, 0) / data.length);
 
-    // CALCULAR EM MINUTOS
     const totalSeconds = data.reduce((sum, w) => sum + w.duration, 0);
     const totalMinutes = Math.round(totalSeconds / 60);
     
     const avgCaloriesPerWorkout = Math.round(totalCalories / totalWorkouts);
 
-    // Atividade favorita
     const typeCount = data.reduce((acc, w) => {
       acc[w.type] = (acc[w.type] || 0) + 1;
       return acc;
@@ -187,7 +179,6 @@ const History: React.FC = () => {
       b[1] > (typeCount[a] || 0) ? b[0] : a, 'academia'
     );
 
-    // Melhor dia (mais calorias) - AGORA COM TIPO
     const caloriesByDate = data.reduce((acc, w) => {
       const date = new Date(w.date).toLocaleDateString();
       if (!acc[date]) {
@@ -206,13 +197,11 @@ const History: React.FC = () => {
       ? dates.reduce((a, b) => caloriesByDate[a].calories > caloriesByDate[b].calories ? a : b)
       : 'N/A';
 
-    // Pegar o tipo do treino do melhor dia
     const bestDayWorkouts = caloriesByDate[bestDate]?.workouts || [];
     const bestDayType = bestDayWorkouts.length === 1 
       ? getWorkoutTypeDisplay(bestDayWorkouts[0])
       : 'Múltiplos';
 
-    // CORREÇÃO: Streak sem Set
     const dateStrings = data.map(w => new Date(w.date).toLocaleDateString());
     const uniqueDates = dateStrings.filter((value, index, self) => self.indexOf(value) === index);
     uniqueDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
@@ -226,7 +215,6 @@ const History: React.FC = () => {
       else break;
     }
 
-    // Maior streak
     let maxStreak = 1;
     let tempStreak = 1;
     for (let i = 0; i < uniqueDates.length - 1; i++) {
@@ -292,7 +280,6 @@ const History: React.FC = () => {
     }
   };
 
-  // Dados para gráficos
   const prepareChartData = () => {
     const last30Days = [...Array(30)].map((_, i) => {
       const d = new Date();
@@ -329,7 +316,6 @@ const History: React.FC = () => {
     ]
   };
 
-  // NOVO GRÁFICO DE FREQUÊNCIA COM CORES POR TIPO
   const prepareFrequencyChartData = () => {
     const last30Days = [...Array(30)].map((_, i) => {
       const d = new Date();
@@ -337,7 +323,6 @@ const History: React.FC = () => {
       return d.toLocaleDateString();
     }).reverse();
 
-    // Contar treinos por tipo em cada dia
     const treinoAData = last30Days.map(date => 
       filteredWorkouts.filter(w => 
         new Date(w.date).toLocaleDateString() === date && 
@@ -374,7 +359,7 @@ const History: React.FC = () => {
         {
           label: 'Treino A',
           data: treinoAData,
-          backgroundColor: 'rgba(59, 130, 246, 0.8)', // Azul
+          backgroundColor: 'rgba(59, 130, 246, 0.8)',
           borderColor: 'rgba(59, 130, 246, 1)',
           borderWidth: 1,
           borderRadius: 4,
@@ -383,7 +368,7 @@ const History: React.FC = () => {
         {
           label: 'Treino B',
           data: treinoBData,
-          backgroundColor: 'rgba(239, 68, 68, 0.8)', // Vermelho
+          backgroundColor: 'rgba(239, 68, 68, 0.8)',
           borderColor: 'rgba(239, 68, 68, 1)',
           borderWidth: 1,
           borderRadius: 4,
@@ -392,7 +377,7 @@ const History: React.FC = () => {
         {
           label: 'Natação',
           data: natacaoData,
-          backgroundColor: 'rgba(16, 185, 129, 0.8)', // Verde Esmeralda
+          backgroundColor: 'rgba(16, 185, 129, 0.8)',
           borderColor: 'rgba(16, 185, 129, 1)',
           borderWidth: 1,
           borderRadius: 4,
@@ -401,7 +386,7 @@ const History: React.FC = () => {
         {
           label: 'Pilates',
           data: pilatesData,
-          backgroundColor: 'rgba(245, 158, 11, 0.8)', // Laranja/Âmbar
+          backgroundColor: 'rgba(245, 158, 11, 0.8)',
           borderColor: 'rgba(245, 158, 11, 1)',
           borderWidth: 1,
           borderRadius: 4,
@@ -413,7 +398,6 @@ const History: React.FC = () => {
 
   const frequencyChartData = prepareFrequencyChartData();
 
-  // GRÁFICO DE DISTRIBUIÇÃO COM CORES ATUALIZADAS
   const typeDistribution = {
     labels: ['Academia', 'Natação', 'Pilates'],
     datasets: [
@@ -424,9 +408,9 @@ const History: React.FC = () => {
           filteredWorkouts.filter(w => w.type === 'pilates').length
         ],
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',   // Azul para Academia
-          'rgba(16, 185, 129, 0.8)',   // Verde Esmeralda para Natação
-          'rgba(245, 158, 11, 0.8)'    // Laranja/Âmbar para Pilates
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(16, 185, 129, 0.8)',
+          'rgba(245, 158, 11, 0.8)'
         ],
         borderColor: [
           'rgba(59, 130, 246, 1)',
@@ -459,7 +443,6 @@ const History: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-dark via-secondary-dark to-black">
       
-      {/* BACKGROUND EFECTS */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-20 w-72 h-72 bg-accent-red/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-20 w-72 h-72 bg-accent-blue/10 rounded-full blur-3xl"></div>
@@ -467,7 +450,6 @@ const History: React.FC = () => {
 
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
         
-        {/* HEADER */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Link
@@ -498,7 +480,6 @@ const History: React.FC = () => {
           </button>
         </div>
 
-        {/* STATS CARDS - COM MINUTOS */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-xl p-4 
@@ -539,7 +520,6 @@ const History: React.FC = () => {
           </div>
         )}
 
-        {/* CALENDÁRIO */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
             <i className="fas fa-calendar-alt text-accent-red"></i>
@@ -551,9 +531,7 @@ const History: React.FC = () => {
           />
         </div>
 
-        {/* CARROSSEL DE GRÁFICOS */}
         <ChartCarousel>
-          {/* Gráfico de Calorias */}
           <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
             border border-white/10 h-full">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -586,7 +564,6 @@ const History: React.FC = () => {
             </div>
           </div>
 
-          {/* Gráfico de Frequência - NOVO COM CORES */}
           <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
             border border-white/10 h-full">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -638,10 +615,8 @@ const History: React.FC = () => {
                       const datasetIndex = element.datasetIndex;
                       const dataIndex = element.index;
                       
-                      // Pega a data correspondente
                       const date = frequencyChartData.labels[dataIndex];
                       
-                      // Filtra os treinos dessa data do tipo correspondente
                       let typeFilter = '';
                       if (datasetIndex === 0) typeFilter = 'treino a';
                       else if (datasetIndex === 1) typeFilter = 'treino b';
@@ -676,7 +651,6 @@ const History: React.FC = () => {
             </div>
           </div>
 
-          {/* Gráfico de Distribuição */}
           <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
             border border-white/10 h-full">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -706,7 +680,6 @@ const History: React.FC = () => {
                       else if (index === 1) typeFilter = 'natacao';
                       else if (index === 2) typeFilter = 'pilates';
                       
-                      // Aplica o filtro e rola para a lista
                       setFilter(typeFilter as any);
                       document.getElementById('workouts-list')?.scrollIntoView({ behavior: 'smooth' });
                     }
@@ -717,25 +690,20 @@ const History: React.FC = () => {
           </div>
         </ChartCarousel>
 
-
-        {/* MELHOR DIA - CENTRALIZADO COM CLASSES ESPECÍFICAS */}
         {stats && (
           <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 
             rounded-2xl p-8 border border-white/10 mb-8 text-center">
             
-            {/* TÍTULO COM TROFÉU */}
             <h3 className="best-day-title font-bold text-white mb-6 flex items-center justify-center gap-3">
               <i className="fas fa-trophy text-yellow-500 best-day-trophy"></i>
               Melhor Dia
             </h3>
             
             <div className="flex flex-col items-center justify-center gap-3">
-              {/* DATA */}
               <p className="best-day-date font-bold text-white/90">
                 {stats.bestDay.date}
               </p>
               
-              {/* CALORIAS */}
               <div className="flex items-center gap-2">
                 <span className="best-day-calories font-bold text-accent-green">
                   {stats.bestDay.calories}
@@ -743,7 +711,6 @@ const History: React.FC = () => {
                 <span className="best-day-kcal text-text-secondary">kcal</span>
               </div>
               
-              {/* BADGE DO TIPO */}
               <span className={`best-day-badge rounded-full font-bold mt-1
                 ${stats.bestDay.type === 'Treino A' ? 'bg-blue-500/20 text-blue-400' :
                   stats.bestDay.type === 'Treino B' ? 'bg-red-500/20 text-red-400' :
@@ -760,11 +727,9 @@ const History: React.FC = () => {
           </div>
         )}
 
-        {/* FILTROS - VERSÃO MOBILE OTIMIZADA */}
         <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
           border border-white/10 mb-8">
           
-          {/* BUSCA - SEM ÍCONE */}
           <div className="mb-4">
             <input
               type="text"
@@ -776,7 +741,6 @@ const History: React.FC = () => {
             />
           </div>
 
-          {/* FILTROS EM GRID */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <select
               value={filter}
@@ -821,7 +785,6 @@ const History: React.FC = () => {
             </select>
           </div>
 
-          {/* INDICADOR DE FILTROS ATIVOS */}
           {(filter !== 'all' || timeRange !== 'month' || searchTerm) && (
             <div className="mt-3 flex items-center gap-2 text-xs text-accent-red">
               <i className="fas fa-filter"></i>
@@ -842,7 +805,6 @@ const History: React.FC = () => {
           )}
         </div>
 
-        {/* LISTA DE TREINOS */}
         <div id="workouts-list" className="space-y-4">
           {filteredWorkouts.length === 0 ? (
             <div className="text-center py-16 bg-gradient-to-br from-secondary-dark/30 to-black/30 
@@ -873,13 +835,11 @@ const History: React.FC = () => {
                 >
                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div className="flex items-center gap-3 md:gap-4 flex-1 w-full">
-                      {/* Ícone */}
                       <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center
                         ${getActivityBgColor(workout.type)} transition-all group-hover:scale-110 flex-shrink-0`}>
                         <i className={`fas fa-${getActivityIcon(workout.type)} text-xl md:text-2xl`}></i>
                       </div>
 
-                      {/* Info principal */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <h3 className="text-base md:text-lg font-bold text-white truncate">
@@ -901,7 +861,6 @@ const History: React.FC = () => {
                           })}
                         </p>
 
-                        {/* Detalhes específicos */}
                         {workout.type === 'natacao' && workout.details && (
                           <p className="text-xs text-accent-blue mt-1 truncate">
                             <i className="fas fa-water mr-1"></i>
@@ -918,7 +877,6 @@ const History: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Métricas - Versão mobile otimizada */}
                     <div className="flex items-center justify-between w-full md:w-auto gap-4 md:gap-6">
                       <div className="text-center md:text-right flex-1 md:flex-none">
                         <p className="text-accent-green font-bold text-base md:text-xl">{workout.calories}</p>
@@ -935,7 +893,6 @@ const History: React.FC = () => {
                         <p className="text-text-secondary text-[10px] md:text-xs">min</p>
                       </div>
 
-                      {/* Botão deletar */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -964,7 +921,6 @@ const History: React.FC = () => {
           )}
         </div>
 
-        {/* MODAL DE DETALHES - COM BOTÃO DE RELATÓRIO */}
         {selectedWorkout && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setSelectedWorkout(null)}>
@@ -1046,7 +1002,6 @@ const History: React.FC = () => {
                   </div>
                 )}
 
-                {/* BOTÃO PARA VER RELATÓRIO COMPLETO */}
                 <div className="flex justify-center mt-6">
                   <button
                     onClick={() => setShowFullReport(true)}
@@ -1063,7 +1018,6 @@ const History: React.FC = () => {
           </div>
         )}
 
-        {/* MODAL DO RELATÓRIO COMPLETO */}
         {showFullReport && selectedWorkout && (
           <WorkoutFullReportModal
             workout={selectedWorkout}
@@ -1071,7 +1025,6 @@ const History: React.FC = () => {
           />
         )}
 
-        {/* MODAL DE CONFIRMAÇÃO DE DELETE */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={() => setShowDeleteConfirm(false)}>

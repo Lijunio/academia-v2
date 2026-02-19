@@ -5,4 +5,4 @@ interface CaloriesInputModalProps {
   onCancel: () => void;
 }
 
-export {}; // <-- ADICIONE NO FINAL DO ARQUIVO
+export {};

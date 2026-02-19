@@ -23,12 +23,11 @@ const ChartCarousel: React.FC<ChartCarouselProps> = ({ children }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Auto-play apenas em mobile
   useEffect(() => {
     if (isMobile && children.length > 1) {
       intervalRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % children.length);
-      }, 10000); // 10 segundos
+      }, 10000);
     }
 
     return () => {
@@ -48,20 +47,16 @@ const ChartCarousel: React.FC<ChartCarouselProps> = ({ children }) => {
 
   const handleTouchEnd = () => {
     if (touchStartX.current - touchEndX.current > 50) {
-      // Deslizou para esquerda - próximo
       setCurrentIndex((prev) => (prev + 1) % children.length);
     } else if (touchEndX.current - touchStartX.current > 50) {
-      // Deslizou para direita - anterior
       setCurrentIndex((prev) => (prev - 1 + children.length) % children.length);
     }
   };
 
   if (!isMobile) {
-    // Em desktop, mostra todos os filhos em grid
     return <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">{children}</div>;
   }
 
-  // Em mobile, mostra carrossel (apenas swipe, sem botões)
   return (
     <div className="relative mb-8">
       <div

@@ -1,3 +1,4 @@
+// src/pages/WorkoutA/WorkoutA.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ExerciseCard from '../../components/features/ExerciseCard/ExerciseCard';
@@ -108,7 +109,6 @@ const WorkoutA: React.FC = () => {
 
   const finalizeWorkoutManually = () => {
     localStorage.removeItem('workout-A');
-    alert('Treino finalizado com sucesso!');
     navigate('/');
   };
 
@@ -125,7 +125,6 @@ const WorkoutA: React.FC = () => {
 
       await finalizeWorkout(calories, heartRate);
       
-      // Salvar no Supabase quando finalizar
       await workoutService.save({
         type: 'academia',
         date: new Date(),
@@ -440,7 +439,6 @@ const WorkoutA: React.FC = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              {/* BOTÃO RESETAR - SÓ ATIVO QUANDO TREINO INICIADO */}
               <button 
                 onClick={() => setShowResetModal(true)}
                 disabled={!session.workoutStarted}

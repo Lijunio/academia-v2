@@ -30,34 +30,30 @@ const Login: React.FC = () => {
     <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-primary-dark via-secondary-dark to-black 
       flex items-center justify-center p-4">
       
-      {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-20 w-72 h-72 bg-accent-red/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-20 w-72 h-72 bg-accent-blue/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative z-10 w-full max-w-md max-h-full overflow-hidden">
-        {/* Logo */}
         <div className="text-center mb-8">
-        <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
-          <img 
-            src="/logo512.png" 
-            alt="Logo" 
-            className="w-34 h-34 object-contain animate-float"
-          />
-        </div>
+          <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
+            <img 
+              src="/logo512.png" 
+              alt="Logo" 
+              className="w-34 h-34 object-contain animate-float"
+            />
+          </div>
           <h1 className="text-3xl font-black text-white font-montserrat">
             TREINOS DO <span className="bg-gradient-to-r from-accent-red to-accent-purple bg-clip-text text-transparent">ELIJUNIO</span>
           </h1>
           <p className="text-text-secondary mt-2">Faça login para continuar</p>
         </div>
 
-        {/* Card de Login */}
         <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-8 
           border border-white/10 backdrop-blur-xl">
           
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
             <div>
               <label className="block text-white mb-2 text-sm">Email</label>
               <div className="relative">
@@ -74,7 +70,6 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            {/* Senha */}
             <div>
               <label className="block text-white mb-2 text-sm">Senha</label>
               <div className="relative">
@@ -91,14 +86,12 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            {/* Erro */}
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
                 <p className="text-red-400 text-sm text-center">{error}</p>
               </div>
             )}
 
-            {/* Botão */}
             <button
               type="submit"
               disabled={loading}

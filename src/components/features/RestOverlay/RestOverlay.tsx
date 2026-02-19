@@ -23,7 +23,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Cores baseadas no tipo de treino
   const colors = {
     'A': { primary: '#ff4757', gradient: 'linear-gradient(135deg, #ff4757, #ff6b81)' },
     'B': { primary: '#2e86de', gradient: 'linear-gradient(135deg, #2e86de, #54a0ff)' }
@@ -31,12 +30,9 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
 
   const workoutColor = colors[workoutType];
 
-  // Inicializar áudio de forma segura
   useEffect(() => {
-    // Não criar áudio se não estiver visível
     if (!isVisible) return;
 
-    // Criar áudio de forma segura
     try {
       audioRef.current = new Audio('/assets/audio/rest-start.mp3');
       audioRef.current.preload = 'auto';
@@ -52,13 +48,10 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
     };
   }, [isVisible]);
 
-  // Configurar e gerenciar o timer
   useEffect(() => {
     if (isVisible) {
-      // Resetar timer
       setTimeLeft(restTime);
       
-      // Tocar som de início de forma segura
       if (audioRef.current) {
         try {
           audioRef.current.currentTime = 0;
@@ -68,14 +61,11 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
         }
       }
 
-      // Iniciar timer
       timerRef.current = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) {
-            // Timer completado
             if (timerRef.current) clearInterval(timerRef.current);
             
-            // Tocar som de término de forma segura
             try {
               const finishAudio = new Audio('/assets/audio/rest-end.mp3');
               finishAudio.play().catch(console.error);
@@ -83,7 +73,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
               console.error('Erro ao tocar áudio de término:', error);
             }
             
-            // Fechar após 1 segundo
             setTimeout(() => onClose(), 100);
             return 0;
           }
@@ -100,14 +89,12 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
     };
   }, [isVisible, restTime, onClose]);
 
-  // Pular descanso
   const handleSkip = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
     
-    // Tocar som de término de forma segura
     try {
       const finishAudio = new Audio('/assets/audio/rest-end.mp3');
       finishAudio.play().catch(console.error);
@@ -118,14 +105,12 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
     onClose();
   };
 
-  // Formatar tempo (MM:SS)
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Botão X no canto superior direito
   const handleClose = () => {
     onClose();
   };
@@ -141,7 +126,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
           boxShadow: `0 10px 30px ${workoutColor.primary}40`
         }}
       >
-        {/* BOTÃO X NO CANTO SUPERIOR DIREITO */}
         <button
           onClick={handleClose}
           className="absolute top-3 right-3 sm:top-4 sm:right-4 w-8 h-8 rounded-full bg-white/10 
@@ -152,13 +136,11 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
           <i className="fas fa-times text-sm"></i>
         </button>
 
-        {/* BARRA SUPERIOR COLORIDA */}
         <div 
           className="absolute top-0 left-0 right-0 h-1 sm:h-2"
           style={{ background: workoutColor.gradient }}
         />
 
-        {/* CABEÇALHO */}
         <div className="text-center mb-4 sm:mb-5 md:mb-6 pt-2">
           <div className="flex flex-col items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
             <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-black/30 to-transparent 
@@ -180,7 +162,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
             </div>
           </div>
           
-          {/* PRÓXIMO EXERCÍCIO */}
           <div className="bg-white/5 rounded-lg p-2 sm:p-3 border border-white/10 mb-4">
             <p className="text-text-secondary text-xs sm:text-sm mb-0.5 sm:mb-1">Próximo exercício:</p>
             <p 
@@ -193,9 +174,7 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
           </div>
         </div>
 
-        {/* TIMER VISUAL */}
         <div className="relative w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 mx-auto mb-4 sm:mb-5 md:mb-6">
-          {/* ANEL DE FUNDO */}
           <svg className="absolute inset-0 w-full h-full transform -rotate-90">
             <circle
               cx="50%"
@@ -205,7 +184,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
               strokeWidth="6"
               fill="transparent"
             />
-            {/* ANEL DE PROGRESSO */}
             <circle
               cx="50%"
               cy="50%"
@@ -223,7 +201,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
             />
           </svg>
           
-          {/* TEMPO NO CENTRO */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-white font-montserrat mb-1 sm:mb-2">
               {formatTime(timeLeft)}
@@ -237,7 +214,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
           </div>
         </div>
 
-        {/* CONTROLES - APENAS PULAR */}
         <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
           <button
             onClick={handleSkip}
@@ -254,7 +230,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
           </button>
         </div>
 
-        {/* INFORMAÇÕES IMPORTANTES - SOMENTE EM TELAS GRANDES */}
         <div className="hidden sm:grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-5 md:mb-6">
           <div className="bg-white/5 rounded-lg sm:rounded-xl p-2 sm:p-3 text-center border border-white/10">
             <i className="fas fa-clock text-lg sm:text-xl mb-1 sm:mb-2" style={{ color: workoutColor.primary }}></i>
@@ -273,7 +248,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
           </div>
         </div>
 
-        {/* DICAS DINÂMICAS */}
         <div className="bg-gradient-to-r from-black/30 to-transparent rounded-lg sm:rounded-xl p-3 sm:p-4 mb-3 sm:mb-4 border border-white/10">
           <div className="flex items-center gap-2 mb-1 sm:mb-2">
             <i className="fas fa-lightbulb text-base sm:text-lg" style={{ color: workoutColor.primary }}></i>
@@ -291,7 +265,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
           </p>
         </div>
 
-        {/* CONTAGEM REGRESSIVA VISUAL */}
         {timeLeft <= 10 && (
           <div className="text-center mb-3 sm:mb-4">
             <div className="inline-flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-black/40 rounded-full border border-white/20">
@@ -301,7 +274,6 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
           </div>
         )}
 
-        {/* RODAPÉ - SOMENTE EM TELAS GRANDES */}
         <div className="hidden sm:block text-center pt-3 sm:pt-4 border-t border-white/10">
           <p className="text-text-secondary text-[10px] sm:text-xs">
             <i className="fas fa-info-circle mr-1 text-[10px] sm:text-xs"></i>

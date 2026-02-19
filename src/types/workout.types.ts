@@ -1,4 +1,4 @@
-// types/workout.types.ts - VERSÃO COMPLETA
+// types/workout.types.ts
 export type MuscleGroup = 
   | 'peito' 
   | 'ombro' 

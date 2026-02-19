@@ -35,8 +35,6 @@ const ExerciseSkipModal: React.FC<ExerciseSkipModalProps> = ({
       setSelectedReason('');
       setCustomReason('');
       onClose();
-    } else {
-      alert('Por favor, selecione ou digite um motivo!');
     }
   };
 

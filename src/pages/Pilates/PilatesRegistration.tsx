@@ -15,7 +15,6 @@ const PilatesRegistration: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!duration || !heartRate || !calories) {
-      alert('Preencha todos os campos obrigatórios');
       return;
     }
 
@@ -34,11 +33,9 @@ const PilatesRegistration: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // 1. Salvar no LOCALSTORAGE
       const existing = JSON.parse(localStorage.getItem('pilates-activities') || '[]');
       localStorage.setItem('pilates-activities', JSON.stringify([...existing, activity]));
       
-      // 2. Salvar no SUPABASE
       await workoutService.save({
         type: 'pilates',
         date: new Date(),
@@ -52,15 +49,12 @@ const PilatesRegistration: React.FC = () => {
         notes: notes || undefined
       });
       
-      // 3. Enviar para TELEGRAM
       await sendTelegramReport(activity);
       
-      alert('Sessão de pilates registrada com sucesso!');
       navigate('/');
       
     } catch (error) {
       console.error('Erro:', error);
-      alert('Erro ao salvar. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +120,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
     <div className="min-h-screen bg-gradient-to-b from-green-900/20 to-black">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         
-        {/* HEADER */}
         <div className="mb-10">
           <button
             onClick={() => navigate('/')}
@@ -148,13 +141,11 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
           </div>
         </div>
 
-        {/* FORM */}
         <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
           border border-white/10 mb-8">
           
           <h2 className="text-xl font-bold text-white mb-6">📋 Dados da Sessão</h2>
           
-          {/* DURAÇÃO */}
           <div className="mb-4">
             <label className="block text-white mb-2">
               Duração (minutos) *
@@ -172,7 +163,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             />
           </div>
 
-          {/* FREQUÊNCIA CARDÍACA */}
           <div className="mb-4">
             <label className="block text-white mb-2">
               Frequência cardíaca média (bpm) *
@@ -190,7 +180,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             />
           </div>
 
-          {/* CALORIAS */}
           <div className="mb-6">
             <label className="block text-white mb-2">
               Calorias perdidas (kcal) *
@@ -208,7 +197,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             />
           </div>
 
-          {/* OBSERVAÇÕES */}
           <div className="mb-8">
             <label className="block text-white mb-2">
               Observações (opcional)
@@ -224,7 +212,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             />
           </div>
 
-          {/* BOTÕES */}
           <div className="flex gap-3">
             <button
               onClick={() => navigate('/')}
@@ -247,7 +234,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
           </div>
         </div>
 
-        {/* ESTATÍSTICAS */}
         {duration && calories && heartRate && (
           <div className="bg-green-500/10 rounded-2xl p-6 border border-green-500/20">
             <h3 className="text-lg font-bold text-white mb-4">

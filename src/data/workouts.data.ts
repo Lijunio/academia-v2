@@ -1,7 +1,6 @@
 // src/data/workouts.data.ts
 import { Workout } from '../types/workout.types';
 
-// Função para criar exercícios básicos
 const createBasicExercise = (
   id: number,
   name: string,
@@ -25,7 +24,7 @@ export const workoutsData: Workout[] = [
     focus: 'Peito + Ombro + Tríceps + Perna Anterior',
     groups: ['peito', 'ombro', 'triceps', 'pernas'],
     exercises: [
-      // PEITO
+
       createBasicExercise(
         1,
         "Supino reto (halteres)",
@@ -54,7 +53,6 @@ export const workoutsData: Workout[] = [
         ]
       ),
       
-      // OMBRO
       createBasicExercise(
         4,
         "Desenvolvimento halteres",
@@ -75,7 +73,6 @@ export const workoutsData: Workout[] = [
         ]
       ),
       
-      // TRÍCEPS
       createBasicExercise(
         6,
         "Tríceps testa",
@@ -108,7 +105,6 @@ export const workoutsData: Workout[] = [
         ]
       ),
       
-      // PERNA ANTERIOR
       createBasicExercise(
         9,
         "Agachamento livre ou hack",
@@ -164,7 +160,7 @@ export const workoutsData: Workout[] = [
     focus: 'Costas + Trapézio + Bíceps + Antebraço + Perna Posterior + Panturrilha',
     groups: ['costas', 'trapezio', 'biceps', 'antebraco', 'posterior', 'panturrilha'],
     exercises: [
-      // COSTAS
+
       createBasicExercise(
         1,
         "Barra fixa ou puxada frente",
@@ -193,7 +189,6 @@ export const workoutsData: Workout[] = [
         ["/images/workouts/treino-b/remadacurvada.webp"]
       ),
       
-      // TRAPÉZIO
       createBasicExercise(
         4,
         "Elevação posterior",
@@ -214,7 +209,6 @@ export const workoutsData: Workout[] = [
         ["/images/workouts/treino-b/encolhimento.gif"]
       ),
       
-      // BÍCEPS
       createBasicExercise(
         6,
         "Rosca direta",
@@ -232,7 +226,6 @@ export const workoutsData: Workout[] = [
         ["/images/workouts/treino-b/roscainclinada.gif"]
       ),
       
-      // ANTEBRAÇO
       createBasicExercise(
         8,
         "Rosca punho",
@@ -256,7 +249,6 @@ export const workoutsData: Workout[] = [
         ]
       ),
       
-      // PERNA POSTERIOR
       createBasicExercise(
         10,
         "Levantamento terra romeno",
@@ -285,7 +277,6 @@ export const workoutsData: Workout[] = [
         ["/images/workouts/treino-b/cadeiraflexora.gif"]
       ),
       
-      // PANTURRILHA
       createBasicExercise(
         13,
         "Panturrilha em pé",

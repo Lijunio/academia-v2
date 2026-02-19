@@ -14,7 +14,7 @@ export interface Workout {
   id?: string;
   type: 'academia' | 'natacao' | 'pilates';
   date: Date;
-  duration: number; // em segundos
+  duration: number;
   calories: number;
   heart_rate: number;
   details: any;
@@ -22,7 +22,7 @@ export interface Workout {
 }
 
 export const workoutService = {
-  // Salvar treino
+
   async save(workout: Workout) {
     const { data, error } = await supabase
       .from('workouts')
@@ -39,7 +39,6 @@ export const workoutService = {
     return data;
   },
 
-  // Buscar todos
   async getAll() {
     const { data, error } = await supabase
       .from('workouts')
@@ -53,7 +52,6 @@ export const workoutService = {
     return data || [];
   },
 
-  // Buscar por tipo
   async getByType(type: string) {
     const { data, error } = await supabase
       .from('workouts')
@@ -68,7 +66,6 @@ export const workoutService = {
     return data || [];
   },
 
-  // Deletar
   async delete(id: string) {
     const { error } = await supabase
       .from('workouts')
@@ -81,7 +78,6 @@ export const workoutService = {
     }
   },
 
-  // Atualizar
   async update(id: string, updates: Partial<Workout>) {
     const { data, error } = await supabase
       .from('workouts')

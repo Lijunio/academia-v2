@@ -9,7 +9,7 @@ interface ExerciseCardProps {
   isCompleted: boolean;
   isCurrent: boolean;
   isLocked: boolean;
-  onToggleComplete: () => void; // ← Isso deve APENAS abrir o modal
+  onToggleComplete: () => void;
   onSkipExercise?: (reason: string) => void;
   workoutType: 'A' | 'B';
   workoutStarted: boolean;
@@ -40,21 +40,18 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   const [localSkipReason, setLocalSkipReason] = useState(exercise.skipReason);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Refs para controle
   const hasBeenCompletedRef = useRef(propIsCompleted);
   const isProcessingRef = useRef(false);
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const hasMultipleImages = exercise.images && exercise.images.length > 1;
 
-  // Sincronizar com prop changes
   useEffect(() => {
     setLocalIsCompleted(propIsCompleted);
     setLocalSkipReason(exercise.skipReason);
     hasBeenCompletedRef.current = propIsCompleted;
   }, [propIsCompleted, exercise.skipReason]);
 
-  // Cleanup no unmount
   useEffect(() => {
     return () => {
       if (clickTimeoutRef.current) {
@@ -81,43 +78,32 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     setCurrentImageIndex(index);
   };
 
-  // FUNÇÃO CRÍTICA CORRIGIDA - DEVE APENAS ABRIR O MODAL, NÃO CONCLUIR
   const handleCompleteClick = useCallback(() => {
-    // Se já estiver concluído, não faz nada
     if (localIsCompleted || hasBeenCompletedRef.current) {
       console.log('🚫 Exercício já concluído localmente, ignorando clique');
       return;
     }
     
-    // Se já estiver processando, não faz nada
     if (isProcessingRef.current || isProcessing) {
       console.log('⏳ Exercício já em processamento, ignorando clique');
       return;
     }
     
-    // Verifica se o treino foi iniciado
     if (!workoutStarted) {
-      alert('Você precisa iniciar o treino primeiro! Clique em "Iniciar Treino" no timer.');
       return;
     }
     
-    // Verifica se está bloqueado
     if (isLocked) {
-      alert('Este exercício está bloqueado. Conclua os exercícios anteriores primeiro.');
       return;
     }
     
-    // Marca como processando para evitar cliques duplos
     isProcessingRef.current = true;
     setIsProcessing(true);
     
     console.log(`🔄 ExerciseCard - Abrindo modal de peso para exercício ${exercise.id} (${exercise.name})`);
     
-    // NOTA IMPORTANTE: NÃO marca como concluído aqui!
-    // Apenas chama a função que abre o modal
     onToggleComplete();
     
-    // Reseta o estado de processamento após um tempo
     clickTimeoutRef.current = setTimeout(() => {
       isProcessingRef.current = false;
       setIsProcessing(false);
@@ -137,7 +123,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     }
     
     if (!workoutStarted) {
-      alert('Você precisa iniciar o treino primeiro! Clique em "Iniciar Treino" no timer.');
       return;
     }
     
@@ -149,7 +134,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     isProcessingRef.current = true;
     setIsProcessing(true);
     
-    // Marca como concluído localmente (apenas visual)
     setLocalIsCompleted(true);
     setLocalSkipReason(reason);
     hasBeenCompletedRef.current = true;
@@ -192,7 +176,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
       }
     `}>
       
-      {/* BADGE NÚMERO */}
       <div className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 z-10">
         <div 
           className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12
@@ -210,16 +193,13 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 pt-8 sm:pt-10 md:pt-0">
         
-        {/* CONTEÚDO PRINCIPAL */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-            {/* NOME DO EXERCÍCIO COM QUEBRA DE TEXTO */}
             <h3 className="text-base sm:text-lg md:text-xl font-bold text-white 
               font-montserrat pr-12 break-words">
               {exercise.name}
             </h3>
             
-            {/* BADGE DE STATUS - SOMENTE EM TELAS GRANDES */}
             <div className="hidden sm:flex items-center gap-2">
               {localIsCompleted && !isSkipped && (
                 <span className="px-2 py-1 bg-green-500/20 text-green-300 rounded-full text-xs font-bold">
@@ -275,7 +255,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
               </p>
             )}
 
-            {/* REGISTRO DE PESO (se houver) */}
             {hasWeightData && weightData && (
               <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
@@ -324,7 +303,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
               </div>
             )}
 
-            {/* MOTIVO DO SKIP */}
             {localSkipReason && (
               <div className="mt-3 p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
@@ -337,7 +315,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         </div>
 
-        {/* IMAGEM DO EXERCÍCIO */}
         {exercise.images && exercise.images.length > 0 && (
           <div className="w-full lg:w-2/5 xl:w-1/3 mt-4 lg:mt-0">
             <div className="bg-white rounded-lg sm:rounded-xl p-1 sm:p-2 
@@ -400,9 +377,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
         )}
       </div>
 
-      {/* BOTÕES DE AÇÃO */}
       <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/10">
-        {/* EXERCÍCIO ATUAL NÃO CONCLUÍDO */}
         {isCurrent && !localIsCompleted && !isLocked && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
@@ -446,7 +421,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         )}
 
-        {/* EXERCÍCIO BLOQUEADO */}
         {isLocked && (
           <div className="text-center p-3 sm:p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
             <p className="text-red-400 text-sm sm:text-base">
@@ -456,7 +430,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         )}
 
-        {/* EXERCÍCIO CONCLUÍDO OU PULADO */}
         {localIsCompleted && !isLocked && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {!isSkipped ? (
@@ -492,7 +465,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         )}
 
-        {/* EXERCÍCIO DISPONÍVEL MAS NÃO É O ATUAL */}
         {!isCurrent && !isLocked && !localIsCompleted && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <button
@@ -536,7 +508,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         )}
 
-        {/* AVISO SE TREINO NÃO INICIADO */}
         {!workoutStarted && !localIsCompleted && !isLocked && (
           <div className="text-center p-3 bg-gray-800/30 rounded-lg mt-2">
             <p className="text-gray-400 text-sm">
@@ -546,7 +517,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         )}
 
-        {/* MODAL DE PULAR EXERCÍCIO */}
         <ExerciseSkipModal
           isVisible={showSkipModal}
           onClose={() => setShowSkipModal(false)}

@@ -1,7 +1,6 @@
 // src/data/exercises.data.ts
 import { Exercise } from '../types/workout.types';
 
-// Função para criar exercícios com propriedades padrão
 const createExercise = (
   id: number,
   name: string,
@@ -18,8 +17,8 @@ const createExercise = (
   images,
   completed: false,
   started: false,
-  reps: 10, // Valor padrão
-  restTime: 60 // Valor padrão
+  reps: 10,
+  restTime: 60
 });
 
 export const exercisesA: Exercise[] = [

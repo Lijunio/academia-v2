@@ -4,4 +4,4 @@ interface SmartwatchConfirmModalProps {
   onCancel: () => void;
 }
 
-export {}; // <-- ADICIONE NO FINAL DO ARQUIVO
+export {};

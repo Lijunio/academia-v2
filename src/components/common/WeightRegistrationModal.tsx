@@ -9,7 +9,7 @@ interface WeightRegistrationModalProps {
     variationId?: number;
     observations?: string;
   }) => void;
-  onCancel: () => void; // ← APENAS FECHA O MODAL
+  onCancel: () => void;
 }
 
 interface ExerciseVariation {
@@ -58,23 +58,16 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
     }
   };
 
-  // FUNÇÃO CRÍTICA - Deve APENAS fechar, NUNCA salvar
   const handleCloseModal = () => {
-    //console.log('❌❌❌ BOTÃO X PRESSIONADO - Fechando modal SEM salvar');
-    //console.log('❌ Exercício permanecerá pendente:', exercise?.name);
-    
-    // Limpa estados locais
     setWeight('');
     setSelectedVariation(undefined);
     setObservations('');
     
-    // IMPORTANTE: Chama APENAS onCancel, NUNCA onSave
     onCancel();
   };
 
   useEffect(() => {
     if (exercise && isVisible) {
-      //console.log('📱 Modal aberto para exercício:', exercise.id, exercise.name);
       setWeight('');
       setSelectedVariation(undefined);
       setObservations('');
@@ -90,7 +83,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
   const handleSave = () => {
     const weightNum = parseFloat(weight);
     if (isNaN(weightNum) || weightNum < 0) {
-      alert('Por favor, insira um peso válido');
       return;
     }
 
@@ -98,7 +90,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
     console.log('💾 exercise.id:', exercise?.id);
     console.log('💾 weight:', weightNum);
     
-    // Só chama onSave quando o usuário explicitamente clica em "Salvar"
     onSave({
       weight: weightNum,
       variationId: selectedVariation,
@@ -115,7 +106,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
       <div className="bg-gradient-to-br from-secondary-dark to-black rounded-2xl 
         p-6 max-w-md w-full border border-white/10 relative">
         
-        {/* BOTÃO X - DEVE APENAS FECHAR */}
         <button
           onClick={handleCloseModal}
           className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 
@@ -127,7 +117,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           <i className="fas fa-times text-sm"></i>
         </button>
         
-        {/* CABEÇALHO */}
         <div className="text-center mb-4 sm:mb-6 pt-2">
           <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br 
             from-orange-500 to-red-500 flex items-center justify-center">
@@ -142,7 +131,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           </p>
         </div>
 
-        {/* PESO PRINCIPAL */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-2">
             <label className="block text-text-secondary text-xs sm:text-sm">
@@ -178,7 +166,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
             </div>
           </div>
           
-          {/* PESOS RÁPIDOS */}
           <div className="mt-3 sm:mt-4">
             <p className="text-text-secondary text-xs sm:text-sm mb-2">
               Peso rápido:
@@ -216,7 +203,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           </div>
         </div>
 
-        {/* VARIAÇÕES */}
         {exercise.hasVariations && exercise.variations && exercise.variations.length > 0 && (
           <div className="mb-3 sm:mb-4">
             <label className="block text-text-secondary text-xs sm:text-sm mb-2">
@@ -253,7 +239,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           </div>
         )}
 
-        {/* OBSERVAÇÕES */}
         <div className="mb-4 sm:mb-6">
           <label className="block text-text-secondary text-xs sm:text-sm mb-2">
             Observações (opcional)
@@ -284,7 +269,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           </div>
         </div>
 
-        {/* BOTÃO SALVAR - ÚNICA MANEIRA DE CONCLUIR */}
         <div>
           <button
             onClick={handleSave}

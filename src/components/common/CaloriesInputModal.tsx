@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 interface CaloriesInputModalProps {
   isVisible: boolean;
-  workoutDuration: number; // Tempo REAL decorrido em segundos
+  workoutDuration: number;
   onSave: (calories: number, heartRate?: number) => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -38,12 +38,10 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
     const heartRateNum = heartRate ? parseInt(heartRate) : undefined;
     
     if (isNaN(caloriesNum) || caloriesNum < 0 || caloriesNum > 5000) {
-      alert('Por favor, insira um valor entre 0 e 5000 calorias');
       return;
     }
     
     if (heartRateNum !== undefined && (heartRateNum < 40 || heartRateNum > 220)) {
-      alert('Por favor, insira uma frequência cardíaca entre 40 e 220 bpm');
       return;
     }
     
@@ -90,7 +88,6 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
             Registre os dados do seu treino para o relatório.
           </p>
           
-          {/* CARD COM TEMPO REAL */}
           <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 mb-4">
             <div className="text-center">
               <div className="text-3xl font-bold text-white">
@@ -101,7 +98,6 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
           </div>
         </div>
 
-        {/* CAMPO DE CALORIAS */}
         <div className="mb-4">
           <label className="block text-text-secondary text-sm mb-2">
             Calorias gastas (kcal) *
@@ -125,7 +121,6 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
           </p>
         </div>
 
-        {/* CAMPO DE FREQUÊNCIA CARDÍACA */}
         <div className="mb-6">
           <label className="block text-text-secondary text-sm mb-2">
             Frequência Cardíaca Média (opcional)
@@ -148,7 +143,6 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
           </p>
         </div>
 
-        {/* BOTÕES */}
         <div className="flex gap-3">
           <button
             onClick={handleCancel}
@@ -183,7 +177,6 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
           </button>
         </div>
 
-        {/* NOTA */}
         <div className="mt-6 pt-4 border-t border-white/10">
           <p className="text-xs text-text-secondary text-center">
             <i className="fas fa-info-circle mr-1"></i>
