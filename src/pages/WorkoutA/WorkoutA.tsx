@@ -1,4 +1,4 @@
-// src/pages/WorkoutA/WorkoutA.tsx
+// pages/WorkoutA/WorkoutA.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ExerciseCard from '../../components/features/ExerciseCard/ExerciseCard';
@@ -7,7 +7,6 @@ import ConfirmModal from '../../components/features/ExerciseCard/ConfirmModal';
 import SmartwatchConfirmModal from '../../components/common/SmartwatchConfirmModal';
 import WeightRegistrationModal from '../../components/common/WeightRegistrationModal';
 import CaloriesInputModal from '../../components/common/CaloriesInputModal';
-import WorkoutReport from '../../components/common/Modal/WorkoutReport';
 import { Timer } from '../../components/common';
 import { useWorkoutLogic } from '../../hooks/useWorkoutLogic';
 import { workoutsData } from '../../data/workouts.data';
@@ -30,7 +29,8 @@ const WorkoutA: React.FC = () => {
     currentExerciseForWeight,
     isSendingReport,
     initializeExercises,
-    startWorkout,
+    resetWorkout,
+    // Mantendo startWorkoutWithConfirmation que é usado no Timer
     startWorkoutWithConfirmation,
     confirmSmartwatchStart,
     cancelSmartwatchStart,
@@ -47,7 +47,6 @@ const WorkoutA: React.FC = () => {
     prepareWorkoutFinalization,
     finalizeWorkout,
     canFinishWorkout,
-    resetWorkout,
     closeWeightModal,
     closeCaloriesModal,
     getElapsedWorkoutTime
@@ -242,7 +241,6 @@ const WorkoutA: React.FC = () => {
               workoutStarted={session.workoutStarted}
               exerciseStarted={!!session.currentExerciseId}
               onStartWorkout={startWorkoutWithConfirmation}
-              onResetTimer={resetWorkout}
             />
           </div>
 

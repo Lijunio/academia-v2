@@ -1,3 +1,4 @@
+// src/pages/AcademiaSelection.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { workoutsData } from '../../data/workouts.data';

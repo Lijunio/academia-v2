@@ -1,4 +1,4 @@
-// src/pages/Swimming/SwimmingRegistration.tsx - VERSÃO COM SUPABASE + LOCALSTORAGE + TELEGRAM
+// src/pages/Swimming/SwimmingRegistration.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SwimmingActivity } from '../../types/activities.types';

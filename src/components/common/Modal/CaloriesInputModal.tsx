@@ -1,3 +1,4 @@
+// components/Modal/CaloriesInputModaltsx
 interface CaloriesInputModalProps {
   isVisible: boolean;
   workoutDuration: number;

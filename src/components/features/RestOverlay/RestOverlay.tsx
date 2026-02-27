@@ -1,3 +1,4 @@
+// components/features/RestOverlay/RestOverlay.tsx
 import React, { useState, useEffect, useRef } from 'react';
 
 interface RestOverlayProps {

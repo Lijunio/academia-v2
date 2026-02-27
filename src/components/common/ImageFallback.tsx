@@ -1,3 +1,4 @@
+// components/common/ImageFallback.tsx
 import React, { useState } from 'react';
 
 interface ImageFallbackProps {

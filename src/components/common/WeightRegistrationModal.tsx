@@ -1,3 +1,4 @@
+// components/common/WeightRegistrationModal.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Exercise } from '../../types/workout.types';
 
@@ -35,34 +36,22 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
     const currentWeight = parseFloat(weight) || 0;
     const newWeight = currentWeight + quickWeight;
     setWeight(newWeight.toFixed(1));
-    
-    if (weightInputRef.current) {
-      weightInputRef.current.focus();
-    }
   };
 
   const removeQuickWeight = (quickWeight: number) => {
     const currentWeight = parseFloat(weight) || 0;
     const newWeight = Math.max(0, currentWeight - quickWeight);
     setWeight(newWeight.toFixed(1));
-    
-    if (weightInputRef.current) {
-      weightInputRef.current.focus();
-    }
   };
 
   const clearWeight = () => {
     setWeight('');
-    if (weightInputRef.current) {
-      weightInputRef.current.focus();
-    }
   };
 
   const handleCloseModal = () => {
     setWeight('');
     setSelectedVariation(undefined);
     setObservations('');
-    
     onCancel();
   };
 
@@ -86,10 +75,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
       return;
     }
 
-    console.log('💾💾💾 BOTÃO SALVAR PRESSIONADO - Vai concluir exercício');
-    console.log('💾 exercise.id:', exercise?.id);
-    console.log('💾 weight:', weightNum);
-    
     onSave({
       weight: weightNum,
       variationId: selectedVariation,
@@ -155,10 +140,13 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
               placeholder="0.0"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 sm:py-4 
                 text-white placeholder-gray-400 focus:outline-none focus:ring-2 
-                focus:ring-blue-500 text-center text-xl sm:text-2xl font-bold"
+                focus:ring-blue-500 text-center text-xl sm:text-2xl font-bold
+                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none 
+                [&::-webkit-inner-spin-button]:appearance-none"
               step="0.5"
               min="0"
               max="500"
+              inputMode="decimal"
             />
             <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 
               text-gray-400 font-semibold pointer-events-none text-sm sm:text-base">
@@ -176,6 +164,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
                 <button
                   key={quickWeight}
                   onClick={() => addQuickWeight(quickWeight)}
+                  onMouseDown={(e) => e.preventDefault()}
                   className="bg-gradient-to-br from-blue-600 to-blue-700 
                     text-white rounded-lg py-2 sm:py-2.5 hover:opacity-90 transition-all 
                     active:scale-95 font-medium text-xs sm:text-sm"
@@ -191,6 +180,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
                 <button
                   key={`minus-${quickWeight}`}
                   onClick={() => removeQuickWeight(quickWeight)}
+                  onMouseDown={(e) => e.preventDefault()}
                   className="bg-gradient-to-br from-red-600 to-red-700 
                     text-white rounded-lg py-2 sm:py-2.5 hover:opacity-90 transition-all 
                     active:scale-95 font-medium text-xs sm:text-sm"

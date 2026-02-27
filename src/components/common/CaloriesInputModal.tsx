@@ -1,3 +1,4 @@
+// components/common/CaloriesInputModal.tsx
 import React, { useState, useEffect } from 'react';
 
 interface CaloriesInputModalProps {

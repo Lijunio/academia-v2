@@ -1,3 +1,4 @@
+// components/Modal/WorkoutReport.tsx
 import React from 'react';
 import { WorkoutReport as WorkoutReportType } from '../../../types/workout.types';
 

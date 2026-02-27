@@ -1,3 +1,4 @@
+// components/common/SmartwatchConfirmModal.tsx
 import React from 'react';
 
 interface SmartwatchConfirmModalProps {

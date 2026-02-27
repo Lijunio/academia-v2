@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+// components/common/Timer/Timer.tsx
+import React, { useState, useEffect } from 'react';
+import { usePersistentTimer } from '../../../hooks/usePersistentTimer';
 
 interface TimerProps {
   totalTime: number;
@@ -6,7 +8,6 @@ interface TimerProps {
   workoutStarted: boolean;
   exerciseStarted: boolean;
   onStartWorkout?: () => void;
-  onResetTimer?: () => void;
 }
 
 const Timer: React.FC<TimerProps> = ({ 
@@ -14,96 +15,39 @@ const Timer: React.FC<TimerProps> = ({
   onTimeUp,
   workoutStarted,
   exerciseStarted,
-  onStartWorkout,
-  onResetTimer
+  onStartWorkout
 }) => {
   const [timeLeft, setTimeLeft] = useState(totalTime);
   const [isRunning, setIsRunning] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number | null>(null);
+  
+  const timer = usePersistentTimer(totalTime);
 
   useEffect(() => {
-    if (workoutStarted) {
-      setHasStarted(true);
-      setIsRunning(true);
-      startTimeRef.current = Date.now() - (totalTime - timeLeft) * 1000;
-    } else {
-      setHasStarted(false);
-      setIsRunning(false);
-      setTimeLeft(totalTime);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
+    const unsubscribe = timer.subscribe((state) => {
+      setTimeLeft(state.timeLeft);
+      setIsRunning(state.isRunning);
+      setHasStarted(state.hasStarted);
+      
+      if (state.timeLeft === 0 && onTimeUp) {
+        onTimeUp();
       }
+    });
+    
+    return unsubscribe;
+  }, [timer, onTimeUp]);
+
+  useEffect(() => {
+    if (workoutStarted && !hasStarted) {
+      timer.startTimer();
     }
-  }, [workoutStarted, totalTime]);
+  }, [workoutStarted, hasStarted, timer]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
-
-  const startTimer = () => {
-    if (!hasStarted) {
-      if (onStartWorkout) {
-        onStartWorkout();
-      }
-    } else {
-      setIsRunning(true);
-      startTimeRef.current = Date.now() - (totalTime - timeLeft) * 1000;
-    }
-  };
-
-  const pauseTimer = () => {
-    setIsRunning(false);
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-  };
-
-  const resetTimer = () => {
-    setIsRunning(false);
-    setHasStarted(false);
-    setTimeLeft(totalTime);
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    
-    if (onResetTimer) {
-      onResetTimer();
-    }
-  };
-
-  useEffect(() => {
-    if (isRunning && timeLeft > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft(prev => {
-          const newTime = Math.max(0, prev - 1);
-          
-          if (newTime === 0) {
-            setIsRunning(false);
-            if (timerRef.current) clearInterval(timerRef.current);
-            
-            if (onTimeUp) onTimeUp();
-            const finishSound = new Audio('/assets/audio/finish.mp3');
-            finishSound.play().catch(console.error);
-          }
-          
-          return newTime;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [isRunning, timeLeft, onTimeUp]);
 
   const progressPercentage = ((totalTime - timeLeft) / totalTime) * 100;
 
@@ -161,7 +105,7 @@ const Timer: React.FC<TimerProps> = ({
       <div className="flex flex-col sm:flex-row gap-[clamp(0.5rem,1vw,0.75rem)] justify-center">
         {!hasStarted ? (
           <button
-            onClick={startTimer}
+            onClick={onStartWorkout}
             className={`
               px-[clamp(1.5rem,3vw,2rem)] py-[clamp(0.75rem,1.5vw,1rem)]
               rounded-[clamp(0.5rem,1vw,0.75rem)] font-bold 
@@ -177,7 +121,7 @@ const Timer: React.FC<TimerProps> = ({
           <>
             {isRunning ? (
               <button
-                onClick={pauseTimer}
+                onClick={timer.pauseTimer}
                 className="px-[clamp(1.5rem,3vw,2rem)] py-[clamp(0.75rem,1.5vw,1rem)]
                   rounded-[clamp(0.5rem,1vw,0.75rem)] font-bold 
                   text-[clamp(0.875rem,1.5vw,1.125rem)] 
@@ -190,7 +134,7 @@ const Timer: React.FC<TimerProps> = ({
               </button>
             ) : (
               <button
-                onClick={startTimer}
+                onClick={timer.startTimer}
                 className={`
                   px-[clamp(1.5rem,3vw,2rem)] py-[clamp(0.75rem,1.5vw,1rem)]
                   rounded-[clamp(0.5rem,1vw,0.75rem)] font-bold 
@@ -203,20 +147,6 @@ const Timer: React.FC<TimerProps> = ({
                 Continuar
               </button>
             )}
-            
-            <button
-              onClick={resetTimer}
-              className={`
-                px-[clamp(1.5rem,3vw,2rem)] py-[clamp(0.75rem,1.5vw,1rem)]
-                rounded-[clamp(0.5rem,1vw,0.75rem)] font-bold 
-                text-[clamp(0.875rem,1.5vw,1.125rem)] flex items-center justify-center gap-[clamp(0.5rem,1vw,0.75rem)]
-                transition-all duration-300 border-2 min-h-[clamp(2.75rem,5vw,3rem)]
-                border-accent-red/50 text-accent-red hover:bg-accent-red/10
-              `}
-            >
-              <i className="fas fa-redo"></i>
-              Reiniciar
-            </button>
           </>
         )}
       </div>

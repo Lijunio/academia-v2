@@ -1,4 +1,4 @@
-// components/features/ExerciseCard/ExerciseCard.tsx - VERSÃO CORRIGIDA
+// components/features/ExerciseCard/ExerciseCard.tsx
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Exercise } from '../../../types/workout.types';
 import ExerciseSkipModal from './ExerciseSkipModal';
@@ -80,12 +80,10 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
   const handleCompleteClick = useCallback(() => {
     if (localIsCompleted || hasBeenCompletedRef.current) {
-      console.log('🚫 Exercício já concluído localmente, ignorando clique');
       return;
     }
     
     if (isProcessingRef.current || isProcessing) {
-      console.log('⏳ Exercício já em processamento, ignorando clique');
       return;
     }
     
@@ -100,8 +98,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     isProcessingRef.current = true;
     setIsProcessing(true);
     
-    console.log(`🔄 ExerciseCard - Abrindo modal de peso para exercício ${exercise.id} (${exercise.name})`);
-    
     onToggleComplete();
     
     clickTimeoutRef.current = setTimeout(() => {
@@ -109,16 +105,14 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
       setIsProcessing(false);
     }, 1000);
     
-  }, [localIsCompleted, workoutStarted, isProcessing, isLocked, onToggleComplete, exercise.id, exercise.name]);
+  }, [localIsCompleted, workoutStarted, isProcessing, isLocked, onToggleComplete]);
 
   const handleSkipClick = useCallback(() => {
     if (localIsCompleted || hasBeenCompletedRef.current) {
-      console.log('🚫 Exercício já concluído localmente, ignorando clique');
       return;
     }
     
     if (isProcessingRef.current || isProcessing) {
-      console.log('⏳ Exercício já em processamento, ignorando clique');
       return;
     }
     
@@ -315,66 +309,47 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         </div>
 
-        {exercise.images && exercise.images.length > 0 && (
-          <div className="w-full lg:w-2/5 xl:w-1/3 mt-4 lg:mt-0">
-            <div className="bg-white rounded-lg sm:rounded-xl p-1 sm:p-2 
-              shadow h-40 sm:h-48 md:h-56 lg:h-64 relative overflow-hidden">
-              
-              <div className="h-full w-full flex items-center justify-center bg-gray-50">
-                <img
-                  src={exercise.images[currentImageIndex]}
-                  alt={`${exercise.name}`}
-                  className="max-h-full max-w-full object-contain p-1 sm:p-2"
-                  loading="lazy"
-                />
-              </div>
-
-              {hasMultipleImages && (
-                <>
-                  <button
-                    onClick={handlePrevImage}
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 
-                      w-6 h-6 sm:w-8 sm:h-8
-                      bg-black/70 text-white rounded-full flex items-center justify-center
-                      transition-colors z-20 border border-white/20 text-xs sm:text-sm"
-                    aria-label="Anterior"
-                  >
-                    <i className="fas fa-chevron-left"></i>
-                  </button>
-
-                  <button
-                    onClick={handleNextImage}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 
-                      w-6 h-6 sm:w-8 sm:h-8
-                      bg-black/70 text-white rounded-full flex items-center justify-center
-                      transition-colors z-20 border border-white/20 text-xs sm:text-sm"
-                    aria-label="Próxima"
-                  >
-                    <i className="fas fa-chevron-right"></i>
-                  </button>
-
-                  <div className="absolute bottom-2 left-0 right-0 
-                    flex justify-center gap-1 z-20">
-                    {exercise.images.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleDotClick(index)}
-                        className={`
-                          w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all
-                          ${index === currentImageIndex 
-                            ? 'bg-white scale-125' 
-                            : 'bg-white/50'
-                          }
-                        `}
-                        aria-label={`Imagem ${index + 1}`}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
+      {exercise.images && exercise.images.length > 0 && (
+        <div className="w-full lg:w-2/5 xl:w-1/3 mt-4 lg:mt-0">
+          <div className="bg-white rounded-lg sm:rounded-xl p-1 sm:p-2 
+            shadow h-40 sm:h-48 md:h-56 lg:h-64 relative overflow-hidden">
+            
+            <div className="h-full w-full flex items-center justify-center bg-gray-50">
+              <img
+                src={exercise.images[currentImageIndex]}
+                alt={`${exercise.name}`}
+                className="max-h-full max-w-full object-contain p-1 sm:p-2"
+                loading="lazy"
+              />
             </div>
+
+            {hasMultipleImages && (
+              <>
+                {/* Botões de seta laterais - APENAS ISSO, SEM DOTS */}
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 
+                    w-8 h-8 bg-black/70 text-white rounded-full flex items-center justify-center
+                    hover:bg-black/90 transition-colors z-20 border border-white/20"
+                  aria-label="Imagem anterior"
+                >
+                  <i className="fas fa-chevron-left text-sm"></i>
+                </button>
+
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 
+                    w-8 h-8 bg-black/70 text-white rounded-full flex items-center justify-center
+                    hover:bg-black/90 transition-colors z-20 border border-white/20"
+                  aria-label="Próxima imagem"
+                >
+                  <i className="fas fa-chevron-right text-sm"></i>
+                </button>
+              </>
+            )}
           </div>
-        )}
+        </div>
+      )}
       </div>
 
       <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/10">

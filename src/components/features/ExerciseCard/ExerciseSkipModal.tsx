@@ -1,4 +1,4 @@
-// components/features/ExerciseCard/ExerciseSkipModal.tsx - VERSÃO ORIGINAL
+// components/features/ExerciseCard/ExerciseSkipModal.tsx
 import React, { useState } from 'react';
 
 interface ExerciseSkipModalProps {
