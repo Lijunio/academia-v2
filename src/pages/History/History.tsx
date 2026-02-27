@@ -1,4 +1,4 @@
-// src/pages/History/History.tsx
+// src/pages/History/History.tsx - Seção do gráfico de pizza corrigida
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -19,6 +19,8 @@ import { workoutService } from '../../services/supabase.service';
 import YearCalendar, { Workout } from '../../components/YearCalendar';
 import WorkoutFullReportModal from '../../components/common/Modal/WorkoutFullReportModal';
 import ChartCarousel from '../../components/ChartCarousel';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+ChartJS.register(ChartDataLabels);
 
 ChartJS.register(
   CategoryScale,
@@ -398,22 +400,51 @@ const History: React.FC = () => {
 
   const frequencyChartData = prepareFrequencyChartData();
 
+  // Separar Academia em Treino A e Treino B
+  const treinoACount = filteredWorkouts.filter(w => 
+    w.type === 'academia' && 
+    (w.notes?.toLowerCase().includes('treino a') || w.details?.workoutType === 'A')
+  ).length;
+
+  const treinoBCount = filteredWorkouts.filter(w => 
+    w.type === 'academia' && 
+    (w.notes?.toLowerCase().includes('treino b') || w.details?.workoutType === 'B')
+  ).length;
+
+  const academiaSemTipoCount = filteredWorkouts.filter(w => 
+    w.type === 'academia' && 
+    !w.notes?.toLowerCase().includes('treino a') && 
+    !w.notes?.toLowerCase().includes('treino b') && 
+    w.details?.workoutType !== 'A' && 
+    w.details?.workoutType !== 'B'
+  ).length;
+
+  // Se houver academias sem tipo definido, adicionar ao Treino A por padrão
+  const treinoAFinal = treinoACount + academiaSemTipoCount;
+  
+  const natacaoCount = filteredWorkouts.filter(w => w.type === 'natacao').length;
+  const pilatesCount = filteredWorkouts.filter(w => w.type === 'pilates').length;
+  const totalFiltered = filteredWorkouts.length;
+
+  const treinoAPercentage = totalFiltered > 0 ? Math.round((treinoAFinal / totalFiltered) * 100) : 0;
+  const treinoBPercentage = totalFiltered > 0 ? Math.round((treinoBCount / totalFiltered) * 100) : 0;
+  const natacaoPercentage = totalFiltered > 0 ? Math.round((natacaoCount / totalFiltered) * 100) : 0;
+  const pilatesPercentage = totalFiltered > 0 ? Math.round((pilatesCount / totalFiltered) * 100) : 0;
+
   const typeDistribution = {
-    labels: ['Academia', 'Natação', 'Pilates'],
+    labels: ['Treino A', 'Treino B', 'Natação', 'Pilates'],
     datasets: [
       {
-        data: [
-          filteredWorkouts.filter(w => w.type === 'academia').length,
-          filteredWorkouts.filter(w => w.type === 'natacao').length,
-          filteredWorkouts.filter(w => w.type === 'pilates').length
-        ],
+        data: [treinoAFinal, treinoBCount, natacaoCount, pilatesCount],
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)'
+          'rgba(59, 130, 246, 0.8)',  // Azul - Treino A
+          'rgba(239, 68, 68, 0.8)',    // Vermelho/ Laranja - Treino B
+          'rgba(16, 185, 129, 0.8)',   // Verde - Natação
+          'rgba(245, 158, 11, 0.8)'    // Amarelo/ Laranja - Pilates
         ],
         borderColor: [
           'rgba(59, 130, 246, 1)',
+          'rgba(239, 68, 68, 1)',
           'rgba(16, 185, 129, 1)',
           'rgba(245, 158, 11, 1)'
         ],
@@ -567,93 +598,6 @@ const History: React.FC = () => {
           <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
             border border-white/10 h-full">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <i className="fas fa-calendar-check text-accent-blue"></i>
-              Frequência de Treinos
-            </h3>
-            <div className="h-64">
-              <Bar 
-                key="frequency-chart"
-                data={frequencyChartData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                    y: {
-                      grid: { color: 'rgba(255,255,255,0.1)' },
-                      ticks: { color: 'white', stepSize: 1 },
-                      stacked: true,
-                    },
-                    x: {
-                      grid: { display: false },
-                      ticks: { color: 'white', maxRotation: 45, maxTicksLimit: 5 },
-                      stacked: true,
-                    }
-                  },
-                  plugins: {
-                    legend: {
-                      position: 'top',
-                      labels: { 
-                        color: 'white',
-                        usePointStyle: true,
-                        pointStyle: 'circle',
-                      }
-                    },
-                    tooltip: {
-                      backgroundColor: '#1A1F2E',
-                      callbacks: {
-                        label: (context) => {
-                          const label = context.dataset.label || '';
-                          const value = context.raw as number;
-                          return `${label}: ${value} treino(s)`;
-                        }
-                      }
-                    }
-                  },
-                  onClick: (event, elements) => {
-                    if (elements.length > 0) {
-                      const element = elements[0];
-                      const datasetIndex = element.datasetIndex;
-                      const dataIndex = element.index;
-                      
-                      const date = frequencyChartData.labels[dataIndex];
-                      
-                      let typeFilter = '';
-                      if (datasetIndex === 0) typeFilter = 'treino a';
-                      else if (datasetIndex === 1) typeFilter = 'treino b';
-                      else if (datasetIndex === 2) typeFilter = 'natacao';
-                      else if (datasetIndex === 3) typeFilter = 'pilates';
-                      
-                      const workoutsOnDate = filteredWorkouts.filter(w => {
-                        const workoutDate = new Date(w.date).toLocaleDateString();
-                        if (workoutDate !== date) return false;
-                        
-                        if (datasetIndex === 0) {
-                          return w.type === 'academia' && 
-                            (w.notes?.toLowerCase().includes('treino a') || w.details?.workoutType === 'A');
-                        } else if (datasetIndex === 1) {
-                          return w.type === 'academia' && 
-                            (w.notes?.toLowerCase().includes('treino b') || w.details?.workoutType === 'B');
-                        } else if (datasetIndex === 2) {
-                          return w.type === 'natacao';
-                        } else if (datasetIndex === 3) {
-                          return w.type === 'pilates';
-                        }
-                        return false;
-                      });
-                      
-                      if (workoutsOnDate.length > 0) {
-                        setSelectedWorkout(workoutsOnDate[0]);
-                      }
-                    }
-                  }
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
-            border border-white/10 h-full">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <i className="fas fa-chart-pie text-accent-purple"></i>
               Distribuição por Tipo
             </h3>
@@ -667,7 +611,36 @@ const History: React.FC = () => {
                   plugins: {
                     legend: {
                       position: 'bottom',
-                      labels: { color: 'white' }
+                      labels: { 
+                        color: 'white',
+                        font: {
+                          size: window.innerWidth < 640 ? 10 : 12
+                        }
+                      }
+                    },
+                    tooltip: {
+                      callbacks: {
+                        label: (context) => {
+                          const label = context.label || '';
+                          const value = context.raw as number;
+                          const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+                          const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                          return `${label}: ${value} treinos (${percentage}%)`;
+                        }
+                      }
+                    },
+                    datalabels: {
+                      display: true,
+                      color: 'white',
+                      font: {
+                        weight: 'bold',
+                        size: window.innerWidth < 640 ? 10 : 12
+                      },
+                      formatter: (value: number, context: any) => {
+                        const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                        return percentage > 5 ? `${percentage}%` : ''; // Só mostra se for > 5% para não poluir
+                      }
                     }
                   },
                   onClick: (event, elements) => {
@@ -675,16 +648,27 @@ const History: React.FC = () => {
                       const element = elements[0];
                       const index = element.index;
                       
-                      let typeFilter = '';
-                      if (index === 0) typeFilter = 'academia';
-                      else if (index === 1) typeFilter = 'natacao';
-                      else if (index === 2) typeFilter = 'pilates';
+                      if (index === 0) {
+                        setFilter('academia');
+                        // Aplicar filtro para Treino A especificamente? 
+                        // Por enquanto filtra por academia
+                      } else if (index === 1) {
+                        setFilter('academia');
+                      } else if (index === 2) {
+                        setFilter('natacao');
+                      } else if (index === 3) {
+                        setFilter('pilates');
+                      }
                       
-                      setFilter(typeFilter as any);
                       document.getElementById('workouts-list')?.scrollIntoView({ behavior: 'smooth' });
                     }
                   }
                 }}
+                plugins={[{
+                  id: 'datalabels',
+                  // Plugin externo necessário: chartjs-plugin-datalabels
+                  // npm install chartjs-plugin-datalabels
+                }]}
               />
             </div>
           </div>

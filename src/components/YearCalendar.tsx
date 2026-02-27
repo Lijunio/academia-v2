@@ -1,4 +1,4 @@
-// src/components/YearCalendar.tsx
+// components/YearCalendar.tsx - Versão completa com cores iguais ao History
 import React, { useState } from 'react';
 
 export interface Workout {
@@ -107,8 +107,8 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
         };
       } else {
         return { 
-          bg: 'bg-orange-600/30',
-          border: 'border-orange-500/50' 
+          bg: 'bg-red-500/30',
+          border: 'border-red-500/50' 
         };
       }
     }
@@ -122,8 +122,8 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
     
     if (workout.type === 'pilates') {
       return { 
-        bg: 'bg-purple-600/30',
-        border: 'border-purple-500/50' 
+        bg: 'bg-amber-500/30',
+        border: 'border-amber-500/50' 
       };
     }
     
@@ -168,7 +168,7 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
               : 'bg-gray-800/30 border-gray-700/20 text-gray-600 hover:bg-gray-700/30'
           }`}
       >
-        <span className={`text-sm font-bold ${hasWorkout ? 'text-white' : 'text-gray-500'}`}>
+        <span className={`text-sm font-bold whitespace-nowrap ${hasWorkout ? 'text-white' : 'text-gray-500'}`}>
           {day}
         </span>
         
@@ -179,11 +179,11 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
               let dotColor = 'bg-white/70';
               
               if (workout.type === 'academia') {
-                dotColor = variant === 'Treino A' ? 'bg-blue-300' : 'bg-orange-300';
+                dotColor = variant === 'Treino A' ? 'bg-blue-300' : 'bg-red-300';
               } else if (workout.type === 'natacao') {
                 dotColor = 'bg-emerald-300';
               } else if (workout.type === 'pilates') {
-                dotColor = 'bg-purple-300';
+                dotColor = 'bg-amber-300';
               }
               
               return (
@@ -267,7 +267,7 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
           <span className="text-text-secondary text-xs">Treino A</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-orange-600/50 border border-orange-500"></div>
+          <div className="w-4 h-4 rounded bg-red-500/50 border border-red-500"></div>
           <span className="text-text-secondary text-xs">Treino B</span>
         </div>
         <div className="flex items-center gap-2">
@@ -275,7 +275,7 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
           <span className="text-text-secondary text-xs">Natação</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-purple-600/50 border border-purple-500"></div>
+          <div className="w-4 h-4 rounded bg-amber-500/50 border border-amber-500"></div>
           <span className="text-text-secondary text-xs">Pilates</span>
         </div>
         <div className="flex items-center gap-2">

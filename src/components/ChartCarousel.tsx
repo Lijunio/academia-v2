@@ -1,4 +1,4 @@
-// src/components/ChartCarousel.tsx
+// components/ChartCarousel.tsx
 import React, { useState, useEffect, useRef } from 'react';
 
 interface ChartCarouselProps {
@@ -8,9 +8,10 @@ interface ChartCarouselProps {
 const ChartCarousel: React.FC<ChartCarouselProps> = ({ children }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const touchStartX = useRef<number>(0);
-  const touchEndX = useRef<number>(0);
-  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  
+  const minSwipeDistance = 50;
 
   useEffect(() => {
     const checkMobile = () => {
@@ -23,35 +24,52 @@ const ChartCarousel: React.FC<ChartCarouselProps> = ({ children }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % children.length);
+  };
+
+  const goToPrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + children.length) % children.length);
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      goToNext();
+    } else if (isRightSwipe) {
+      goToPrev();
+    }
+  };
+
   useEffect(() => {
+    let interval: NodeJS.Timeout | undefined;
+    
     if (isMobile && children.length > 1) {
-      intervalRef.current = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % children.length);
-      }, 10000);
+      interval = setInterval(() => {
+        goToNext();
+      }, 8000);
     }
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (interval) {
+        clearInterval(interval);
       }
     };
-  }, [isMobile, children.length]);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    if (touchStartX.current - touchEndX.current > 50) {
-      setCurrentIndex((prev) => (prev + 1) % children.length);
-    } else if (touchEndX.current - touchStartX.current > 50) {
-      setCurrentIndex((prev) => (prev - 1 + children.length) % children.length);
-    }
-  };
+  }, [isMobile, children.length, currentIndex]);
 
   if (!isMobile) {
     return <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">{children}</div>;
@@ -61,9 +79,9 @@ const ChartCarousel: React.FC<ChartCarouselProps> = ({ children }) => {
     <div className="relative mb-8">
       <div
         className="overflow-hidden touch-pan-y"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
       >
         <div
           className="flex transition-transform duration-300 ease-out"
