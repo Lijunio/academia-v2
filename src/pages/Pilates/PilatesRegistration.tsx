@@ -4,6 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { PilatesActivity } from '../../types/activities.types';
 import { workoutService } from '../../services/supabase.service';
 
+interface Equipment {
+  id: string;
+  name: string;
+  icon: string;
+}
+
 const PilatesRegistration: React.FC = () => {
   const navigate = useNavigate();
 
@@ -11,7 +17,23 @@ const PilatesRegistration: React.FC = () => {
   const [heartRate, setHeartRate] = useState('');
   const [calories, setCalories] = useState('');
   const [notes, setNotes] = useState('');
+  const [selectedEquipment, setSelectedEquipment] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const equipmentList: Equipment[] = [
+    { id: 'reformer', name: 'Reformer', icon: 'fa-solid fa-dumbbell' },
+    { id: 'cadillac', name: 'Cadillac', icon: 'fa-solid fa-cube' },
+    { id: 'chair', name: 'Chair (Cadeira)', icon: 'fa-solid fa-chair' },
+    { id: 'barrel', name: 'Barrel', icon: 'fa-solid fa-circle' }
+  ];
+
+  const toggleEquipment = (equipmentId: string) => {
+    setSelectedEquipment(prev => 
+      prev.includes(equipmentId)
+        ? prev.filter(id => id !== equipmentId)
+        : [...prev, equipmentId]
+    );
+  };
 
   const handleSubmit = async () => {
     if (!duration || !heartRate || !calories) {
@@ -27,6 +49,7 @@ const PilatesRegistration: React.FC = () => {
       heartRate: parseInt(heartRate),
       focusArea: 'core',
       difficulty: 3,
+      equipment: selectedEquipment,
       notes: notes || undefined
     };
 
@@ -44,7 +67,8 @@ const PilatesRegistration: React.FC = () => {
         heart_rate: parseInt(heartRate),
         details: {
           focusArea: 'core',
-          difficulty: 3
+          difficulty: 3,
+          equipment: selectedEquipment
         },
         notes: notes || undefined
       });
@@ -67,6 +91,11 @@ const PilatesRegistration: React.FC = () => {
         return `${mins} min`;
       };
 
+      const equipmentNames = activity.equipment?.map(eq => {
+        const equip = equipmentList.find(e => e.id === eq);
+        return equip ? equip.name : eq;
+      }).join(', ') || 'Nenhum';
+
       const message = `
 🧘‍♀️ *RELATÓRIO DE PILATES* 🧘‍♂️
 
@@ -78,6 +107,9 @@ const PilatesRegistration: React.FC = () => {
 ├ 💓 FC Média: ${activity.heartRate} bpm
 └ 🔥 Calorias: ${activity.calories} kcal
 
+🛠️ *EQUIPAMENTOS UTILIZADOS:*
+${equipmentNames}
+
 📈 *ANÁLISE:*
 ├ ⚡ Intensidade: ${(activity.calories / (activity.duration / 60)).toFixed(1)} kcal/min
 └ 🏆 Performance: ${activity.heartRate < 100 ? 'Leve' : activity.heartRate < 130 ? 'Moderada' : 'Alta'}
@@ -88,7 +120,6 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
 • Manter respiração controlada
 • Aumentar tempo de isometria
 • Trabalhar alinhamento postural
-
       `.trim();
 
       const TELEGRAM_BOT_TOKEN = process.env.REACT_APP_TELEGRAM_BOT_TOKEN || '';
@@ -197,6 +228,39 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
             />
           </div>
 
+          <div className="mb-6">
+            <label className="block text-white mb-3">
+              Equipamentos utilizados (opcional - múltipla escolha)
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {equipmentList.map((equipment) => (
+                <button
+                  key={equipment.id}
+                  type="button"
+                  onClick={() => toggleEquipment(equipment.id)}
+                  className={`
+                    flex items-center gap-3 p-4 rounded-xl border-2 transition-all
+                    ${selectedEquipment.includes(equipment.id)
+                      ? 'bg-green-500/20 border-green-500 text-white'
+                      : 'bg-white/5 border-white/10 text-gray-300 hover:bg-white/10'
+                    }
+                  `}
+                >
+                  <i className={`${equipment.icon} text-lg ${
+                    selectedEquipment.includes(equipment.id) ? 'text-green-400' : 'text-gray-400'
+                  }`}></i>
+                  <span className="flex-1 text-left">{equipment.name}</span>
+                  {selectedEquipment.includes(equipment.id) && (
+                    <i className="fas fa-check-circle text-green-400"></i>
+                  )}
+                </button>
+              ))}
+            </div>
+            <p className="text-green-300 text-xs mt-2">
+              {selectedEquipment.length} equipamento(s) selecionado(s)
+            </p>
+          </div>
+
           <div className="mb-8">
             <label className="block text-white mb-2">
               Observações (opcional)
@@ -256,6 +320,21 @@ ${activity.notes ? `📝 *OBSERVAÇÕES:*\n${activity.notes}\n` : ''}
                 </div>
               </div>
             </div>
+            {selectedEquipment.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-white/10">
+                <p className="text-green-300 text-sm mb-2">Equipamentos selecionados:</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedEquipment.map(eq => {
+                    const equip = equipmentList.find(e => e.id === eq);
+                    return (
+                      <span key={eq} className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs">
+                        {equip?.name}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

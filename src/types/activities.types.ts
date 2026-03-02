@@ -22,6 +22,7 @@ export interface PilatesActivity extends BaseActivity {
   type: 'pilates';
   focusArea: 'core' | 'flexibility' | 'strength' | 'posture' | 'breathing';
   difficulty: 1 | 2 | 3 | 4 | 5;
+  equipment?: string[];
 }
 
 export type Activity = SwimmingActivity | PilatesActivity;

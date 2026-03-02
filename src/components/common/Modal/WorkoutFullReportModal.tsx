@@ -63,7 +63,6 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
     
     return (
       <div className="space-y-4">
-        {/* Estatísticas */}
         <div className="bg-blue-500/10 rounded-xl p-4 border border-blue-500/20">
           <h4 className="text-blue-300 font-bold mb-3">📊 ESTATÍSTICAS DO TREINO</h4>
           <div className="grid grid-cols-2 gap-3">
@@ -93,13 +92,11 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
             <div key={ex.id} className="bg-white/5 rounded-xl p-4 border border-white/10">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  {/* Nome do exercício */}
                   <p className="text-white font-bold flex items-center gap-2">
                     <span className="hidden sm:inline">{index + 1}. </span>
                     <span className="truncate">{ex.name}</span>
                   </p>
                   
-                  {/* VERSÃO MOBILE - Com ícones e motivo */}
                   <div className="sm:hidden mt-3 space-y-2">
                     {isCompleted && (
                       <>
@@ -147,7 +144,6 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
                     )}
                   </div>
                   
-                  {/* VERSÃO DESKTOP - Texto completo */}
                   <div className="hidden sm:block">
                     {isCompleted && execution && (
                       <div className="mt-2 space-y-1">
@@ -168,7 +164,6 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
                   </div>
                 </div>
                 
-                {/* Badges Desktop */}
                 <div className="hidden sm:flex sm:items-center">
                   {isCompleted && (
                     <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium">
@@ -225,6 +220,7 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
 
   const renderPilatesDetails = () => {
     const details = workout.details || {};
+    const equipmentList = details.equipment || [];
     
     return (
       <div className="space-y-4">
@@ -240,6 +236,22 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
               <p className="text-white font-bold">{details.difficulty || 3}/5</p>
             </div>
           </div>
+          
+          {equipmentList.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-green-500/20">
+              <p className="text-green-300 text-sm mb-3">🛠️ Equipamentos utilizados:</p>
+              <div className="flex flex-wrap gap-2">
+                {equipmentList.map((eq: string) => (
+                  <span key={eq} className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs">
+                    {eq === 'reformer' ? 'Reformer' :
+                     eq === 'cadillac' ? 'Cadillac' :
+                     eq === 'chair' ? 'Chair (Cadeira)' :
+                     eq === 'barrel' ? 'Barrel' : eq}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -250,7 +262,6 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
       <div className="bg-gradient-to-br from-secondary-dark to-black rounded-2xl p-4 sm:p-6 md:p-8 
         max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/10">
         
-        {/* Header */}
         <div className="flex items-center justify-between mb-4 sm:mb-6 sticky top-0 bg-gradient-to-br from-secondary-dark to-black py-2 z-10">
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white flex items-center gap-2 sm:gap-3">
             <i className="fas fa-file-alt text-accent-red"></i>
@@ -265,7 +276,6 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
           </button>
         </div>
 
-        {/* Resumo do treino */}
         <div className="bg-white/5 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <div className="col-span-2 sm:col-span-1">
@@ -294,12 +304,10 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
           </div>
         </div>
 
-        {/* Detalhes específicos por tipo */}
         {workout.type === 'academia' && renderAcademiaDetails()}
         {workout.type === 'natacao' && renderNatacaoDetails()}
         {workout.type === 'pilates' && renderPilatesDetails()}
 
-        {/* Resumo final */}
         <div className="mt-4 sm:mt-6 pt-4 border-t border-white/10">
           <h4 className="text-white font-bold mb-3">📈 RESUMO</h4>
           <div className="bg-gradient-to-br from-accent-red/10 to-accent-purple/10 rounded-xl p-4">

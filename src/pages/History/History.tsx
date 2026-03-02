@@ -1,4 +1,4 @@
-// src/pages/History/History.tsx - Seção do gráfico de pizza corrigida
+// src/pages/History/History.tsx
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -19,8 +19,8 @@ import { workoutService } from '../../services/supabase.service';
 import YearCalendar, { Workout } from '../../components/YearCalendar';
 import WorkoutFullReportModal from '../../components/common/Modal/WorkoutFullReportModal';
 import ChartCarousel from '../../components/ChartCarousel';
+import ExpandedCaloriesChart from '../../components/ExpandedCaloriesChart';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-ChartJS.register(ChartDataLabels);
 
 ChartJS.register(
   CategoryScale,
@@ -32,7 +32,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
+  ChartDataLabels
 );
 
 interface Stats {
@@ -61,6 +62,7 @@ const History: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [workoutToDelete, setWorkoutToDelete] = useState<string | null>(null);
   const [showFullReport, setShowFullReport] = useState(false);
+  const [showExpandedChart, setShowExpandedChart] = useState(false);
   const [isMobileFilters, setIsMobileFilters] = useState(false);
 
   useEffect(() => {
@@ -259,11 +261,6 @@ const History: React.FC = () => {
     }
   };
 
-  const handleDayClick = (date: string) => {
-    setSearchTerm(date);
-    document.getElementById('workouts-list')?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'academia': return 'dumbbell';
@@ -295,11 +292,7 @@ const History: React.FC = () => {
         .reduce((sum, w) => sum + w.calories, 0);
     });
 
-    const countByDay = last30Days.map(date => {
-      return filteredWorkouts.filter(w => new Date(w.date).toLocaleDateString() === date).length;
-    });
-
-    return { labels: last30Days, calories: caloriesByDay, count: countByDay };
+    return { labels: last30Days, calories: caloriesByDay };
   };
 
   const chartData = prepareChartData();
@@ -317,88 +310,6 @@ const History: React.FC = () => {
       }
     ]
   };
-
-  const prepareFrequencyChartData = () => {
-    const last30Days = [...Array(30)].map((_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      return d.toLocaleDateString();
-    }).reverse();
-
-    const treinoAData = last30Days.map(date => 
-      filteredWorkouts.filter(w => 
-        new Date(w.date).toLocaleDateString() === date && 
-        w.type === 'academia' && 
-        (w.notes?.toLowerCase().includes('treino a') || w.details?.workoutType === 'A')
-      ).length
-    );
-
-    const treinoBData = last30Days.map(date => 
-      filteredWorkouts.filter(w => 
-        new Date(w.date).toLocaleDateString() === date && 
-        w.type === 'academia' && 
-        (w.notes?.toLowerCase().includes('treino b') || w.details?.workoutType === 'B')
-      ).length
-    );
-
-    const natacaoData = last30Days.map(date => 
-      filteredWorkouts.filter(w => 
-        new Date(w.date).toLocaleDateString() === date && 
-        w.type === 'natacao'
-      ).length
-    );
-
-    const pilatesData = last30Days.map(date => 
-      filteredWorkouts.filter(w => 
-        new Date(w.date).toLocaleDateString() === date && 
-        w.type === 'pilates'
-      ).length
-    );
-
-    return {
-      labels: last30Days,
-      datasets: [
-        {
-          label: 'Treino A',
-          data: treinoAData,
-          backgroundColor: 'rgba(59, 130, 246, 0.8)',
-          borderColor: 'rgba(59, 130, 246, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-          stack: 'stack0',
-        },
-        {
-          label: 'Treino B',
-          data: treinoBData,
-          backgroundColor: 'rgba(239, 68, 68, 0.8)',
-          borderColor: 'rgba(239, 68, 68, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-          stack: 'stack0',
-        },
-        {
-          label: 'Natação',
-          data: natacaoData,
-          backgroundColor: 'rgba(16, 185, 129, 0.8)',
-          borderColor: 'rgba(16, 185, 129, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-          stack: 'stack0',
-        },
-        {
-          label: 'Pilates',
-          data: pilatesData,
-          backgroundColor: 'rgba(245, 158, 11, 0.8)',
-          borderColor: 'rgba(245, 158, 11, 1)',
-          borderWidth: 1,
-          borderRadius: 4,
-          stack: 'stack0',
-        }
-      ]
-    };
-  };
-
-  const frequencyChartData = prepareFrequencyChartData();
 
   // Separar Academia em Treino A e Treino B
   const treinoACount = filteredWorkouts.filter(w => 
@@ -419,17 +330,10 @@ const History: React.FC = () => {
     w.details?.workoutType !== 'B'
   ).length;
 
-  // Se houver academias sem tipo definido, adicionar ao Treino A por padrão
   const treinoAFinal = treinoACount + academiaSemTipoCount;
   
   const natacaoCount = filteredWorkouts.filter(w => w.type === 'natacao').length;
   const pilatesCount = filteredWorkouts.filter(w => w.type === 'pilates').length;
-  const totalFiltered = filteredWorkouts.length;
-
-  const treinoAPercentage = totalFiltered > 0 ? Math.round((treinoAFinal / totalFiltered) * 100) : 0;
-  const treinoBPercentage = totalFiltered > 0 ? Math.round((treinoBCount / totalFiltered) * 100) : 0;
-  const natacaoPercentage = totalFiltered > 0 ? Math.round((natacaoCount / totalFiltered) * 100) : 0;
-  const pilatesPercentage = totalFiltered > 0 ? Math.round((pilatesCount / totalFiltered) * 100) : 0;
 
   const typeDistribution = {
     labels: ['Treino A', 'Treino B', 'Natação', 'Pilates'],
@@ -437,10 +341,10 @@ const History: React.FC = () => {
       {
         data: [treinoAFinal, treinoBCount, natacaoCount, pilatesCount],
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',  // Azul - Treino A
-          'rgba(239, 68, 68, 0.8)',    // Vermelho/ Laranja - Treino B
-          'rgba(16, 185, 129, 0.8)',   // Verde - Natação
-          'rgba(245, 158, 11, 0.8)'    // Amarelo/ Laranja - Pilates
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(239, 68, 68, 0.8)',
+          'rgba(16, 185, 129, 0.8)',
+          'rgba(245, 158, 11, 0.8)'
         ],
         borderColor: [
           'rgba(59, 130, 246, 1)',
@@ -492,9 +396,9 @@ const History: React.FC = () => {
               <i className="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
             </Link>
             <div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white font-montserrat whitespace-nowrap overflow-hidden text-ellipsis">
-              Histórico <span className="bg-gradient-to-r from-accent-red to-accent-purple bg-clip-text text-transparent">Completo</span>
-            </h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white font-montserrat whitespace-nowrap overflow-hidden text-ellipsis">
+                Histórico <span className="bg-gradient-to-r from-accent-red to-accent-purple bg-clip-text text-transparent">Completo</span>
+              </h1>
               <p className="text-text-secondary">
                 {filteredWorkouts.length} treinos encontrados
               </p>
@@ -563,11 +467,19 @@ const History: React.FC = () => {
         </div>
 
         <ChartCarousel>
-          <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
-            border border-white/10 h-full">
+          {/* Card de Calorias - Expansível */}
+          <div 
+            className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
+              border border-white/10 h-full cursor-pointer hover:scale-[1.02] transition-all group"
+            onClick={() => setShowExpandedChart(true)}
+          >
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
               <i className="fas fa-fire text-accent-red"></i>
               Evolução de Calorias
+              <span className="ml-auto text-xs bg-accent-blue/20 text-accent-blue px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <i className="fas fa-expand-alt mr-1"></i>
+                Expandir
+              </span>
             </h3>
             <div className="h-64">
               <Line 
@@ -595,6 +507,7 @@ const History: React.FC = () => {
             </div>
           </div>
 
+          {/* Card de Distribuição por Tipo */}
           <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-6 
             border border-white/10 h-full">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -639,7 +552,7 @@ const History: React.FC = () => {
                       formatter: (value: number, context: any) => {
                         const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
                         const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                        return percentage > 5 ? `${percentage}%` : ''; // Só mostra se for > 5% para não poluir
+                        return percentage > 5 ? `${percentage}%` : '';
                       }
                     }
                   },
@@ -648,27 +561,15 @@ const History: React.FC = () => {
                       const element = elements[0];
                       const index = element.index;
                       
-                      if (index === 0) {
-                        setFilter('academia');
-                        // Aplicar filtro para Treino A especificamente? 
-                        // Por enquanto filtra por academia
-                      } else if (index === 1) {
-                        setFilter('academia');
-                      } else if (index === 2) {
-                        setFilter('natacao');
-                      } else if (index === 3) {
-                        setFilter('pilates');
-                      }
+                      if (index === 0) setFilter('academia');
+                      else if (index === 1) setFilter('academia');
+                      else if (index === 2) setFilter('natacao');
+                      else if (index === 3) setFilter('pilates');
                       
                       document.getElementById('workouts-list')?.scrollIntoView({ behavior: 'smooth' });
                     }
                   }
                 }}
-                plugins={[{
-                  id: 'datalabels',
-                  // Plugin externo necessário: chartjs-plugin-datalabels
-                  // npm install chartjs-plugin-datalabels
-                }]}
               />
             </div>
           </div>
@@ -1006,6 +907,13 @@ const History: React.FC = () => {
           <WorkoutFullReportModal
             workout={selectedWorkout}
             onClose={() => setShowFullReport(false)}
+          />
+        )}
+
+        {showExpandedChart && (
+          <ExpandedCaloriesChart 
+            data={caloriesChart} 
+            onClose={() => setShowExpandedChart(false)} 
           />
         )}
 
