@@ -15,6 +15,9 @@ import WorkoutA from './pages/WorkoutA/WorkoutA';
 import WorkoutB from './pages/WorkoutB/WorkoutB';
 import SwimmingRegistration from './pages/Swimming/SwimmingRegistration';
 import PilatesRegistration from './pages/Pilates/PilatesRegistration';
+import EsteiraRegistration from './pages/Esteira/EsteiraRegistration';
+import SpinningRegistration from './pages/Spinning/SpinningRegistration';
+import Exercises from './pages/Exercises/Exercises';
 import History from './pages/History/History';
 
 function App() {
@@ -54,6 +57,21 @@ function App() {
           <Route path="/pilates" element={
             <ProtectedRoute>
               <PilatesRegistration />
+            </ProtectedRoute>
+          } />
+          <Route path="/esteira" element={
+            <ProtectedRoute>
+              <EsteiraRegistration />
+            </ProtectedRoute>
+          } />
+          <Route path="/spinning" element={
+            <ProtectedRoute>
+              <SpinningRegistration />
+            </ProtectedRoute>
+          } />
+          <Route path="/exercises" element={
+            <ProtectedRoute>
+              <Exercises />
             </ProtectedRoute>
           } />
           <Route path="/history" element={

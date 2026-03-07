@@ -1,11 +1,11 @@
 // src/types/activities.types.ts
-export type ActivityType = 'academia' | 'natacao' | 'pilates';
+export type ActivityType = 'academia' | 'natacao' | 'pilates' | 'esteira' | 'spinning';
 
 export interface BaseActivity {
   id: string;
   type: ActivityType;
   date: Date;
-  duration: number;
+  duration: number; // em segundos
   calories: number;
   heartRate: number;
   notes?: string;
@@ -25,4 +25,15 @@ export interface PilatesActivity extends BaseActivity {
   equipment?: string[];
 }
 
-export type Activity = SwimmingActivity | PilatesActivity;
+export interface EsteiraActivity extends BaseActivity {
+  type: 'esteira';
+  distance: number; // em metros
+  avgSpeed?: number; // ✅ Velocidade média em km/h (calculada)
+}
+
+export interface SpinningActivity extends BaseActivity {
+  type: 'spinning';
+  distance: number; // em metros
+}
+
+export type Activity = SwimmingActivity | PilatesActivity | EsteiraActivity | SpinningActivity;

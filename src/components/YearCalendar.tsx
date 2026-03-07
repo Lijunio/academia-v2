@@ -1,9 +1,9 @@
-// components/YearCalendar.tsx - Versão completa com cores iguais ao History
+// src/components/YearCalendar.tsx
 import React, { useState } from 'react';
 
 export interface Workout {
   id: string;
-  type: 'academia' | 'natacao' | 'pilates';
+  type: 'academia' | 'natacao' | 'pilates' | 'esteira' | 'spinning';
   date: string;
   duration: number;
   calories: number;
@@ -127,6 +127,20 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
       };
     }
     
+    if (workout.type === 'esteira') {
+      return { 
+        bg: 'bg-orange-500/30',
+        border: 'border-orange-500/50' 
+      };
+    }
+    
+    if (workout.type === 'spinning') {
+      return { 
+        bg: 'bg-cyan-500/30',
+        border: 'border-cyan-500/50' 
+      };
+    }
+    
     return { 
       bg: 'bg-gray-800/50', 
       border: 'border-gray-700/30' 
@@ -184,6 +198,10 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
                 dotColor = 'bg-emerald-300';
               } else if (workout.type === 'pilates') {
                 dotColor = 'bg-amber-300';
+              } else if (workout.type === 'esteira') {
+                dotColor = 'bg-orange-300';
+              } else if (workout.type === 'spinning') {
+                dotColor = 'bg-cyan-300';
               }
               
               return (
@@ -277,6 +295,14 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-amber-500/50 border border-amber-500"></div>
           <span className="text-text-secondary text-xs">Pilates</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-orange-500/50 border border-orange-500"></div>
+          <span className="text-text-secondary text-xs">Esteira</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-cyan-500/50 border border-cyan-500"></div>
+          <span className="text-text-secondary text-xs">Spinning</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-gray-700 border border-gray-600"></div>

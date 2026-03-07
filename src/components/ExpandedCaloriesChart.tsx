@@ -1,5 +1,5 @@
 // src/components/ExpandedCaloriesChart.tsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -32,18 +32,12 @@ interface ExpandedCaloriesChartProps {
 const ExpandedCaloriesChart: React.FC<ExpandedCaloriesChartProps> = ({ data, onClose }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isRotated, setIsRotated] = useState(false);
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight
-  });
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const [chartDimensions, setChartDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight
-      });
     };
     
     checkMobile();
@@ -59,11 +53,29 @@ const ExpandedCaloriesChart: React.FC<ExpandedCaloriesChartProps> = ({ data, onC
     }
   }, [isMobile]);
 
+  // Atualizar dimensões quando o container mudar
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (chartContainerRef.current) {
+        const { width, height } = chartContainerRef.current.getBoundingClientRect();
+        setChartDimensions({ width, height });
+      }
+    };
+
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    
+    // Pequeno timeout para garantir que o container já foi renderizado
+    setTimeout(updateDimensions, 100);
+
+    return () => window.removeEventListener('resize', updateDimensions);
+  }, [isRotated, isMobile]);
+
   const toggleRotation = () => {
     setIsRotated(!isRotated);
   };
 
-  // Calcular estatísticas básicas (apenas para desktop)
+  // Calcular estatísticas básicas
   const totalCalories = data.datasets[0].data.reduce((sum: number, val: number) => sum + val, 0);
   const workoutsWithData = data.datasets[0].data.filter((v: number) => v > 0).length;
   const averageCalories = workoutsWithData > 0 ? Math.round(totalCalories / workoutsWithData) : 0;
@@ -77,7 +89,7 @@ const ExpandedCaloriesChart: React.FC<ExpandedCaloriesChartProps> = ({ data, onC
         border-0 relative w-full h-full flex flex-col
       ">
         
-        {/* Header - mais compacto em mobile rotacionado */}
+        {/* Header */}
         <div className={`
           bg-gradient-to-br from-secondary-dark to-black px-4 py-2 sm:p-6 border-b border-white/10 
           flex items-center justify-between flex-shrink-0
@@ -122,13 +134,13 @@ const ExpandedCaloriesChart: React.FC<ExpandedCaloriesChartProps> = ({ data, onC
           </div>
         </div>
 
-        {/* Conteúdo - ocupa todo espaço restante sem scroll */}
+        {/* Conteúdo - ocupa todo espaço restante */}
         <div className="flex-1 flex items-center justify-center overflow-hidden p-0">
           {!isMobile ? (
             /* DESKTOP: layout normal com cards */
             <div className="flex flex-row gap-6 w-full h-full p-6 overflow-auto">
               <div className="flex-1 bg-white/5 rounded-xl p-4 border border-white/10 h-full">
-                <div className="h-full w-full">
+                <div ref={chartContainerRef} className="h-full w-full">
                   <Line 
                     data={data}
                     options={{
@@ -201,13 +213,25 @@ const ExpandedCaloriesChart: React.FC<ExpandedCaloriesChartProps> = ({ data, onC
               </div>
             </div>
           ) : isRotated ? (
-            /* MOBILE ROTACIONADO: gráfico ocupa TELA INTEIRA sem scroll */
+            /* MOBILE ROTACIONADO: gráfico ocupa TELA INTEIRA */
             <div className="w-full h-full flex items-center justify-center p-0">
-              <div className="transform rotate-90 origin-center" style={{
-                width: Math.min(windowSize.height * 0.98, windowSize.width * 1.5),
-                height: Math.min(windowSize.width * 0.98, windowSize.height * 0.7)
-              }}>
-                <div className="bg-white/5 rounded-xl border border-white/10 w-full h-full p-2">
+              <div 
+                className="transform rotate-90 origin-center"
+                style={{
+                  width: '100vh',
+                  height: '100vw',
+                  maxWidth: '100vh',
+                  maxHeight: '100vw',
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%) rotate(90deg)',
+                }}
+              >
+                <div 
+                  ref={chartContainerRef}
+                  className="bg-white/5 rounded-xl border border-white/10 w-full h-full p-2"
+                >
                   <div className="w-full h-full">
                     <Line 
                       data={data}
@@ -219,7 +243,7 @@ const ExpandedCaloriesChart: React.FC<ExpandedCaloriesChartProps> = ({ data, onC
                             grid: { color: 'rgba(255,255,255,0.1)' },
                             ticks: { 
                               color: 'white',
-                              font: { size: 14 }
+                              font: { size: 12 }
                             }
                           },
                           x: {
@@ -227,8 +251,8 @@ const ExpandedCaloriesChart: React.FC<ExpandedCaloriesChartProps> = ({ data, onC
                             ticks: { 
                               color: 'white', 
                               maxRotation: 45,
-                              maxTicksLimit: 20,
-                              font: { size: 14 }
+                              maxTicksLimit: 10,
+                              font: { size: 10 }
                             }
                           }
                         },
@@ -243,10 +267,13 @@ const ExpandedCaloriesChart: React.FC<ExpandedCaloriesChartProps> = ({ data, onC
               </div>
             </div>
           ) : (
-            /* MOBILE NORMAL: gráfico normal com botão */
-            <div className="w-full h-full p-4 flex flex-col">
-              <div className="flex-1 bg-white/5 rounded-xl p-3 border border-white/10">
-                <div className="h-full w-full">
+            /* MOBILE NORMAL: gráfico ocupa todo espaço */
+            <div className="w-full h-full p-4">
+              <div 
+                ref={chartContainerRef}
+                className="bg-white/5 rounded-xl p-3 border border-white/10 w-full h-full"
+              >
+                <div className="w-full h-full">
                   <Line 
                     data={data}
                     options={{
@@ -259,7 +286,7 @@ const ExpandedCaloriesChart: React.FC<ExpandedCaloriesChartProps> = ({ data, onC
                         },
                         x: {
                           grid: { display: false },
-                          ticks: { color: 'white', maxRotation: 45, maxTicksLimit: 5 }
+                          ticks: { color: 'white', maxRotation: 45, maxTicksLimit: 6 }
                         }
                       },
                       plugins: {

@@ -1,5 +1,5 @@
-// pages/WorkoutA/WorkoutA.tsx
-import React, { useState, useEffect } from 'react';
+// src/pages/WorkoutA/WorkoutA.tsx
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import ExerciseCard from '../../components/features/ExerciseCard/ExerciseCard';
 import RestOverlay from '../../components/features/RestOverlay/RestOverlay';
@@ -11,6 +11,11 @@ import { Timer } from '../../components/common';
 import { useWorkoutLogic } from '../../hooks/useWorkoutLogic';
 import { workoutsData } from '../../data/workouts.data';
 import { workoutService } from '../../services/supabase.service';
+
+// Interface para armazenar últimos pesos
+interface LastWeightData {
+  [exerciseId: number]: number;
+}
 
 const WorkoutA: React.FC = () => {
   const navigate = useNavigate();
@@ -30,7 +35,6 @@ const WorkoutA: React.FC = () => {
     isSendingReport,
     initializeExercises,
     resetWorkout,
-    // Mantendo startWorkoutWithConfirmation que é usado no Timer
     startWorkoutWithConfirmation,
     confirmSmartwatchStart,
     cancelSmartwatchStart,
@@ -55,6 +59,7 @@ const WorkoutA: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [exerciseOptions, setExerciseOptions] = useState<{ name: string; group: string }[]>([]);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [lastWeights, setLastWeights] = useState<LastWeightData>({});
 
   useEffect(() => {
     console.log('📊 WorkoutA - Estado atual:', {
@@ -76,10 +81,33 @@ const WorkoutA: React.FC = () => {
       console.log('✅ WorkoutA - Dados encontrados:', workoutData.exercises.length, 'exercícios');
       initializeExercises(workoutData.exercises);
       setIsInitialized(true);
+      
+      // Carregar últimos pesos
+      loadLastWeights();
     } else {
       console.error('❌ WorkoutA - Dados não encontrados!');
     }
   }, [initializeExercises]);
+
+  // Função para carregar últimos pesos
+  const loadLastWeights = useCallback(async () => {
+    try {
+      const weights: LastWeightData = {};
+      const exercisesList = workoutsData.find(w => w.id === 'A')?.exercises || [];
+      
+      for (const exercise of exercisesList) {
+        const lastWeight = await workoutService.getLastExerciseWeight(exercise.id, 'A');
+        if (lastWeight) {
+          weights[exercise.id] = lastWeight;
+        }
+      }
+      
+      setLastWeights(weights);
+      console.log('📊 Últimos pesos carregados:', weights);
+    } catch (error) {
+      console.error('Erro ao carregar últimos pesos:', error);
+    }
+  }, []);
 
   useEffect(() => {
     if (session.workoutStarted) {
@@ -138,6 +166,9 @@ const WorkoutA: React.FC = () => {
         },
         notes: 'Treino A finalizado'
       });
+      
+      // Recarregar últimos pesos após finalizar
+      await loadLastWeights();
       
       navigate('/');
     } catch (error) {
@@ -321,6 +352,7 @@ const WorkoutA: React.FC = () => {
                           const isCurrent = isExerciseCurrent(exercise.id);
                           const isLocked = isExerciseLocked(exercise.id);
                           const execution = executionData[exercise.id];
+                          const lastWeight = lastWeights[exercise.id];
                           
                           return (
                             <ExerciseCard
@@ -340,6 +372,7 @@ const WorkoutA: React.FC = () => {
                                 variation: execution.variationName,
                                 observations: execution.observations
                               } : undefined}
+                              lastWeight={lastWeight}
                             />
                           );
                         })}
@@ -490,6 +523,7 @@ const WorkoutA: React.FC = () => {
       <WeightRegistrationModal
         isVisible={showWeightModal}
         exercise={currentExerciseForWeight}
+        lastWeight={currentExerciseForWeight ? lastWeights[currentExerciseForWeight.id] : undefined}
         onSave={saveWeightRegistration}
         onCancel={closeWeightModal}
       />

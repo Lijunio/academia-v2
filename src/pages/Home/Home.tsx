@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 interface Workout {
   id: string;
-  type: 'academia' | 'natacao' | 'pilates';
+  type: 'academia' | 'natacao' | 'pilates' | 'esteira' | 'spinning';
   date: string;
   duration: number;
   calories: number;
@@ -24,6 +24,8 @@ interface Stats {
     academia: number;
     natacao: number;
     pilates: number;
+    esteira: number;
+    spinning: number;
   };
   streak: number;
   bestDay: string;
@@ -56,7 +58,9 @@ const Home: React.FC = () => {
       const byType = {
         academia: data.filter((w: Workout) => w.type === 'academia').length,
         natacao: data.filter((w: Workout) => w.type === 'natacao').length,
-        pilates: data.filter((w: Workout) => w.type === 'pilates').length
+        pilates: data.filter((w: Workout) => w.type === 'pilates').length,
+        esteira: data.filter((w: Workout) => w.type === 'esteira').length,
+        spinning: data.filter((w: Workout) => w.type === 'spinning').length
       };
 
       const dateStrings = data.map((w: Workout) => new Date(w.date).toLocaleDateString());
@@ -93,12 +97,61 @@ const Home: React.FC = () => {
         bestDay
       });
 
-      setRecentWorkouts(data.slice(0, 5));
+      // Pegar os 5 treinos mais recentes
+      const sorted = [...data].sort((a, b) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      setRecentWorkouts(sorted.slice(0, 5));
       
     } catch (error) {
       console.error('Erro ao carregar estatísticas:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Função para navegar para o history e abrir o treino específico
+  const handleWorkoutClick = (workout: Workout) => {
+    // Salvar o ID do treino no sessionStorage para abrir no history
+    sessionStorage.setItem('selectedWorkoutId', workout.id);
+    navigate('/history');
+  };
+
+  const getWorkoutTypeDisplay = (workout: Workout): string => {
+    if (workout.type === 'academia') {
+      const notes = workout.notes?.toLowerCase() || '';
+      const details = workout.details || {};
+      
+      if (notes.includes('treino a') || details.workoutType === 'A') return 'Treino A';
+      if (notes.includes('treino b') || details.workoutType === 'B') return 'Treino B';
+      return 'Academia';
+    }
+    if (workout.type === 'natacao') return 'Natação';
+    if (workout.type === 'pilates') return 'Pilates';
+    if (workout.type === 'esteira') return 'Esteira';
+    if (workout.type === 'spinning') return 'Spinning';
+    return workout.type;
+  };
+
+  const getActivityIcon = (type: string): string => {
+    switch (type) {
+      case 'academia': return 'dumbbell';
+      case 'natacao': return 'swimmer';
+      case 'pilates': return 'spa';
+      case 'esteira': return 'person-walking';
+      case 'spinning': return 'bicycle';
+      default: return 'dumbbell';
+    }
+  };
+
+  const getActivityBgColor = (type: string): string => {
+    switch (type) {
+      case 'academia': return 'bg-red-500/20 text-red-400';
+      case 'natacao': return 'bg-blue-500/20 text-blue-400';
+      case 'pilates': return 'bg-green-500/20 text-green-400';
+      case 'esteira': return 'bg-orange-500/20 text-orange-400';
+      case 'spinning': return 'bg-cyan-500/20 text-cyan-400';
+      default: return 'bg-gray-500/20 text-gray-400';
     }
   };
 
@@ -135,6 +188,28 @@ const Home: React.FC = () => {
       description: 'Exercícios de controle e flexibilidade',
       stats: ['Foco em Core', 'Respiração', 'Postura'],
       count: stats?.byType.pilates || 0
+    },
+    {
+      id: 'esteira',
+      title: 'Esteira',
+      icon: 'fas fa-person-walking',
+      gradientFrom: '#ff9f43',
+      gradientTo: '#feca57',
+      path: '/esteira',
+      description: 'Caminhada ou corrida na esteira',
+      stats: ['Distância', 'Velocidade', 'Pace'],
+      count: stats?.byType.esteira || 0
+    },
+    {
+      id: 'spinning',
+      title: 'Spinning',
+      icon: 'fas fa-bicycle',
+      gradientFrom: '#54a0ff',
+      gradientTo: '#2e86de',
+      path: '/spinning',
+      description: 'Bicicleta ergométrica',
+      stats: ['Distância', 'Velocidade', 'Resistência'],
+      count: stats?.byType.spinning || 0
     }
   ];
 
@@ -146,19 +221,32 @@ const Home: React.FC = () => {
     navigate(path);
   };
 
-  const getWorkoutTypeDisplay = (workout: Workout): string => {
-    if (workout.type === 'academia') {
-      const notes = workout.notes?.toLowerCase() || '';
-      const details = workout.details || {};
-      
-      if (notes.includes('treino a') || details.workoutType === 'A') return 'Treino A';
-      if (notes.includes('treino b') || details.workoutType === 'B') return 'Treino B';
-      return 'Academia';
-    }
-    if (workout.type === 'natacao') return 'Natação';
-    if (workout.type === 'pilates') return 'Pilates';
-    return workout.type;
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).replace('.', '');
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0A0F1C] via-[#1A1F2E] to-[#0D0F1A] flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-accent-red/20 border-t-accent-red rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <i className="fas fa-dumbbell text-accent-red animate-pulse"></i>
+            </div>
+          </div>
+          <h2 className="text-xl font-bold text-white mt-4">Carregando...</h2>
+          <p className="text-text-secondary">Buscando seus dados</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A0F1C] via-[#1A1F2E] to-[#0D0F1A]">
@@ -304,7 +392,7 @@ const Home: React.FC = () => {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {activities.map((activity, index) => (
               <Link
                 key={activity.id}
@@ -387,7 +475,7 @@ const Home: React.FC = () => {
                         background: `linear-gradient(135deg, ${activity.gradientFrom}, ${activity.gradientTo})`
                       }}
                     >
-                      <span>Iniciar {activity.title}</span>
+                      <span>Iniciar</span>
                       <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </div>
                   </div>
@@ -414,33 +502,26 @@ const Home: React.FC = () => {
 
             <div className="space-y-3">
               {recentWorkouts.map((workout) => (
-                <div key={workout.id} 
+                <div 
+                  key={workout.id} 
+                  onClick={() => handleWorkoutClick(workout)}
                   className="flex items-center justify-between p-4 bg-white/5 rounded-xl
                     hover:bg-white/10 transition-all group cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center
-                      ${workout.type === 'academia' ? 'bg-red-500/20 text-red-400' : 
-                        workout.type === 'natacao' ? 'bg-blue-500/20 text-blue-400' : 
-                        'bg-green-500/20 text-green-400'}`}
-                    >
-                      <i className={`fas fa-${
-                        workout.type === 'academia' ? 'dumbbell' : 
-                        workout.type === 'natacao' ? 'swimmer' : 'spa'
-                      }`}></i>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${getActivityBgColor(workout.type)}`}>
+                      <i className={`fas fa-${getActivityIcon(workout.type)}`}></i>
                     </div>
                     <div>
                       <p className="text-white font-medium">
                         {workout.type === 'academia' ? 'Treino de Academia' : 
-                         workout.type === 'natacao' ? 'Natação' : 'Pilates'}
+                         workout.type === 'natacao' ? 'Natação' : 
+                         workout.type === 'pilates' ? 'Pilates' :
+                         workout.type === 'esteira' ? 'Esteira' :
+                         workout.type === 'spinning' ? 'Spinning' : ''}
                       </p>
                       <p className="text-text-secondary text-xs">
-                        {new Date(workout.date).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: 'short',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
+                        {formatDate(workout.date)}
                       </p>
                     </div>
                   </div>

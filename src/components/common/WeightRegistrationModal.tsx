@@ -1,10 +1,11 @@
 // components/common/WeightRegistrationModal.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Exercise } from '../../types/workout.types';
 
 interface WeightRegistrationModalProps {
   isVisible: boolean;
   exercise: Exercise | null;
+  lastWeight?: number; // Novo: último peso utilizado
   onSave: (data: {
     weight: number;
     variationId?: number;
@@ -22,16 +23,32 @@ interface ExerciseVariation {
 const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
   isVisible,
   exercise,
+  lastWeight,
   onSave,
   onCancel
 }) => {
   const [weight, setWeight] = useState('');
   const [selectedVariation, setSelectedVariation] = useState<number | undefined>();
   const [observations, setObservations] = useState('');
-  const weightInputRef = useRef<HTMLInputElement>(null);
   
   const quickWeights = [2, 5, 7, 10];
   
+  // Inicializar com o último peso quando o modal abrir
+  useEffect(() => {
+    if (exercise && isVisible) {
+      // Se tiver último peso, usar ele como valor inicial
+      if (lastWeight && lastWeight > 0) {
+        setWeight(lastWeight.toString());
+      } else {
+        setWeight('');
+      }
+      setSelectedVariation(undefined);
+      setObservations('');
+      
+      // Não focar automaticamente o input
+    }
+  }, [exercise, isVisible, lastWeight]);
+
   const addQuickWeight = (quickWeight: number) => {
     const currentWeight = parseFloat(weight) || 0;
     const newWeight = currentWeight + quickWeight;
@@ -54,20 +71,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
     setObservations('');
     onCancel();
   };
-
-  useEffect(() => {
-    if (exercise && isVisible) {
-      setWeight('');
-      setSelectedVariation(undefined);
-      setObservations('');
-      
-      setTimeout(() => {
-        if (weightInputRef.current) {
-          weightInputRef.current.focus();
-        }
-      }, 100);
-    }
-  }, [exercise, isVisible]);
 
   const handleSave = () => {
     const weightNum = parseFloat(weight);
@@ -114,6 +117,15 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           <p className="text-text-secondary text-xs sm:text-sm mb-1">
             {exercise.sets} × {exercise.reps}
           </p>
+          
+          {/* Mostrar último peso se disponível */}
+          {lastWeight && lastWeight > 0 && (
+            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 
+              rounded-full border border-blue-500/30">
+              <i className="fas fa-history text-xs text-blue-400"></i>
+              <span className="text-xs text-blue-300">Último peso: <span className="font-bold">{lastWeight} kg</span></span>
+            </div>
+          )}
         </div>
 
         <div className="mb-4">
@@ -133,11 +145,10 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           
           <div className="relative">
             <input
-              ref={weightInputRef}
               type="number"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              placeholder="0.0"
+              placeholder={lastWeight ? lastWeight.toString() : "0.0"}
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 sm:py-4 
                 text-white placeholder-gray-400 focus:outline-none focus:ring-2 
                 focus:ring-blue-500 text-center text-xl sm:text-2xl font-bold
@@ -147,6 +158,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
               min="0"
               max="500"
               inputMode="decimal"
+              // Removido o autoFocus
             />
             <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 
               text-gray-400 font-semibold pointer-events-none text-sm sm:text-base">

@@ -1,9 +1,9 @@
-// components/common/Modal/WorkoutFullReportModal.tsx
+// src/components/common/Modal/WorkoutFullReportModal.tsx
 import React from 'react';
 
 interface Workout {
   id: string;
-  type: 'academia' | 'natacao' | 'pilates';
+  type: 'academia' | 'natacao' | 'pilates' | 'esteira' | 'spinning'; // Tipos atualizados
   date: string;
   duration: number;
   calories: number;
@@ -30,6 +30,8 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
       case 'academia': return 'Treino de Academia';
       case 'natacao': return 'Natação';
       case 'pilates': return 'Pilates';
+      case 'esteira': return 'Esteira / Caminhada';
+      case 'spinning': return 'Spinning';
       default: return type;
     }
   };
@@ -257,6 +259,100 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
     );
   };
 
+const renderEsteiraDetails = () => {
+  const details = workout.details || {};
+  
+  if (!details.distance) {
+    return (
+      <div className="bg-orange-500/10 rounded-xl p-6 text-center">
+        <p className="text-orange-300">Detalhes da esteira não disponíveis</p>
+      </div>
+    );
+  }
+  
+  const distanceKm = (details.distance / 1000).toFixed(2);
+  const pace = workout.duration > 0 
+    ? ((workout.duration / 60) / (details.distance / 1000)).toFixed(2)
+    : '0.00';
+  const avgSpeed = details.avgSpeed?.toFixed(1) || 
+    ((details.distance / 1000) / (workout.duration / 3600)).toFixed(1);
+  
+  return (
+    <div className="space-y-4">
+      <div className="bg-orange-500/10 rounded-xl p-4 border border-orange-500/20">
+        <h4 className="text-orange-300 font-bold mb-3">🚶‍♂️ DETALHES DA ESTEIRA</h4>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-text-secondary text-xs">Distância</p>
+            <p className="text-white font-bold text-xl">{distanceKm} km</p>
+          </div>
+          <div>
+            <p className="text-text-secondary text-xs">Velocidade Média</p>
+            <p className="text-white font-bold text-xl">{avgSpeed} km/h</p>
+          </div>
+          <div>
+            <p className="text-text-secondary text-xs">Pace</p>
+            <p className="text-white font-bold text-xl">{pace} min/km</p>
+          </div>
+          <div>
+            <p className="text-text-secondary text-xs">Duração</p>
+            <p className="text-white font-bold text-xl">
+              {Math.floor(workout.duration / 60)}:{String(workout.duration % 60).padStart(2, '0')} min
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+  const renderSpinningDetails = () => {
+    const details = workout.details || {};
+    
+    if (!details.distance) {
+      return (
+        <div className="bg-cyan-500/10 rounded-xl p-6 text-center">
+          <p className="text-cyan-300">Detalhes do spinning não disponíveis</p>
+        </div>
+      );
+    }
+    
+    const distanceKm = (details.distance / 1000).toFixed(2);
+    const speed = workout.duration > 0 
+      ? ((details.distance / 1000) / (workout.duration / 3600)).toFixed(1)
+      : '0.0';
+    
+    return (
+      <div className="space-y-4">
+        <div className="bg-cyan-500/10 rounded-xl p-4 border border-cyan-500/20">
+          <h4 className="text-cyan-300 font-bold mb-3">🚴‍♂️ DETALHES DO SPINNING</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-text-secondary text-xs">Distância</p>
+              <p className="text-white font-bold text-xl">{distanceKm} km</p>
+            </div>
+            <div>
+              <p className="text-text-secondary text-xs">Velocidade</p>
+              <p className="text-white font-bold text-xl">{speed} km/h</p>
+            </div>
+          </div>
+          {details.rpm && (
+            <div className="mt-3">
+              <p className="text-text-secondary text-xs">RPM</p>
+              <p className="text-white font-bold">{details.rpm}</p>
+            </div>
+          )}
+          {details.resistance && (
+            <div className="mt-3">
+              <p className="text-text-secondary text-xs">Resistência</p>
+              <p className="text-white font-bold">{details.resistance}/10</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
       <div className="bg-gradient-to-br from-secondary-dark to-black rounded-2xl p-4 sm:p-6 md:p-8 
@@ -307,6 +403,8 @@ const WorkoutFullReportModal: React.FC<WorkoutFullReportModalProps> = ({ workout
         {workout.type === 'academia' && renderAcademiaDetails()}
         {workout.type === 'natacao' && renderNatacaoDetails()}
         {workout.type === 'pilates' && renderPilatesDetails()}
+        {workout.type === 'esteira' && renderEsteiraDetails()}
+        {workout.type === 'spinning' && renderSpinningDetails()}
 
         <div className="mt-4 sm:mt-6 pt-4 border-t border-white/10">
           <h4 className="text-white font-bold mb-3">📈 RESUMO</h4>

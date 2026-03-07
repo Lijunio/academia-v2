@@ -14,7 +14,7 @@ import {
   Legend,
   Filler
 } from 'chart.js';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+import { Line, Doughnut } from 'react-chartjs-2';
 import { workoutService } from '../../services/supabase.service';
 import YearCalendar, { Workout } from '../../components/YearCalendar';
 import WorkoutFullReportModal from '../../components/common/Modal/WorkoutFullReportModal';
@@ -53,7 +53,7 @@ const History: React.FC = () => {
   const [filteredWorkouts, setFilteredWorkouts] = useState<Workout[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'academia' | 'natacao' | 'pilates'>('all');
+  const [filter, setFilter] = useState<'all' | 'academia' | 'natacao' | 'pilates' | 'esteira' | 'spinning'>('all');
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year' | 'all'>('month');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'calories' | 'duration'>('date');
@@ -77,6 +77,26 @@ const History: React.FC = () => {
     
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // ✅ NOVO: Verificar se tem um treino para selecionar vindo da Home
+  useEffect(() => {
+    const selectedId = sessionStorage.getItem('selectedWorkoutId');
+    if (selectedId && workouts.length > 0) {
+      const workout = workouts.find(w => w.id === selectedId);
+      if (workout) {
+        setSelectedWorkout(workout);
+        // Limpar o storage para não selecionar novamente
+        sessionStorage.removeItem('selectedWorkoutId');
+        
+        // Rolar até o card (opcional)
+        setTimeout(() => {
+          document.getElementById('workouts-list')?.scrollIntoView({ 
+            behavior: 'smooth' 
+          });
+        }, 100);
+      }
+    }
+  }, [workouts]);
 
   useEffect(() => {
     filterAndSortWorkouts();
@@ -145,6 +165,8 @@ const History: React.FC = () => {
     }
     if (workout.type === 'natacao') return 'Natação';
     if (workout.type === 'pilates') return 'Pilates';
+    if (workout.type === 'esteira') return 'Esteira';
+    if (workout.type === 'spinning') return 'Spinning';
     return workout.type;
   };
 
@@ -156,6 +178,8 @@ const History: React.FC = () => {
     }
     if (type === 'natacao') return 'bg-emerald-500/20 text-emerald-400';
     if (type === 'pilates') return 'bg-amber-500/20 text-amber-400';
+    if (type === 'esteira') return 'bg-orange-500/20 text-orange-400';
+    if (type === 'spinning') return 'bg-cyan-500/20 text-cyan-400';
     return 'bg-gray-500/20 text-gray-400';
   };
 
@@ -266,6 +290,8 @@ const History: React.FC = () => {
       case 'academia': return 'dumbbell';
       case 'natacao': return 'swimmer';
       case 'pilates': return 'spa';
+      case 'esteira': return 'person-walking';
+      case 'spinning': return 'bicycle';
       default: return 'question';
     }
   };
@@ -275,6 +301,8 @@ const History: React.FC = () => {
       case 'academia': return 'bg-red-500/20 text-red-400';
       case 'natacao': return 'bg-blue-500/20 text-blue-400';
       case 'pilates': return 'bg-green-500/20 text-green-400';
+      case 'esteira': return 'bg-orange-500/20 text-orange-400';
+      case 'spinning': return 'bg-cyan-500/20 text-cyan-400';
       default: return 'bg-gray-500/20 text-gray-400';
     }
   };
@@ -334,23 +362,30 @@ const History: React.FC = () => {
   
   const natacaoCount = filteredWorkouts.filter(w => w.type === 'natacao').length;
   const pilatesCount = filteredWorkouts.filter(w => w.type === 'pilates').length;
+  const esteiraCount = filteredWorkouts.filter(w => w.type === 'esteira').length;
+  const spinningCount = filteredWorkouts.filter(w => w.type === 'spinning').length;
+
+  // Para o gráfico, agrupar esteira e spinning como "Aeróbico"
+  const aerobicoCount = esteiraCount + spinningCount;
 
   const typeDistribution = {
-    labels: ['Treino A', 'Treino B', 'Natação', 'Pilates'],
+    labels: ['Treino A', 'Treino B', 'Natação', 'Pilates', 'Aeróbico'],
     datasets: [
       {
-        data: [treinoAFinal, treinoBCount, natacaoCount, pilatesCount],
+        data: [treinoAFinal, treinoBCount, natacaoCount, pilatesCount, aerobicoCount],
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(239, 68, 68, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)'
+          'rgba(59, 130, 246, 0.8)',   // Azul - Treino A
+          'rgba(239, 68, 68, 0.8)',    // Vermelho - Treino B
+          'rgba(16, 185, 129, 0.8)',   // Verde - Natação
+          'rgba(245, 158, 11, 0.8)',   // Laranja - Pilates
+          'rgba(147, 51, 234, 0.8)'    // Roxo - Aeróbico (esteira + spinning)
         ],
         borderColor: [
           'rgba(59, 130, 246, 1)',
           'rgba(239, 68, 68, 1)',
           'rgba(16, 185, 129, 1)',
-          'rgba(245, 158, 11, 1)'
+          'rgba(245, 158, 11, 1)',
+          'rgba(147, 51, 234, 1)'
         ],
         borderWidth: 1
       }
@@ -565,6 +600,7 @@ const History: React.FC = () => {
                       else if (index === 1) setFilter('academia');
                       else if (index === 2) setFilter('natacao');
                       else if (index === 3) setFilter('pilates');
+                      else if (index === 4) setFilter('all'); // Aeróbico
                       
                       document.getElementById('workouts-list')?.scrollIntoView({ behavior: 'smooth' });
                     }
@@ -601,11 +637,15 @@ const History: React.FC = () => {
                   stats.bestDay.type === 'Treino B' ? 'bg-red-500/20 text-red-400' :
                   stats.bestDay.type === 'Natação' ? 'bg-emerald-500/20 text-emerald-400' :
                   stats.bestDay.type === 'Pilates' ? 'bg-amber-500/20 text-amber-400' :
+                  stats.bestDay.type === 'Esteira' ? 'bg-orange-500/20 text-orange-400' :
+                  stats.bestDay.type === 'Spinning' ? 'bg-cyan-500/20 text-cyan-400' :
                   stats.bestDay.type === 'Múltiplos' ? 'bg-purple-500/20 text-purple-400' :
                   'bg-gray-500/20 text-gray-400'}`}>
                 <i className={`fas fa-${stats.bestDay.type === 'Treino A' || stats.bestDay.type === 'Treino B' ? 'dumbbell' : 
                   stats.bestDay.type === 'Natação' ? 'swimmer' :
-                  stats.bestDay.type === 'Pilates' ? 'spa' : 'trophy'} mr-1`}></i>
+                  stats.bestDay.type === 'Pilates' ? 'spa' :
+                  stats.bestDay.type === 'Esteira' ? 'person-walking' :
+                  stats.bestDay.type === 'Spinning' ? 'bicycle' : 'trophy'} mr-1`}></i>
                 {stats.bestDay.type}
               </span>
             </div>
@@ -637,6 +677,8 @@ const History: React.FC = () => {
               <option value="academia">Academia</option>
               <option value="natacao">Natação</option>
               <option value="pilates">Pilates</option>
+              <option value="esteira">Esteira</option>
+              <option value="spinning">Spinning</option>
             </select>
 
             <select
@@ -729,7 +771,10 @@ const History: React.FC = () => {
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <h3 className="text-base md:text-lg font-bold text-white truncate">
                             {workout.type === 'academia' ? 'Treino de Academia' : 
-                             workout.type === 'natacao' ? 'Natação' : 'Pilates'}
+                             workout.type === 'natacao' ? 'Natação' : 
+                             workout.type === 'pilates' ? 'Pilates' :
+                             workout.type === 'esteira' ? 'Esteira' :
+                             workout.type === 'spinning' ? 'Spinning' : ''}
                           </h3>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] md:text-xs font-bold ${typeColor}`}>
                             {workoutTypeDisplay}
@@ -750,6 +795,13 @@ const History: React.FC = () => {
                           <p className="text-xs text-accent-blue mt-1 truncate">
                             <i className="fas fa-water mr-1"></i>
                             {workout.details.distance}m • {workout.details.poolLength}m
+                          </p>
+                        )}
+
+                        {(workout.type === 'esteira' || workout.type === 'spinning') && workout.details && (
+                          <p className="text-xs text-accent-blue mt-1 truncate">
+                            <i className="fas fa-route mr-1"></i>
+                            {workout.details.distance}m
                           </p>
                         )}
 
@@ -883,6 +935,32 @@ const History: React.FC = () => {
                         <p className="text-text-secondary text-xs">Piscina</p>
                         <p className="text-white font-bold">{selectedWorkout.details.poolLength}m</p>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {(selectedWorkout.type === 'esteira' || selectedWorkout.type === 'spinning') && selectedWorkout.details && (
+                  <div className={`rounded-xl p-4 border ${
+                    selectedWorkout.type === 'esteira' 
+                      ? 'bg-orange-500/10 border-orange-500/20' 
+                      : 'bg-cyan-500/10 border-cyan-500/20'
+                  }`}>
+                    <p className={`font-medium mb-2 ${
+                      selectedWorkout.type === 'esteira' ? 'text-orange-300' : 'text-cyan-300'
+                    }`}>
+                      Detalhes do {selectedWorkout.type === 'esteira' ? 'Esteira' : 'Spinning'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-text-secondary text-xs">Distância</p>
+                        <p className="text-white font-bold">{selectedWorkout.details.distance}m</p>
+                      </div>
+                      {selectedWorkout.details.avgSpeed && (
+                        <div>
+                          <p className="text-text-secondary text-xs">Velocidade Média</p>
+                          <p className="text-white font-bold">{selectedWorkout.details.avgSpeed} km/h</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

@@ -1,4 +1,4 @@
-// components/features/ExerciseCard/ExerciseCard.tsx
+// src/components/features/ExerciseCard/ExerciseCard.tsx
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Exercise } from '../../../types/workout.types';
 import ExerciseSkipModal from './ExerciseSkipModal';
@@ -19,6 +19,7 @@ interface ExerciseCardProps {
     variation?: string;
     observations?: string;
   };
+  lastWeight?: number; // Novo: último peso utilizado
 }
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({
@@ -32,7 +33,8 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   workoutType,
   workoutStarted,
   hasWeightData = false,
-  weightData
+  weightData,
+  lastWeight
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSkipModal, setShowSkipModal] = useState(false);
@@ -72,10 +74,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
     setCurrentImageIndex((prev) => 
       prev === 0 ? exercise.images!.length - 1 : prev - 1
     );
-  };
-
-  const handleDotClick = (index: number) => {
-    setCurrentImageIndex(index);
   };
 
   const handleCompleteClick = useCallback(() => {
@@ -239,6 +237,15 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
               >
                 {exercise.sets} séries
               </span>
+              
+              {/* Mostrar último peso se disponível e exercício não concluído */}
+              {lastWeight && lastWeight > 0 && !localIsCompleted && !isLocked && (
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 sm:px-4 sm:py-2
+                  bg-blue-500/20 text-blue-300 rounded-full text-xs sm:text-sm font-medium border border-blue-500/30">
+                  <i className="fas fa-history text-xs"></i>
+                  Último: {lastWeight} kg
+                </span>
+              )}
             </div>
             
             {exercise.description && (
@@ -325,7 +332,6 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
             {hasMultipleImages && (
               <>
-                {/* Botões de seta laterais - APENAS ISSO, SEM DOTS */}
                 <button
                   onClick={handlePrevImage}
                   className="absolute left-2 top-1/2 transform -translate-y-1/2 
