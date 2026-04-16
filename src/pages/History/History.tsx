@@ -54,7 +54,7 @@ const History: React.FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'academia' | 'natacao' | 'pilates' | 'esteira' | 'spinning'>('all');
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year' | 'all'>('month');
+  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year' | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'calories' | 'duration'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
