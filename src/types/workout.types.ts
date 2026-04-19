@@ -1,4 +1,4 @@
-// types/workout.types.ts
+// src/types/workout.types.ts
 export type MuscleGroup = 
   | 'peito' 
   | 'ombro' 
@@ -9,7 +9,9 @@ export type MuscleGroup =
   | 'trapezio'
   | 'antebraco'
   | 'panturrilha'
-  | 'posterior';
+  | 'posterior'
+  | 'abdominal'
+  | 'cardio';
 
 export interface ExerciseVariation {
   id: number;
@@ -26,6 +28,8 @@ export interface ExerciseBase {
   images: string[];
   hasVariations?: boolean;
   variations?: ExerciseVariation[];
+  noWeight?: boolean;  // Para exercícios como abdominal que não precisam de peso
+  isCardio?: boolean;   // Para caminhada que usa dados de esteira
 }
 
 export interface Exercise extends ExerciseBase {
@@ -44,6 +48,13 @@ export interface ExerciseExecution {
   variationName?: string;
   observations?: string;
   completed: boolean;
+  // Para caminhada
+  cardioData?: {
+    distance: number;
+    duration: number;
+    calories: number;
+    heartRate: number;
+  };
 }
 
 export interface WorkoutGroup {
@@ -53,7 +64,7 @@ export interface WorkoutGroup {
   completed: boolean;
 }
 
-export type WorkoutType = 'A' | 'B';
+export type WorkoutType = 'A' | 'B' | '1' | '2' | '3';
 
 export interface Workout {
   id: WorkoutType;
@@ -100,6 +111,11 @@ export interface WorkoutReport {
     sets: number;
     completed: boolean;
     skipReason?: string;
+    cardioData?: {
+      distance: number;
+      calories: number;
+      heartRate: number;
+    };
   }>;
   sentToTelegram: boolean;
   telegramMessageId?: string;

@@ -32,13 +32,116 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ========== GARANTIR QUE NADA ESTOURE ========== */
+/* ========== CORREÇÃO DE QUEBRA DE PALAVRAS ========== */
 * {
   max-width: 100%;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
   box-sizing: border-box;
+  /* NUNCA quebrar palavras no meio */
+  word-break: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* Remove hífen automático */
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+/* Forçar que palavras não sejam quebradas no meio */
+h1, h2, h3, h4, h5, h6,
+p, span, div, label, button, a {
+  word-break: keep-all;
+  word-wrap: normal;
+  overflow-wrap: normal;
+  white-space: normal;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
+
+/* Apenas quando necessário, quebrar em espaços */
+.break-when-needed {
+  word-break: break-word;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* Para textos longos que podem quebrar em espaços */
+.long-text {
+  word-break: break-word;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* ========== AJUSTE DE FONTES RESPONSIVAS ========== */
+html {
+  font-size: 16px;
+}
+
+/* Ajuste base para todos os textos */
+body, p, span, li, label, .text-base {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Títulos - NUNCA quebrar */
+h1, h2, h3, .font-bold, .font-black, .font-montserrat {
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  line-height: 1.2;
+}
+
+/* ========== TAMANHOS RESPONSIVOS ========== */
+/* Mobile pequeno (até 375px) */
+@media (max-width: 375px) {
+  html {
+    font-size: 14px;
+  }
+  
+  h1 { font-size: 1.5rem !important; }
+  h2 { font-size: 1.25rem !important; }
+  h3 { font-size: 1.125rem !important; }
+  p, span, li { font-size: 0.875rem !important; }
+  .text-xs { font-size: 0.7rem !important; }
+  .text-sm { font-size: 0.75rem !important; }
+  .text-base { font-size: 0.875rem !important; }
+  .text-lg { font-size: 1rem !important; }
+  .text-xl { font-size: 1.125rem !important; }
+  .text-2xl { font-size: 1.25rem !important; }
+}
+
+/* Mobile médio (376px - 480px) */
+@media (min-width: 376px) and (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+  
+  h1 { font-size: 1.75rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.25rem !important; }
+  .text-base { font-size: 0.9375rem !important; }
+}
+
+/* Tablet (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+  
+  h1 { font-size: 2rem !important; }
+  h2 { font-size: 1.75rem !important; }
+  h3 { font-size: 1.5rem !important; }
+}
+
+/* Desktop (769px+) */
+@media (min-width: 769px) {
+  html {
+    font-size: 16px;
+  }
+  
+  h1 { font-size: 2.25rem !important; }
+  h2 { font-size: 1.875rem !important; }
+  h3 { font-size: 1.5rem !important; }
 }
 
 /* ========== UTILITÁRIAS ========== */
@@ -139,49 +242,7 @@ body {
 .text-text-secondary { color: var(--text-secondary); }
 .text-text-muted { color: var(--text-muted); }
 
-/* ========== RESPONSIVIDADE ESSENCIAL ========== */
-
-/* iPhone SE / Pequenos (320px - 375px) */
-@media (max-width: 375px) {
-  h1 { font-size: clamp(1.25rem, 5vw, 1.5rem) !important; }
-  h2 { font-size: clamp(1rem, 4vw, 1.25rem) !important; }
-  h3 { font-size: clamp(0.875rem, 3.5vw, 1.1rem) !important; }
-  
-  /* Ajustar fontes muito pequenas */
-  .text-xs { font-size: 0.625rem !important; }
-  .text-sm { font-size: 0.75rem !important; }
-  .text-base { font-size: 0.8125rem !important; }
-}
-
-/* Mobile (376px - 480px) */
-@media (min-width: 376px) and (max-width: 480px) {
-  h1 { font-size: clamp(1.5rem, 5vw, 1.75rem) !important; }
-  h2 { font-size: clamp(1.25rem, 4vw, 1.5rem) !important; }
-  h3 { font-size: clamp(1rem, 3.5vw, 1.25rem) !important; }
-}
-
-/* Tablet (481px - 768px) */
-@media (min-width: 481px) and (max-width: 768px) {
-  h1 { font-size: clamp(1.75rem, 5vw, 2rem) !important; }
-  h2 { font-size: clamp(1.5rem, 4vw, 1.75rem) !important; }
-}
-
-/* Desktop (769px+) */
-@media (min-width: 769px) {
-  h1 { font-size: 2.25rem !important; }
-  h2 { font-size: 1.875rem !important; }
-  h3 { font-size: 1.5rem !important; }
-}
-
 /* ========== AJUSTES GERAIS DE RESPONSIVIDADE ========== */
-
-/* Quebra de palavras longas */
-h1, h2, h3, h4, h5, h6,
-p, span, div {
-  word-break: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-}
 
 /* Garantir que imagens sejam responsivas */
 img {
@@ -207,7 +268,6 @@ img {
     padding: 12px !important;
   }
   
-  /* Ajustar ícones em botões mobile */
   button i,
   .button-like i {
     font-size: 14px !important;
@@ -225,7 +285,7 @@ img {
 
 /* Inputs em mobile */
 input, textarea, select {
-  font-size: 16px !important; /* Evita zoom no iOS */
+  font-size: 16px !important;
 }
 
 /* ========== UTILITÁRIAS ÚTEIS ========== */
@@ -292,7 +352,6 @@ input, textarea, select {
 
 /* ========== AJUSTES ESPECÍFICOS PARA iOS ========== */
 @supports (-webkit-touch-callout: none) {
-  /* Ajustar safe areas para iPhone X+ */
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
@@ -301,7 +360,6 @@ input, textarea, select {
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  /* Melhorar experiência de toque */
   button, 
   .button-like,
   [role="button"] {
@@ -316,27 +374,6 @@ input, textarea, select {
   textarea {
     font-size: 16px !important;
   }
-}
-
-/* ========== MELHORAR VISIBILIDADE EM TELAS MUITO PEQUENAS ========== */
-@media (max-width: 320px) {
-  /* Ajustar ainda mais fontes para telas muito pequenas */
-  body {
-    font-size: 14px;
-  }
-  
-  .text-xs { font-size: 0.5625rem !important; } /* 9px */
-  .text-sm { font-size: 0.6875rem !important; } /* 11px */
-  .text-base { font-size: 0.75rem !important; } /* 12px */
-  
-  /* Reduzir espaçamentos */
-  .p-2 { padding: 0.375rem !important; }
-  .p-3 { padding: 0.5rem !important; }
-  .p-4 { padding: 0.625rem !important; }
-  
-  .m-2 { margin: 0.375rem !important; }
-  .m-3 { margin: 0.5rem !important; }
-  .m-4 { margin: 0.625rem !important; }
 }
 
 /* ========== HOVER STATES APENAS PARA DISPOSITIVOS COM MOUSE ========== */
@@ -361,8 +398,6 @@ input, textarea, select {
   transition-duration: 200ms;
 }
 
-/* Adicione isso no final do seu index.css, antes dos media queries finais */
-
 /* ========== ANIMAÇÕES DO CARROSSEL ========== */
 @keyframes spin-slow {
   from {
@@ -377,7 +412,6 @@ input, textarea, select {
   animation: spin-slow 3s linear infinite;
 }
 
-/* ========== ANIMAÇÕES PARA O CARROSSEL ========== */
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -393,65 +427,64 @@ input, textarea, select {
   animation: slideIn 0.3s ease-out;
 }
 
-/* Indicadores ativos do carrossel */
 .carousel-indicator-active {
   transition: width 0.3s ease;
 }
 
 /* ========== CLASSES ESPECÍFICAS PARA O MELHOR DIA ========== */
 .best-day-title {
-  font-size: 2.5rem !important; /* 40px */
+  font-size: 2.5rem !important;
   line-height: 1.2 !important;
 }
 
 .best-day-date {
-  font-size: 2rem !important; /* 32px */
+  font-size: 2rem !important;
   line-height: 1.2 !important;
 }
 
 .best-day-calories {
-  font-size: 1.75rem !important; /* 28px */
+  font-size: 1.75rem !important;
   line-height: 1.2 !important;
 }
 
 .best-day-kcal {
-  font-size: 1.2rem !important; /* ~19px */
+  font-size: 1.2rem !important;
   line-height: 1.2 !important;
 }
 
 .best-day-badge {
-  font-size: 1rem !important; /* 16px */
+  font-size: 1rem !important;
   padding: 0.5rem 1.2rem !important;
 }
 
 .best-day-trophy {
-  font-size: 2rem !important; /* 32px */
+  font-size: 2rem !important;
 }
 
 /* Ajustes para telas muito pequenas (até 375px) */
 @media (max-width: 375px) {
   .best-day-title {
-    font-size: 2rem !important; /* 32px */
+    font-size: 2rem !important;
   }
   
   .best-day-date {
-    font-size: 1.75rem !important; /* 28px */
+    font-size: 1.75rem !important;
   }
   
   .best-day-calories {
-    font-size: 1.5rem !important; /* 24px */
+    font-size: 1.5rem !important;
   }
   
   .best-day-kcal {
-    font-size: 1rem !important; /* 16px */
+    font-size: 1rem !important;
   }
   
   .best-day-badge {
-    font-size: 0.875rem !important; /* 14px */
+    font-size: 0.875rem !important;
     padding: 0.4rem 1rem !important;
   }
   
   .best-day-trophy {
-    font-size: 1.75rem !important; /* 28px */
+    font-size: 1.75rem !important;
   }
 }

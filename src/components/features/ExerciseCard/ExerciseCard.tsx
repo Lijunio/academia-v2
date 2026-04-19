@@ -11,7 +11,7 @@ interface ExerciseCardProps {
   isLocked: boolean;
   onToggleComplete: () => void;
   onSkipExercise?: (reason: string) => void;
-  workoutType: 'A' | 'B';
+  workoutType: 'A' | 'B' | '1' | '2' | '3';
   workoutStarted: boolean;
   hasWeightData?: boolean;
   weightData?: {
@@ -19,7 +19,11 @@ interface ExerciseCardProps {
     variation?: string;
     observations?: string;
   };
-  lastWeight?: number; // Novo: último peso utilizado
+  lastWeight?: number;
+  cardioData?: {
+    distance: number;
+    duration: number;
+  };
 }
 
 const ExerciseCard: React.FC<ExerciseCardProps> = ({
@@ -34,7 +38,8 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   workoutStarted,
   hasWeightData = false,
   weightData,
-  lastWeight
+  lastWeight,
+  cardioData
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showSkipModal, setShowSkipModal] = useState(false);
@@ -142,7 +147,10 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
   const accentColors = {
     'A': { primary: '#ff4757', gradient: 'linear-gradient(135deg, #ff4757, #ff6b81)' },
-    'B': { primary: '#2e86de', gradient: 'linear-gradient(135deg, #2e86de, #54a0ff)' }
+    'B': { primary: '#2e86de', gradient: 'linear-gradient(135deg, #2e86de, #54a0ff)' },
+    '1': { primary: '#10ac84', gradient: 'linear-gradient(135deg, #10ac84, #1dd1a1)' },  
+    '2': { primary: '#54a0ff', gradient: 'linear-gradient(135deg, #54a0ff, #5f27cd)' },  
+    '3': { primary: '#9c88ff', gradient: 'linear-gradient(135deg, #9c88ff, #8e44ad)' }  
   };
 
   const colors = accentColors[workoutType];
@@ -256,7 +264,8 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
               </p>
             )}
 
-            {hasWeightData && weightData && (
+            {/* Dados Registrados - Para exercícios com peso */}
+            {hasWeightData && weightData && !exercise.isCardio && (
               <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <i className="fas fa-weight-hanging text-blue-400"></i>
@@ -304,6 +313,36 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
               </div>
             )}
 
+            {/* Dados Registrados - Para exercícios de cardio (caminhada) - SOMENTE DISTÂNCIA E DURAÇÃO */}
+            {cardioData && (
+              <div className="mt-3 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <i className="fas fa-person-walking text-green-400"></i>
+                  <span className="text-green-300 font-bold text-sm">Dados da Caminhada:</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-md bg-green-500/20 flex items-center justify-center">
+                      <i className="fas fa-route text-green-300 text-xs"></i>
+                    </div>
+                    <div>
+                      <div className="text-text-secondary text-xs">Distância</div>
+                      <div className="text-white font-bold">{cardioData.distance}m</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-md bg-green-500/20 flex items-center justify-center">
+                      <i className="fas fa-clock text-green-300 text-xs"></i>
+                    </div>
+                    <div>
+                      <div className="text-text-secondary text-xs">Duração</div>
+                      <div className="text-white font-bold">{cardioData.duration}min</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {localSkipReason && (
               <div className="mt-3 p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-1">
@@ -316,46 +355,46 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         </div>
 
-      {exercise.images && exercise.images.length > 0 && (
-        <div className="w-full lg:w-2/5 xl:w-1/3 mt-4 lg:mt-0">
-          <div className="bg-white rounded-lg sm:rounded-xl p-1 sm:p-2 
-            shadow h-40 sm:h-48 md:h-56 lg:h-64 relative overflow-hidden">
-            
-            <div className="h-full w-full flex items-center justify-center bg-gray-50">
-              <img
-                src={exercise.images[currentImageIndex]}
-                alt={`${exercise.name}`}
-                className="max-h-full max-w-full object-contain p-1 sm:p-2"
-                loading="lazy"
-              />
+        {exercise.images && exercise.images.length > 0 && (
+          <div className="w-full lg:w-2/5 xl:w-1/3 mt-4 lg:mt-0">
+            <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-lg sm:rounded-xl 
+              shadow h-40 sm:h-48 md:h-56 lg:h-64 relative overflow-hidden">
+              
+              <div className="h-full w-full flex items-center justify-center">
+                <img
+                  src={exercise.images[currentImageIndex]}
+                  alt={`${exercise.name}`}
+                  className="max-h-full max-w-full object-contain"
+                  loading="lazy"
+                />
+              </div>
+
+              {hasMultipleImages && (
+                <>
+                  <button
+                    onClick={handlePrevImage}
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 
+                      w-8 h-8 bg-black/70 text-white rounded-full flex items-center justify-center
+                      hover:bg-black/90 transition-colors z-20 border border-white/20"
+                    aria-label="Imagem anterior"
+                  >
+                    <i className="fas fa-chevron-left text-sm"></i>
+                  </button>
+
+                  <button
+                    onClick={handleNextImage}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 
+                      w-8 h-8 bg-black/70 text-white rounded-full flex items-center justify-center
+                      hover:bg-black/90 transition-colors z-20 border border-white/20"
+                    aria-label="Próxima imagem"
+                  >
+                    <i className="fas fa-chevron-right text-sm"></i>
+                  </button>
+                </>
+              )}
             </div>
-
-            {hasMultipleImages && (
-              <>
-                <button
-                  onClick={handlePrevImage}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 
-                    w-8 h-8 bg-black/70 text-white rounded-full flex items-center justify-center
-                    hover:bg-black/90 transition-colors z-20 border border-white/20"
-                  aria-label="Imagem anterior"
-                >
-                  <i className="fas fa-chevron-left text-sm"></i>
-                </button>
-
-                <button
-                  onClick={handleNextImage}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 
-                    w-8 h-8 bg-black/70 text-white rounded-full flex items-center justify-center
-                    hover:bg-black/90 transition-colors z-20 border border-white/20"
-                  aria-label="Próxima imagem"
-                >
-                  <i className="fas fa-chevron-right text-sm"></i>
-                </button>
-              </>
-            )}
           </div>
-        </div>
-      )}
+        )}
       </div>
 
       <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/10">

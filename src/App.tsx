@@ -13,11 +13,13 @@ import Home from './pages/Home/Home';
 import AcademiaSelection from './pages/Academia/AcademiaSelection';
 import WorkoutA from './pages/WorkoutA/WorkoutA';
 import WorkoutB from './pages/WorkoutB/WorkoutB';
+import Workout1 from './pages/Workout1/Workout1';
+import Workout2 from './pages/Workout2/Workout2';
+import Workout3 from './pages/Workout3/Workout3';
 import SwimmingRegistration from './pages/Swimming/SwimmingRegistration';
 import PilatesRegistration from './pages/Pilates/PilatesRegistration';
 import EsteiraRegistration from './pages/Esteira/EsteiraRegistration';
 import SpinningRegistration from './pages/Spinning/SpinningRegistration';
-import Exercises from './pages/Exercises/Exercises';
 import History from './pages/History/History';
 
 function App() {
@@ -25,10 +27,10 @@ function App() {
     <Router>
       <AuthProvider>
         <Routes>
-          {/* Rota pública - não precisa de login */}
+          {/* Rota pública */}
           <Route path="/login" element={<Login />} />
           
-          {/* Rotas protegidas - precisam de login */}
+          {/* Rotas protegidas */}
           <Route path="/" element={
             <ProtectedRoute>
               <Home />
@@ -39,6 +41,8 @@ function App() {
               <AcademiaSelection />
             </ProtectedRoute>
           } />
+          
+          {/* Treinos de 2 dias */}
           <Route path="/workout-a" element={
             <ProtectedRoute>
               <WorkoutA />
@@ -49,6 +53,25 @@ function App() {
               <WorkoutB />
             </ProtectedRoute>
           } />
+          
+          {/* Treinos de 3 dias */}
+          <Route path="/workout-1" element={
+            <ProtectedRoute>
+              <Workout1 />
+            </ProtectedRoute>
+          } />
+          <Route path="/workout-2" element={
+            <ProtectedRoute>
+              <Workout2 />
+            </ProtectedRoute>
+          } />
+          <Route path="/workout-3" element={
+            <ProtectedRoute>
+              <Workout3 />
+            </ProtectedRoute>
+          } />
+          
+          {/* Outros treinos */}
           <Route path="/swimming" element={
             <ProtectedRoute>
               <SwimmingRegistration />
@@ -67,11 +90,6 @@ function App() {
           <Route path="/spinning" element={
             <ProtectedRoute>
               <SpinningRegistration />
-            </ProtectedRoute>
-          } />
-          <Route path="/exercises" element={
-            <ProtectedRoute>
-              <Exercises />
             </ProtectedRoute>
           } />
           <Route path="/history" element={

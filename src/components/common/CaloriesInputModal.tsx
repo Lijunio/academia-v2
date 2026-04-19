@@ -1,10 +1,10 @@
-// components/common/CaloriesInputModal.tsx
+// src/components/common/CaloriesInputModal.tsx
 import React, { useState, useEffect } from 'react';
 
 interface CaloriesInputModalProps {
   isVisible: boolean;
   workoutDuration: number;
-  onSave: (calories: number, heartRate?: number) => void;
+  onSave: (calories: number, heartRate?: number) => void;  // ← Esta é a assinatura correta
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -49,30 +49,13 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
     onSave(caloriesNum, heartRateNum);
   };
 
-  const handleCancel = () => {
-    onCancel();
-  };
-
   const isValid = calories.trim() !== '' && 
                   !isNaN(parseInt(calories)) && 
                   parseInt(calories) >= 0 &&
-                  parseInt(calories) <= 5000 &&
-                  (!heartRate || 
-                   (!isNaN(parseInt(heartRate)) && 
-                    parseInt(heartRate) >= 40 && 
-                    parseInt(heartRate) <= 220));
-
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      handleCancel();
-    }
-  };
+                  parseInt(calories) <= 5000;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-      onClick={handleBackdropClick}
-    >
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-gradient-to-br from-secondary-dark to-black rounded-2xl 
         p-6 max-w-md w-full border border-white/10">
         
@@ -117,9 +100,6 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
             />
             <span className="absolute right-4 top-3 text-gray-400">kcal</span>
           </div>
-          <p className="text-xs text-text-secondary mt-1">
-            Consulte o registro do seu smartwatch ou app de fitness.
-          </p>
         </div>
 
         <div className="mb-6">
@@ -139,18 +119,14 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
             />
             <span className="absolute right-4 top-3 text-gray-400">bpm</span>
           </div>
-          <p className="text-xs text-text-secondary mt-1">
-            Frequência cardíaca média durante o treino.
-          </p>
         </div>
 
         <div className="flex gap-3">
           <button
-            onClick={handleCancel}
+            onClick={onCancel}
             disabled={isLoading}
             className="flex-1 py-3 bg-gradient-to-r from-gray-600 to-gray-700 
-              text-white font-bold rounded-xl transition-all hover:opacity-90
-              disabled:opacity-50 disabled:cursor-not-allowed"
+              text-white font-bold rounded-xl transition-all hover:opacity-90"
           >
             Cancelar
           </button>
@@ -160,7 +136,7 @@ const CaloriesInputModal: React.FC<CaloriesInputModalProps> = ({
             disabled={!isValid || isLoading}
             className={`flex-1 py-3 font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
               isValid && !isLoading
-                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:opacity-90 hover:scale-105'
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:opacity-90'
                 : 'bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
           >

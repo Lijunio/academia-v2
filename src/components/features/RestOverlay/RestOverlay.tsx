@@ -6,7 +6,7 @@ interface RestOverlayProps {
   onClose: () => void;
   restTime: number;
   nextExerciseName: string;
-  workoutType: 'A' | 'B';
+  workoutType: 'A' | 'B' | '1' | '2' | '3';
   isGroupRest?: boolean;
   exerciseOptions?: { name: string; group: string }[];
 }
@@ -25,10 +25,12 @@ const RestOverlay: React.FC<RestOverlayProps> = ({
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const colors = {
-    'A': { primary: '#ff4757', gradient: 'linear-gradient(135deg, #ff4757, #ff6b81)' },
-    'B': { primary: '#2e86de', gradient: 'linear-gradient(135deg, #2e86de, #54a0ff)' }
-  };
-
+  'A': { primary: '#ff4757', gradient: 'linear-gradient(135deg, #ff4757, #ff6b81)' },
+  'B': { primary: '#2e86de', gradient: 'linear-gradient(135deg, #2e86de, #54a0ff)' },
+  '1': { primary: '#10ac84', gradient: 'linear-gradient(135deg, #10ac84, #1dd1a1)' },  
+  '2': { primary: '#54a0ff', gradient: 'linear-gradient(135deg, #54a0ff, #5f27cd)' },  
+  '3': { primary: '#9c88ff', gradient: 'linear-gradient(135deg, #9c88ff, #8e44ad)' }   
+};
   const workoutColor = colors[workoutType];
 
   useEffect(() => {

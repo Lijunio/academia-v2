@@ -12,8 +12,12 @@ import {
   WorkoutType
 } from '../types/workout.types';
 
+// Grupos para cada tipo de treino
 const WORKOUT_A_GROUPS: MuscleGroup[] = ['peito', 'ombro', 'triceps', 'pernas'];
 const WORKOUT_B_GROUPS: MuscleGroup[] = ['costas', 'trapezio', 'biceps', 'antebraco', 'posterior', 'panturrilha'];
+const WORKOUT_1_GROUPS: MuscleGroup[] = ['peito', 'ombro', 'triceps', 'abdominal', 'cardio'];
+const WORKOUT_2_GROUPS: MuscleGroup[] = ['costas', 'trapezio', 'biceps', 'antebraco', 'abdominal', 'cardio'];
+const WORKOUT_3_GROUPS: MuscleGroup[] = ['posterior', 'pernas', 'panturrilha', 'abdominal'];
 
 const GROUP_DISPLAY_NAMES: Record<MuscleGroup, string> = {
   peito: 'Peito',
@@ -25,7 +29,9 @@ const GROUP_DISPLAY_NAMES: Record<MuscleGroup, string> = {
   trapezio: 'Trapézio',
   antebraco: 'Antebraço',
   panturrilha: 'Panturrilha',
-  posterior: 'Perna Posterior'
+  posterior: 'Perna Posterior',
+  abdominal: 'Abdominal',
+  cardio: 'Cardio'
 };
 
 interface EnhancedWorkoutReport extends Omit<WorkoutReport, 'heartRate'> {
@@ -46,9 +52,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     workoutStartTime: undefined
   });
   
-  // Lista linear de todos os exercícios na ordem correta
-  const [linearExercises, setLinearExercises] = useState<{ id: number; name: string; groupName: string }[]>([]);
-  
   const [executionData, setExecutionData] = useState<Record<number, ExerciseExecution>>({});
   const [showSmartwatchModal, setShowSmartwatchModal] = useState(false);
   const [showWeightModal, setShowWeightModal] = useState(false);
@@ -60,45 +63,41 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
   const [restType, setRestType] = useState<'exercise' | 'group'>('exercise');
   const [nextExerciseName, setNextExerciseName] = useState('');
   
+  const [showCardioModal, setShowCardioModal] = useState(false);
+  const [currentCardioExercise, setCurrentCardioExercise] = useState<Exercise | null>(null);
+  
   const isInitializedRef = useRef(false);
   const workoutStartTimeRef = useRef<Date | null>(null);
   
-  // ===== FUNÇÕES DE SALVAMENTO =====
-  const saveProgress = useCallback(() => {
-    if (exercises.length === 0 || groups.length === 0) return;
+  // Lista linear de todos os exercícios em ordem
+  const [linearExerciseOrder, setLinearExerciseOrder] = useState<{ id: number; name: string; groupIndex: number }[]>([]);
+  
+  const getWorkoutGroups = useCallback((): MuscleGroup[] => {
+    switch(workoutType) {
+      case 'A': return WORKOUT_A_GROUPS;
+      case 'B': return WORKOUT_B_GROUPS;
+      case '1': return WORKOUT_1_GROUPS;
+      case '2': return WORKOUT_2_GROUPS;
+      case '3': return WORKOUT_3_GROUPS;
+      default: return WORKOUT_A_GROUPS;
+    }
+  }, [workoutType]);
 
-    const data: WorkoutData = { 
-      exercises, 
-      session: {
-        ...session,
-        workoutStartTime: workoutStartTimeRef.current || undefined
-      }, 
-      groups,
-      executionData
-    };
-    
-    localStorage.setItem(`workout-${workoutType}`, JSON.stringify(data));
-    console.log('💾 Progresso salvo');
-  }, [exercises, session, groups, workoutType, executionData]);
-
-  // ===== FUNÇÕES DE INICIALIZAÇÃO =====
   const initializeExercises = useCallback((initialExercises: ExerciseBase[]) => {
     if (isInitializedRef.current) return;
 
-    console.log('🎯 Inicializando exercícios...');
-    
     const enhancedExercises: Exercise[] = initialExercises.map(exercise => ({
       ...exercise,
       completed: false,
       started: false,
       reps: 10,
-      restTime: 60,
+      restTime: exercise.noWeight || exercise.isCardio ? 30 : 60,
       skipReason: undefined,
       hasVariations: exercise.hasVariations || false,
       variations: exercise.variations || []
     }));
 
-    const workoutGroups = workoutType === 'A' ? WORKOUT_A_GROUPS : WORKOUT_B_GROUPS;
+    const workoutGroups = getWorkoutGroups();
 
     const workoutGroupsData: WorkoutGroup[] = workoutGroups.map(groupName => {
       const groupExercises = enhancedExercises.filter(ex => ex.muscleGroup === groupName);
@@ -113,20 +112,18 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     setExercises(enhancedExercises);
     setGroups(workoutGroupsData);
     
-    // CRIAR LISTA LINEAR DE EXERCÍCIOS NA ORDEM CORRETA
-    const linear: { id: number; name: string; groupName: string }[] = [];
-    workoutGroupsData.forEach(group => {
+    // Criar lista linear de exercícios na ordem dos grupos
+    const linear: { id: number; name: string; groupIndex: number }[] = [];
+    workoutGroupsData.forEach((group, groupIdx) => {
       group.exercises.forEach(ex => {
         linear.push({
           id: ex.id,
           name: ex.name,
-          groupName: group.name
+          groupIndex: groupIdx
         });
       });
     });
-    setLinearExercises(linear);
-    
-    console.log('📋 Lista linear criada:', linear.map(e => e.name).join(' → '));
+    setLinearExerciseOrder(linear);
     
     isInitializedRef.current = true;
 
@@ -135,16 +132,8 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
       if (saved) {
         try {
           const parsed: WorkoutData = JSON.parse(saved);
-          console.log('📂 Carregando progresso salvo');
-          
-          if (parsed.exercises && Array.isArray(parsed.exercises)) {
-            setExercises(parsed.exercises);
-          }
-          
-          if (parsed.groups && Array.isArray(parsed.groups)) {
-            setGroups(parsed.groups);
-          }
-          
+          if (parsed.exercises) setExercises(parsed.exercises);
+          if (parsed.groups) setGroups(parsed.groups);
           if (parsed.session) {
             const sessionWithDates = {
               ...parsed.session,
@@ -155,7 +144,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
               workoutStartTimeRef.current = sessionWithDates.workoutStartTime;
             }
           }
-          
           if (parsed.executionData) {
             const executionDataWithDates: Record<number, ExerciseExecution> = {};
             Object.entries(parsed.executionData).forEach(([key, value]: [string, any]) => {
@@ -172,7 +160,7 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
         }
       }
     }, 50);
-  }, [workoutType]);
+  }, [workoutType, getWorkoutGroups]);
 
   useEffect(() => {
     if (exercises.length > 0 && groups.length > 0) {
@@ -192,147 +180,99 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     }
   }, [exercises, groups.length]);
 
-  // ===== FUNÇÕES DE ENVIO DE MENSAGENS =====
-  const sendWhatsAppStartMessage = useCallback(() => {
-    try {
-      const now = new Date();
-      const formattedTime = now.toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-      const formattedDate = now.toLocaleDateString('pt-BR');
-      
-      const message = `🏋️‍♂️ *INÍCIO DE TREINO* 🏋️‍♂️\n\n` +
-        `✅ *Treino iniciado com sucesso!*\n\n` +
-        `📅 Data: ${formattedDate}\n` +
-        `⏰ Hora: ${formattedTime}\n` +
-        `🏋️ Tipo: ${workoutType}\n\n` +
-        `🚀 *Bom treino! Vamos evoluir!* 💪`;
-      
-      const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-      
-      window.open(whatsappUrl, '_blank');
-      
-      console.log('✅ WhatsApp enviado');
-    } catch (error) {
-      console.error('❌ Erro ao enviar WhatsApp:', error);
-    }
-  }, [workoutType]);
+  const saveProgress = useCallback(() => {
+    if (exercises.length === 0 || groups.length === 0) return;
+    const data: WorkoutData = { 
+      exercises, 
+      session: {
+        ...session,
+        workoutStartTime: workoutStartTimeRef.current || undefined
+      }, 
+      groups,
+      executionData
+    };
+    localStorage.setItem(`workout-${workoutType}`, JSON.stringify(data));
+  }, [exercises, session, groups, workoutType, executionData]);
 
-  // ===== FUNÇÕES DO CARD DE DESCANSO (COM LOGS) =====
-  const findNextExercise = useCallback((currentId?: number): { id: number; name: string } | null => {
-    console.log('🔍 [findNextExercise] currentId:', currentId);
-    console.log('🔍 [findNextExercise] linearExercises:', linearExercises.map(e => e.name));
-    console.log('🔍 [findNextExercise] exercises completed:', exercises.map(e => ({ id: e.id, name: e.name, completed: e.completed, skipReason: e.skipReason })));
-    
-    if (linearExercises.length === 0) {
-      console.log('🔍 [findNextExercise] linearExercises vazio');
-      return null;
-    }
-    
-    // Encontrar índice do exercício atual na lista linear
-    let startIndex = -1;
-    if (currentId) {
-      startIndex = linearExercises.findIndex(item => item.id === currentId);
-      console.log('🔍 [findNextExercise] startIndex do atual:', startIndex);
-    }
-    
-    // Procurar a partir do próximo índice
-    console.log('🔍 [findNextExercise] Procurando após posição', startIndex);
-    for (let i = startIndex + 1; i < linearExercises.length; i++) {
-      const ex = linearExercises[i];
-      const exerciseState = exercises.find(e => e.id === ex.id);
-      console.log(`🔍 [findNextExercise] Verificando ${ex.name}: completed=${exerciseState?.completed}, skipReason=${exerciseState?.skipReason}`);
-      
-      if (!exerciseState?.completed && !exerciseState?.skipReason) {
-        console.log(`🔍 [findNextExercise] ENCONTRADO: ${ex.name}`);
-        return { id: ex.id, name: ex.name };
-      }
-    }
-    
-    // Se não encontrou, procurar desde o início (caso tenha pulado algum)
-    console.log('🔍 [findNextExercise] Procurando desde o início');
-    for (let i = 0; i < linearExercises.length; i++) {
-      const ex = linearExercises[i];
-      const exerciseState = exercises.find(e => e.id === ex.id);
-      
-      if (!exerciseState?.completed && !exerciseState?.skipReason) {
-        console.log(`🔍 [findNextExercise] ENCONTRADO: ${ex.name}`);
-        return { id: ex.id, name: ex.name };
-      }
-    }
-    
-    console.log('🔍 [findNextExercise] Nenhum exercício encontrado');
-    return null;
-  }, [linearExercises, exercises]);
+  /**
+   * FUNÇÃO REMOVIDA - Não envia mais mensagem para WhatsApp
+   */
+  // const sendWhatsAppStartMessage = useCallback(() => { ... }); // REMOVIDO
 
+  /**
+   * Encontra o próximo exercício baseado na lista linear
+   */
   const getNextAvailableExercise = useCallback((currentExerciseId?: number): string => {
-    console.log('🎯 [getNextAvailableExercise] currentExerciseId:', currentExerciseId);
-    const next = findNextExercise(currentExerciseId);
-    const result = next ? next.name : 'Treino finalizado';
-    console.log('🎯 [getNextAvailableExercise] resultado:', result);
-    return result;
-  }, [findNextExercise]);
+    if (!session.workoutStarted) return 'Inicie o treino';
+    if (linearExerciseOrder.length === 0) return 'Treino finalizado';
+
+    if (!currentExerciseId) {
+      for (const item of linearExerciseOrder) {
+        const state = exercises.find(e => e.id === item.id);
+        if (!state?.completed && !state?.skipReason) {
+          return item.name;
+        }
+      }
+      return 'Treino finalizado';
+    }
+
+    let currentIndex = -1;
+    for (let i = 0; i < linearExerciseOrder.length; i++) {
+      if (linearExerciseOrder[i].id === currentExerciseId) {
+        currentIndex = i;
+        break;
+      }
+    }
+    
+    if (currentIndex === -1) return 'Treino finalizado';
+
+    for (let i = currentIndex + 1; i < linearExerciseOrder.length; i++) {
+      const nextItem = linearExerciseOrder[i];
+      const state = exercises.find(e => e.id === nextItem.id);
+      if (!state?.completed && !state?.skipReason) {
+        return nextItem.name;
+      }
+    }
+
+    return 'Treino finalizado';
+  }, [session.workoutStarted, linearExerciseOrder, exercises]);
 
   const getNextExerciseOptions = useCallback((currentExerciseId?: number): { name: string; group: string }[] => {
-    console.log('📋 [getNextExerciseOptions] currentExerciseId:', currentExerciseId);
-    const options: { name: string; group: string }[] = [];
+    if (!session.workoutStarted) return [];
+    if (linearExerciseOrder.length === 0) return [];
     
-    if (linearExercises.length === 0) return options;
+    const options: { name: string; group: string }[] = [];
     
     let startIndex = -1;
     if (currentExerciseId) {
-      startIndex = linearExercises.findIndex(item => item.id === currentExerciseId);
-    }
-    
-    // Adicionar próximos exercícios não concluídos
-    for (let i = startIndex + 1; i < linearExercises.length && options.length < 5; i++) {
-      const ex = linearExercises[i];
-      const exerciseState = exercises.find(e => e.id === ex.id);
-      const group = groups.find(g => g.name === ex.groupName);
-      
-      if (!exerciseState?.completed && !exerciseState?.skipReason) {
-        options.push({
-          name: ex.name,
-          group: group?.displayName || ex.groupName
-        });
-      }
-    }
-    
-    // Se ainda não tem 5 opções, adicionar do início
-    if (options.length < 5) {
-      for (let i = 0; i < linearExercises.length && options.length < 5; i++) {
-        const ex = linearExercises[i];
-        const exerciseState = exercises.find(e => e.id === ex.id);
-        const group = groups.find(g => g.name === ex.groupName);
-        
-        if (!exerciseState?.completed && !exerciseState?.skipReason) {
-          if (!options.some(opt => opt.name === ex.name)) {
-            options.push({
-              name: ex.name,
-              group: group?.displayName || ex.groupName
-            });
-          }
+      for (let i = 0; i < linearExerciseOrder.length; i++) {
+        if (linearExerciseOrder[i].id === currentExerciseId) {
+          startIndex = i;
+          break;
         }
       }
     }
     
-    console.log('📋 [getNextExerciseOptions] options:', options);
+    for (let i = startIndex + 1; i < linearExerciseOrder.length && options.length < 5; i++) {
+      const item = linearExerciseOrder[i];
+      const state = exercises.find(e => e.id === item.id);
+      if (!state?.completed && !state?.skipReason) {
+        const group = groups[item.groupIndex];
+        options.push({
+          name: item.name,
+          group: group?.displayName || 'Exercício'
+        });
+      }
+    }
+    
     return options;
-  }, [linearExercises, exercises, groups]);
+  }, [session.workoutStarted, linearExerciseOrder, exercises, groups]);
 
   const showRestTimerWithOptions = useCallback((type: 'exercise' | 'group', currentExerciseId?: number, wasSkipped: boolean = false) => {
-    console.log('⏱️ [showRestTimerWithOptions] type:', type, 'currentExerciseId:', currentExerciseId, 'wasSkipped:', wasSkipped);
-    
-    if (!session.workoutStarted) {
-      console.log('⏱️ [showRestTimerWithOptions] workout não iniciado');
-      return;
-    }
+    if (!session.workoutStarted) return;
     
     if (wasSkipped) {
       const allCompleted = exercises.every(ex => ex.completed || ex.skipReason);
-      console.log('⏱️ [showRestTimerWithOptions] allCompleted após skip:', allCompleted);
       if (allCompleted) {
         setSession(prev => ({ ...prev, workoutCompleted: true }));
         setTimeout(() => setShowCaloriesModal(true), 100);
@@ -340,12 +280,10 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
       return;
     }
     
-    const next = findNextExercise(currentExerciseId);
-    console.log('⏱️ [showRestTimerWithOptions] next encontrado:', next);
+    const nextName = getNextAvailableExercise(currentExerciseId);
     
-    if (!next) {
+    if (nextName === 'Treino finalizado') {
       const allCompleted = exercises.every(ex => ex.completed || ex.skipReason);
-      console.log('⏱️ [showRestTimerWithOptions] allCompleted:', allCompleted);
       if (allCompleted) {
         setSession(prev => ({ ...prev, workoutCompleted: true }));
         setTimeout(() => setShowCaloriesModal(true), 100);
@@ -354,30 +292,33 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     }
     
     setRestType(type);
-    setNextExerciseName(next.name);
+    setNextExerciseName(nextName);
     setShowRest(true);
-    console.log('⏱️ [showRestTimerWithOptions] RestOverlay aberto com próximo:', next.name);
-  }, [session.workoutStarted, exercises, findNextExercise]);
+  }, [session.workoutStarted, exercises, getNextAvailableExercise]);
 
   const closeRestTimer = useCallback(() => {
-    console.log('⏱️ [closeRestTimer] Fechando RestOverlay');
     setShowRest(false);
   }, []);
 
-  // ===== FUNÇÕES DE EXERCÍCIOS =====
-  const completeExercise = useCallback((exerciseId: number) => {
-    console.log('✅ [completeExercise] exerciseId:', exerciseId);
-    
-    if (!session.workoutStarted) {
-      console.log('✅ [completeExercise] workout não iniciado');
-      return;
+  /**
+   * Verifica se todos os exercícios foram concluídos e finaliza o treino
+   */
+  const checkAndFinalizeWorkout = useCallback(() => {
+    const allCompleted = exercises.every(ex => ex.completed || ex.skipReason);
+    if (allCompleted) {
+      console.log('🎉 Todos os exercícios concluídos! Finalizando treino...');
+      setSession(prev => ({ ...prev, workoutCompleted: true }));
+      setTimeout(() => setShowCaloriesModal(true), 100);
+      return true;
     }
+    return false;
+  }, [exercises]);
+
+  const completeExercise = useCallback((exerciseId: number) => {
+    if (!session.workoutStarted) return;
 
     const existingExercise = exercises.find(ex => ex.id === exerciseId);
-    if (!existingExercise || existingExercise.completed) {
-      console.log('✅ [completeExercise] exercício já completo ou não encontrado');
-      return;
-    }
+    if (!existingExercise || existingExercise.completed) return;
     
     setExercises(prevExercises => {
       return prevExercises.map(ex => 
@@ -391,71 +332,136 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
       completedExercises: newCompletedExercises
     }));
     
+    saveProgress();
+    
     setTimeout(() => {
-      const groupIndex = groups.findIndex(g => g.name === existingExercise.muscleGroup);
-      const group = groups[groupIndex];
+      // Verificar se todos os exercícios foram concluídos
+      const updatedExercises = exercises.map(ex => 
+        ex.id === exerciseId ? { ...ex, completed: true } : ex
+      );
+      const allCompleted = updatedExercises.every(ex => ex.completed || ex.skipReason);
       
-      if (group) {
-        const updatedExercises = exercises.map(ex => 
-          ex.id === exerciseId ? { ...ex, completed: true } : ex
-        );
-        
-        const allGroupExercisesCompleted = group.exercises.every(groupEx => {
-          const exerciseState = updatedExercises.find(e => e.id === groupEx.id);
-          return exerciseState?.completed || exerciseState?.skipReason;
+      if (allCompleted) {
+        console.log('🎉 Todos os exercícios concluídos!');
+        setSession(prev => ({ ...prev, workoutCompleted: true }));
+        setTimeout(() => setShowCaloriesModal(true), 100);
+        return;
+      }
+      
+      // Verificar se o grupo atual foi completamente concluído
+      const currentGroup = groups[session.currentGroupIndex];
+      if (currentGroup) {
+        const allInGroupCompleted = currentGroup.exercises.every(ex => {
+          const state = updatedExercises.find(e => e.id === ex.id);
+          return state?.completed || state?.skipReason;
         });
         
-        console.log('✅ [completeExercise] allGroupExercisesCompleted:', allGroupExercisesCompleted);
-        
-        if (allGroupExercisesCompleted) {
+        if (allInGroupCompleted) {
           setGroups(prevGroups => 
             prevGroups.map(g =>
-              g.name === group.name ? { ...g, completed: true } : g
+              g.name === currentGroup.name ? { ...g, completed: true } : g
             )
           );
           
-          const nextGroupIndex = groupIndex + 1;
+          const nextGroupIndex = session.currentGroupIndex + 1;
           if (nextGroupIndex < groups.length) {
-            console.log('✅ [completeExercise] Avançando para próximo grupo');
             setSession(prev => ({
               ...prev,
               currentGroupIndex: nextGroupIndex
             }));
             
-            showRestTimerWithOptions('group', exerciseId, false);
-          } else {
-            const allCompleted = updatedExercises.every(ex => ex.completed || ex.skipReason);
-            if (allCompleted) {
-              console.log('✅ [completeExercise] Todos exercícios completos');
-              setSession(prev => ({ ...prev, workoutCompleted: true }));
-              setTimeout(() => setShowCaloriesModal(true), 100);
+            const firstExerciseInNextGroup = groups[nextGroupIndex].exercises.find(e => {
+              const state = updatedExercises.find(ex => ex.id === e.id);
+              return !state?.completed && !state?.skipReason;
+            });
+            
+            if (firstExerciseInNextGroup) {
+              showRestTimerWithOptions('group', firstExerciseInNextGroup.id, false);
             }
           }
         } else {
-          showRestTimerWithOptions('exercise', exerciseId, false);
+          const nextExercise = getNextAvailableExercise(exerciseId);
+          if (nextExercise !== 'Treino finalizado') {
+            setRestType('exercise');
+            setNextExerciseName(nextExercise);
+            setShowRest(true);
+          }
         }
       }
       
       saveProgress();
     }, 100);
-  }, [session, exercises, groups, saveProgress, showRestTimerWithOptions]);
+  }, [session, exercises, groups, saveProgress, getNextAvailableExercise, showRestTimerWithOptions]);
+
+  const showCardioInputModal = useCallback((exercise: Exercise) => {
+    setCurrentCardioExercise(exercise);
+    setShowCardioModal(true);
+  }, []);
+
+  /**
+   * CORRIGIDO: Só pede Distância e Duração para caminhada
+   */
+  const saveCardioData = useCallback((data: {
+    distance: number;
+    duration: number;
+  }) => {
+    if (!currentCardioExercise) return;
+    
+    // Salvar apenas distância e duração. Calorias e FC serão pedidas no final do treino
+    const execution: ExerciseExecution = {
+      exerciseId: currentCardioExercise.id,
+      date: new Date(),
+      weight: 0,
+      completed: true,
+      cardioData: {
+        distance: data.distance,
+        duration: data.duration,
+        calories: 0, // Será preenchido no final
+        heartRate: 0 // Será preenchido no final
+      }
+    };
+    
+    setExecutionData(prev => ({
+      ...prev,
+      [currentCardioExercise.id]: execution
+    }));
+    
+    completeExercise(currentCardioExercise.id);
+    
+    setShowCardioModal(false);
+    setCurrentCardioExercise(null);
+    
+    saveProgress();
+  }, [currentCardioExercise, saveProgress, completeExercise]);
+
+  const closeCardioModal = useCallback(() => {
+    setShowCardioModal(false);
+    setCurrentCardioExercise(null);
+  }, []);
 
   const prepareWeightRegistration = useCallback((exerciseId: number) => {
-    console.log('⚖️ [prepareWeightRegistration] exerciseId:', exerciseId);
     const exercise = exercises.find(ex => ex.id === exerciseId);
     if (!exercise || exercise.completed) return;
     
+    if (exercise.isCardio) {
+      showCardioInputModal(exercise);
+      return;
+    }
+    
+    if (exercise.noWeight) {
+      completeExercise(exerciseId);
+      return;
+    }
+    
     setCurrentExerciseForWeight(exercise);
     setShowWeightModal(true);
-  }, [exercises]);
+  }, [exercises, showCardioInputModal, completeExercise]);
 
   const saveWeightRegistration = useCallback((data: {
     weight: number;
     variationId?: number;
     observations?: string;
   }) => {
-    console.log('💾 [saveWeightRegistration] data:', data);
-    
     if (!currentExerciseForWeight) return;
     
     const execution: ExerciseExecution = {
@@ -482,8 +488,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
   }, [currentExerciseForWeight, saveProgress, completeExercise]);
 
   const skipExercise = useCallback((exerciseId: number, reason: string) => {
-    console.log('⏭️ [skipExercise] exerciseId:', exerciseId, 'reason:', reason);
-    
     if (!session.workoutStarted) return;
 
     const existingExercise = exercises.find(ex => ex.id === exerciseId);
@@ -497,7 +501,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
           skipReason: reason
         } : ex
       );
-      
       return updatedExercises;
     });
     
@@ -510,47 +513,57 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     saveProgress();
     
     setTimeout(() => {
-      const groupIndex = groups.findIndex(g => g.name === existingExercise.muscleGroup);
-      const group = groups[groupIndex];
+      const updatedExercises = exercises.map(ex => 
+        ex.id === exerciseId ? { ...ex, completed: true, skipReason: reason } : ex
+      );
+      const allCompleted = updatedExercises.every(ex => ex.completed || ex.skipReason);
       
-      if (group) {
-        const currentExercisesState = exercises.map(ex => 
-          ex.id === exerciseId ? { ...ex, completed: true, skipReason: reason } : ex
-        );
-        
-        const allGroupExercisesCompleted = group.exercises.every(groupEx => {
-          const exerciseState = currentExercisesState.find(e => e.id === groupEx.id);
-          return exerciseState?.completed || exerciseState?.skipReason;
+      if (allCompleted) {
+        setSession(prev => ({ ...prev, workoutCompleted: true }));
+        setTimeout(() => setShowCaloriesModal(true), 100);
+        return;
+      }
+      
+      const currentGroup = groups[session.currentGroupIndex];
+      if (currentGroup) {
+        const allInGroupCompleted = currentGroup.exercises.every(ex => {
+          const state = updatedExercises.find(e => e.id === ex.id);
+          return state?.completed || state?.skipReason;
         });
         
-        if (allGroupExercisesCompleted) {
+        if (allInGroupCompleted) {
           setGroups(prevGroups => 
             prevGroups.map(g =>
-              g.name === group.name ? { ...g, completed: true } : g
+              g.name === currentGroup.name ? { ...g, completed: true } : g
             )
           );
           
-          const nextGroupIndex = groupIndex + 1;
+          const nextGroupIndex = session.currentGroupIndex + 1;
           if (nextGroupIndex < groups.length) {
             setSession(prev => ({
               ...prev,
               currentGroupIndex: nextGroupIndex
             }));
           }
-          
-          saveProgress();
         }
       }
-    }, 150);
-  }, [session.workoutStarted, exercises, groups, session.completedExercises, saveProgress]);
+      
+      const nextExercise = getNextAvailableExercise(exerciseId);
+      if (nextExercise !== 'Treino finalizado') {
+        setRestType('exercise');
+        setNextExerciseName(nextExercise);
+        setShowRest(true);
+      }
+      
+      saveProgress();
+    }, 100);
+  }, [session.workoutStarted, exercises, groups, session.completedExercises, session.currentGroupIndex, getNextAvailableExercise, saveProgress]);
 
   const completeExerciseWithRest = useCallback((exerciseId: number) => {
     prepareWeightRegistration(exerciseId);
   }, [prepareWeightRegistration]);
 
   const resetWorkout = useCallback(() => {
-    console.log('🔄 [resetWorkout] Resetando treino');
-    
     setExercises(prevExercises => 
       prevExercises.map(exercise => ({
         ...exercise,
@@ -582,12 +595,9 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     workoutStartTimeRef.current = null;
     
     localStorage.removeItem(`workout-${workoutType}`);
-    
-    console.log('✅ Treino resetado');
   }, [workoutType]);
 
   const startWorkout = useCallback(() => {
-    console.log('▶️ [startWorkout] Abrindo modal smartwatch');
     setShowSmartwatchModal(true);
   }, []);
 
@@ -596,8 +606,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
   }, [startWorkout]);
 
   const confirmSmartwatchStart = useCallback(() => {
-    console.log('✅ [confirmSmartwatchStart] Confirmando início com smartwatch');
-    
     const startTime = new Date();
     const newSession = {
       ...session,
@@ -612,30 +620,34 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     setSession(newSession);
     setShowSmartwatchModal(false);
     saveProgress();
-    sendWhatsAppStartMessage();
-  }, [session, saveProgress, sendWhatsAppStartMessage]);
+    // REMOVIDO: sendWhatsAppStartMessage();
+  }, [session, saveProgress]);
 
   const cancelSmartwatchStart = useCallback(() => {
-    console.log('❌ [cancelSmartwatchStart] Cancelando início com smartwatch');
     setShowSmartwatchModal(false);
   }, []);
 
   const prepareWorkoutFinalization = useCallback(() => {
     const canFinish = exercises.every(ex => ex.completed || ex.skipReason);
-    console.log('🏁 [prepareWorkoutFinalization] canFinish:', canFinish);
+    console.log('🔍 prepareWorkoutFinalization - canFinish:', canFinish);
+    console.log('🔍 Exercícios pendentes:', exercises.filter(ex => !ex.completed && !ex.skipReason).map(ex => ex.name));
     
     if (!canFinish) {
       return;
     }
     
+    console.log('🎯 Abrindo modal de calorias...');
+    console.log('🎯 showCaloriesModal antes:', showCaloriesModal);
     setShowCaloriesModal(true);
-  }, [exercises]);
+    console.log('🎯 showCaloriesModal depois:', true);
+  }, [exercises, showCaloriesModal]);
 
   const canFinishWorkout = useCallback((): boolean => {
-    return exercises.every(ex => ex.completed || ex.skipReason);
+    const allCompleted = exercises.every(ex => ex.completed || ex.skipReason);
+    console.log('🔍 canFinishWorkout - resultado:', allCompleted);
+    return allCompleted;
   }, [exercises]);
 
-  // ===== FUNÇÕES DE RELATÓRIO =====
   const sendTelegramReport = useCallback(async (report: EnhancedWorkoutReport): Promise<boolean> => {
     try {
       const formatDuration = (seconds: number): string => {
@@ -659,7 +671,7 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
       const avgWeight = completedExercisesData.length > 0 ? totalWeight / completedExercisesData.length : 0;
       
       let reportMessage = `
-🏋️‍♂️ *RELATÓRIO DE TREINO - ${report.workoutType.toUpperCase()}* 🏋️‍♂️
+🏋️‍♂️ *RELATÓRIO DE TREINO - ${report.workoutType}* 🏋️‍♂️
 
 📅 *Data:* ${formattedDate}
 ⏰ *Hora de início:* ${formattedTime}
@@ -678,10 +690,16 @@ ${report.heartRate ? `├ 💓 Frequência cardíaca média: ${report.heartRate}
       completedExercisesData.forEach((ex, index) => {
         reportMessage += `
 ${index + 1}. *${ex.name}*
-   ├ Peso: ${ex.weight} kg
+   ├ Peso: ${ex.weight || (ex.cardioData ? '-' : '0')} kg
    ├ Variação: ${ex.variation || 'Padrão'}
    ${ex.observations ? `└ Obs: ${ex.observations}` : '└ Obs: -'}
 `;
+        if (ex.cardioData && ex.cardioData.calories > 0) {
+          reportMessage += `   ├ 📏 Distância: ${ex.cardioData.distance}m
+   ├ 💓 FC: ${ex.cardioData.heartRate} bpm
+   └ 🔥 Calorias: ${ex.cardioData.calories} kcal
+`;
+        }
       });
 
       if (skippedExercisesData.length > 0) {
@@ -738,13 +756,28 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
   }, []);
 
   const finalizeWorkout = useCallback(async (calories: number, heartRate?: number) => {
-    console.log('🏁 [finalizeWorkout] calories:', calories, 'heartRate:', heartRate);
     setIsSendingReport(true);
     
     try {
       const duration = workoutStartTimeRef.current 
         ? Math.floor((Date.now() - workoutStartTimeRef.current.getTime()) / 1000)
         : 0;
+      
+      // Atualizar os dados de cardio com as calorias e FC do treino completo
+      const updatedExecutionData = { ...executionData };
+      for (const [id, exec] of Object.entries(executionData)) {
+        if (exec.cardioData && exec.cardioData.calories === 0) {
+          updatedExecutionData[parseInt(id)] = {
+            ...exec,
+            cardioData: {
+              ...exec.cardioData,
+              calories: calories,
+              heartRate: heartRate || 0
+            }
+          };
+        }
+      }
+      setExecutionData(updatedExecutionData);
       
       const report: EnhancedWorkoutReport = {
         id: `report-${workoutType}-${Date.now()}`,
@@ -756,12 +789,13 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
         exercises: exercises.map(ex => ({
           id: ex.id,
           name: ex.name,
-          weight: executionData[ex.id]?.weight || 0,
-          variation: executionData[ex.id]?.variationName,
-          observations: executionData[ex.id]?.observations,
+          weight: updatedExecutionData[ex.id]?.weight || 0,
+          variation: updatedExecutionData[ex.id]?.variationName,
+          observations: updatedExecutionData[ex.id]?.observations,
           sets: parseInt(ex.sets),
           completed: ex.completed,
-          skipReason: ex.skipReason
+          skipReason: ex.skipReason,
+          cardioData: updatedExecutionData[ex.id]?.cardioData
         })),
         sentToTelegram: false
       };
@@ -786,7 +820,6 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
     }
   }, [workoutType, exercises, executionData, sendTelegramReport, resetWorkout]);
 
-  // ===== FUNÇÕES AUXILIARES =====
   const getCurrentGroup = useCallback((): WorkoutGroup | undefined => {
     if (!groups || groups.length === 0) return undefined;
     const safeIndex = Math.min(session.currentGroupIndex, groups.length - 1);
@@ -813,10 +846,7 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
     
     if (exercise.muscleGroup === currentGroup.name) {
       const exerciseState = exercises.find(e => e.id === exerciseId);
-      
-      if (exerciseState?.completed || exerciseState?.skipReason) {
-        return false;
-      }
+      if (exerciseState?.completed || exerciseState?.skipReason) return false;
       
       for (const ex of currentGroup.exercises) {
         const state = exercises.find(e => e.id === ex.id);
@@ -825,7 +855,6 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
         }
       }
     }
-    
     return false;
   }, [exercises, groups, session.currentGroupIndex]);
 
@@ -875,7 +904,6 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
   const isGroupCompleted = useCallback((groupName: MuscleGroup): boolean => {
     const group = groups.find(g => g.name === groupName);
     if (!group) return false;
-    
     return group.exercises.every(exercise => {
       const exerciseState = exercises.find(e => e.id === exercise.id);
       return exerciseState?.completed || exerciseState?.skipReason;
@@ -883,26 +911,17 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
   }, [groups, exercises]);
 
   const closeWeightModal = useCallback(() => {
-    console.log('❌ [closeWeightModal] Fechando modal de peso');
     setShowWeightModal(false);
     setCurrentExerciseForWeight(null);
   }, []);
 
   const closeCaloriesModal = useCallback(() => {
-    console.log('❌ [closeCaloriesModal] Fechando modal de calorias');
     setShowCaloriesModal(false);
   }, []);
 
   const getElapsedWorkoutTime = useCallback((): number => {
-    if (!workoutStartTimeRef.current) {
-      return 0;
-    }
-    
-    const now = new Date();
-    const startTime = workoutStartTimeRef.current;
-    const elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-    
-    return elapsedSeconds;
+    if (!workoutStartTimeRef.current) return 0;
+    return Math.floor((Date.now() - workoutStartTimeRef.current.getTime()) / 1000);
   }, []);
 
   return {
@@ -917,7 +936,9 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
     showSmartwatchModal,
     showWeightModal,
     showCaloriesModal,
+    showCardioModal,
     currentExerciseForWeight,
+    currentCardioExercise,
     isSendingReport,
     
     initializeExercises,
@@ -931,6 +952,8 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
     
     prepareWeightRegistration,
     saveWeightRegistration,
+    saveCardioData,
+    closeCardioModal,
     skipExercise,
     
     closeRestTimer,
