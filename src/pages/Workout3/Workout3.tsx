@@ -6,6 +6,7 @@ import RestOverlay from '../../components/features/RestOverlay/RestOverlay';
 import ConfirmModal from '../../components/features/ExerciseCard/ConfirmModal';
 import SmartwatchConfirmModal from '../../components/common/SmartwatchConfirmModal';
 import WeightRegistrationModal from '../../components/common/WeightRegistrationModal';
+import CaloriesInputModal from '../../components/common/CaloriesInputModal';  // ← ADICIONAR ESTA LINHA
 import { Timer } from '../../components/common';
 import { useWorkoutLogic } from '../../hooks/useWorkoutLogic';
 import { workouts3DaysData } from '../../data/workouts3days.data';
@@ -160,7 +161,7 @@ const Workout3: React.FC = () => {
           executionData: executionData,
           progress: getWorkoutProgress()
         },
-        notes: 'Treino 3 finalizado - Pernas (Posterior + Anterior + Panturrilha) + Abdominal'
+        notes: 'Treino 3 finalizado - Pernas (Posterior + Anterior + Complemento) + Abdominal'
       });
       
       await loadLastWeights();
@@ -491,6 +492,14 @@ const Workout3: React.FC = () => {
         lastWeight={currentExerciseForWeight ? lastWeights[currentExerciseForWeight.id] : undefined}
         onSave={saveWeightRegistration}
         onCancel={closeWeightModal}
+      />
+
+      <CaloriesInputModal
+        isVisible={showCaloriesModal}
+        workoutDuration={calculateWorkoutDuration()}
+        onSave={handleFinalizeWithCalories}
+        onCancel={closeCaloriesModal}
+        isLoading={isSendingReport}
       />
 
       <ConfirmModal

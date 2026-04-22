@@ -161,6 +161,9 @@ const History: React.FC = () => {
       
       if (notes.includes('treino a') || details.workoutType === 'A') return 'Treino A';
       if (notes.includes('treino b') || details.workoutType === 'B') return 'Treino B';
+      if (notes.includes('treino 1') || details.workoutType === '1') return 'Treino 1';
+      if (notes.includes('treino 2') || details.workoutType === '2') return 'Treino 2';
+      if (notes.includes('treino 3') || details.workoutType === '3') return 'Treino 3';
       return 'Academia';
     }
     if (workout.type === 'natacao') return 'Natação';
@@ -172,8 +175,11 @@ const History: React.FC = () => {
 
   const getWorkoutTypeColor = (type: string, subType?: string): string => {
     if (type === 'academia') {
-      if (subType === 'Treino A') return 'bg-blue-500/20 text-blue-400';
-      if (subType === 'Treino B') return 'bg-red-500/20 text-red-400';
+    if (subType === 'Treino A') return 'bg-red-500/20 text-red-400';
+    if (subType === 'Treino B') return 'bg-blue-500/20 text-blue-400';
+    if (subType === 'Treino 1') return 'bg-green-500/20 text-green-400';
+    if (subType === 'Treino 2') return 'bg-purple-500/20 text-purple-400';
+    if (subType === 'Treino 3') return 'bg-cyan-500/20 text-cyan-400';
       return 'bg-purple-500/20 text-purple-400';
     }
     if (type === 'natacao') return 'bg-emerald-500/20 text-emerald-400';
@@ -340,23 +346,44 @@ const History: React.FC = () => {
   };
 
   // Separar Academia em Treino A e Treino B
-  const treinoACount = filteredWorkouts.filter(w => 
-    w.type === 'academia' && 
-    (w.notes?.toLowerCase().includes('treino a') || w.details?.workoutType === 'A')
-  ).length;
+const treinoACount = filteredWorkouts.filter(w => 
+  w.type === 'academia' && 
+  (w.notes?.toLowerCase().includes('treino a') || w.details?.workoutType === 'A')
+).length;
 
-  const treinoBCount = filteredWorkouts.filter(w => 
-    w.type === 'academia' && 
-    (w.notes?.toLowerCase().includes('treino b') || w.details?.workoutType === 'B')
-  ).length;
+const treinoBCount = filteredWorkouts.filter(w => 
+  w.type === 'academia' && 
+  (w.notes?.toLowerCase().includes('treino b') || w.details?.workoutType === 'B')
+).length;
 
-  const academiaSemTipoCount = filteredWorkouts.filter(w => 
-    w.type === 'academia' && 
-    !w.notes?.toLowerCase().includes('treino a') && 
-    !w.notes?.toLowerCase().includes('treino b') && 
-    w.details?.workoutType !== 'A' && 
-    w.details?.workoutType !== 'B'
-  ).length;
+const treino1Count = filteredWorkouts.filter(w => 
+  w.type === 'academia' && 
+  (w.notes?.toLowerCase().includes('treino 1') || w.details?.workoutType === '1')
+).length;
+
+const treino2Count = filteredWorkouts.filter(w => 
+  w.type === 'academia' && 
+  (w.notes?.toLowerCase().includes('treino 2') || w.details?.workoutType === '2')
+).length;
+
+const treino3Count = filteredWorkouts.filter(w => 
+  w.type === 'academia' && 
+  (w.notes?.toLowerCase().includes('treino 3') || w.details?.workoutType === '3')
+).length;
+
+const academiaSemTipoCount = filteredWorkouts.filter(w => 
+  w.type === 'academia' && 
+  !w.notes?.toLowerCase().includes('treino a') && 
+  !w.notes?.toLowerCase().includes('treino b') &&
+  !w.notes?.toLowerCase().includes('treino 1') &&
+  !w.notes?.toLowerCase().includes('treino 2') &&
+  !w.notes?.toLowerCase().includes('treino 3') &&
+  w.details?.workoutType !== 'A' && 
+  w.details?.workoutType !== 'B' &&
+  w.details?.workoutType !== '1' &&
+  w.details?.workoutType !== '2' &&
+  w.details?.workoutType !== '3'
+).length;
 
   const treinoAFinal = treinoACount + academiaSemTipoCount;
   
@@ -369,23 +396,31 @@ const History: React.FC = () => {
   const aerobicoCount = esteiraCount + spinningCount;
 
   const typeDistribution = {
-    labels: ['Treino A', 'Treino B', 'Natação', 'Pilates', 'Aeróbico'],
+    labels: ['Treino A', 'Treino B', 'Treino 1', 'Treino 2', 'Treino 3', 'Natação', 'Pilates', 'Aeróbico'],
     datasets: [
       {
-        data: [treinoAFinal, treinoBCount, natacaoCount, pilatesCount, aerobicoCount],
+        data: [treinoAFinal, treinoBCount, treino1Count, treino2Count, treino3Count, natacaoCount, pilatesCount, aerobicoCount],
         backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',   // Azul - Treino A
-          'rgba(239, 68, 68, 0.8)',    // Vermelho - Treino B
-          'rgba(16, 185, 129, 0.8)',   // Verde - Natação
-          'rgba(245, 158, 11, 0.8)',   // Laranja - Pilates
-          'rgba(147, 51, 234, 0.8)'    // Roxo - Aeróbico (esteira + spinning)
+        '#06b6d4', // Ciano - Treino A
+        '#f97316', // Laranja - Treino B
+        '#ef4444', // Vermelho - Treino 1
+        '#22c55e', // Verde - Treino 2
+        '#3b82f6', // Azul - Treino 3
+        '#eab308', // Amarelo - Natação
+        '#ec4899', // Rosa - Pilates
+        '#a855f7', // Roxo - Esteira
+        '#ffffff'  // Branco - Spinning
         ],
         borderColor: [
-          'rgba(59, 130, 246, 1)',
-          'rgba(239, 68, 68, 1)',
-          'rgba(16, 185, 129, 1)',
-          'rgba(245, 158, 11, 1)',
-          'rgba(147, 51, 234, 1)'
+        '#06b6d4',
+        '#f97316',
+        '#ef4444',
+        '#22c55e',
+        '#3b82f6',
+        '#eab308',
+        '#ec4899',
+        '#a855f7',
+        '#ffffff'
         ],
         borderWidth: 1
       }

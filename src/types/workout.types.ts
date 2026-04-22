@@ -11,7 +11,8 @@ export type MuscleGroup =
   | 'panturrilha'
   | 'posterior'
   | 'abdominal'
-  | 'cardio';
+  | 'cardio'
+  | 'complemento'; 
 
 export interface ExerciseVariation {
   id: number;

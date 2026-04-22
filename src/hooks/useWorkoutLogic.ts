@@ -17,7 +17,7 @@ const WORKOUT_A_GROUPS: MuscleGroup[] = ['peito', 'ombro', 'triceps', 'pernas'];
 const WORKOUT_B_GROUPS: MuscleGroup[] = ['costas', 'trapezio', 'biceps', 'antebraco', 'posterior', 'panturrilha'];
 const WORKOUT_1_GROUPS: MuscleGroup[] = ['peito', 'ombro', 'triceps', 'abdominal', 'cardio'];
 const WORKOUT_2_GROUPS: MuscleGroup[] = ['costas', 'trapezio', 'biceps', 'antebraco', 'abdominal', 'cardio'];
-const WORKOUT_3_GROUPS: MuscleGroup[] = ['posterior', 'pernas', 'panturrilha', 'abdominal'];
+const WORKOUT_3_GROUPS: MuscleGroup[] = ['posterior', 'pernas', 'complemento', 'abdominal'];
 
 const GROUP_DISPLAY_NAMES: Record<MuscleGroup, string> = {
   peito: 'Peito',
@@ -31,7 +31,8 @@ const GROUP_DISPLAY_NAMES: Record<MuscleGroup, string> = {
   panturrilha: 'Panturrilha',
   posterior: 'Perna Posterior',
   abdominal: 'Abdominal',
-  cardio: 'Cardio'
+  cardio: 'Cardio',
+  complemento: 'Complemento'
 };
 
 interface EnhancedWorkoutReport extends Omit<WorkoutReport, 'heartRate'> {

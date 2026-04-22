@@ -1,13 +1,9 @@
 // src/pages/Academia/AcademiaSelection.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { workoutsData } from '../../data/workouts.data';
-
-type WeekSchedule = '2days' | '3days';
 
 const AcademiaSelection: React.FC = () => {
   const navigate = useNavigate();
-  const [schedule, setSchedule] = useState<WeekSchedule>('2days');
 
   const cardioActivities = [
     {
@@ -29,6 +25,39 @@ const AcademiaSelection: React.FC = () => {
       path: '/spinning',
       description: 'Bicicleta ergométrica / Spinning',
       stats: ['Distância percorrida', 'Batimentos cardíacos', 'Calorias']
+    }
+  ];
+
+  const workout3Days = [
+    {
+      id: '1',
+      title: 'Treino 1',
+      icon: 'fas fa-dumbbell',
+      gradientFrom: '#10ac84',
+      gradientTo: '#1dd1a1',
+      path: '/workout-1',
+      description: 'Peito + Ombro + Tríceps + Abdominal + Caminhada',
+      stats: ['10 exercícios', '27 séries', '75 minutos']
+    },
+    {
+      id: '2',
+      title: 'Treino 2',
+      icon: 'fas fa-dumbbell',
+      gradientFrom: '#54a0ff',
+      gradientTo: '#5f27cd',
+      path: '/workout-2',
+      description: 'Costas + Trapézio + Bíceps + Antebraço + Abdominal + Caminhada',
+      stats: ['11 exercícios', '29 séries', '75 minutos']
+    },
+    {
+      id: '3',
+      title: 'Treino 3',
+      icon: 'fas fa-dumbbell',
+      gradientFrom: '#9c88ff',
+      gradientTo: '#8e44ad',
+      path: '/workout-3',
+      description: 'Pernas (Posterior + Anterior + Panturrilha) + Abdominal',
+      stats: ['12 exercícios', '36 séries', '75 minutos']
     }
   ];
 
@@ -60,7 +89,20 @@ const AcademiaSelection: React.FC = () => {
             animate-shimmer bg-[length:200%_auto]" />
           
           <div className="relative z-10">
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6 mb-4 md:mb-6">
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <Link 
+                to="/" 
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl border border-white/20 
+                  hover:bg-white/20 transition-all group"
+              >
+                <i className="fas fa-arrow-left text-accent-red group-hover:-translate-x-1 transition-transform"></i>
+                <span className="text-white text-sm">Voltar</span>
+              </Link>
+              
+              <div className="flex-1"></div>
+            </div>
+            
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
               <div className="text-4xl md:text-5xl text-accent-red 
                 animate-float filter drop-shadow-[0_0_15px_rgba(255,71,87,0.5)]">
                 <i className="fas fa-dumbbell"></i>
@@ -81,37 +123,11 @@ const AcademiaSelection: React.FC = () => {
               font-inter font-light tracking-wide 
               bg-gradient-to-r from-text-secondary to-white 
               bg-clip-text text-transparent
-              max-w-2xl mx-auto">
+              max-w-2xl mx-auto mt-4">
               Transformação através da disciplina • Evolução através do esforço
             </p>
           </div>
         </header>
-
-        {/* Seletor de Semana */}
-        <div className="mb-8 flex justify-center">
-          <div className="bg-gradient-to-br from-secondary-dark/50 to-black/50 rounded-2xl p-1 border border-white/10 inline-flex">
-            <button
-              onClick={() => setSchedule('2days')}
-              className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                schedule === '2days'
-                  ? 'bg-gradient-to-r from-accent-red to-accent-purple text-white shadow-lg'
-                  : 'text-text-secondary hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Semana de 2 Treinos
-            </button>
-            <button
-              onClick={() => setSchedule('3days')}
-              className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                schedule === '3days'
-                  ? 'bg-gradient-to-r from-accent-red to-accent-purple text-white shadow-lg'
-                  : 'text-text-secondary hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Semana de 3 Treinos
-            </button>
-          </div>
-        </div>
 
         {/* Seção Treinos de Musculação */}
         <section className="mb-12">
@@ -120,253 +136,95 @@ const AcademiaSelection: React.FC = () => {
               <i className="fas fa-dumbbell text-white"></i>
             </div>
             <h2 className="text-2xl md:text-3xl font-bold text-white">
-              {schedule === '2days' ? 'Treinos de Musculação' : 'Semana de 3 Treinos'}
+              Treinos de Musculação
             </h2>
           </div>
 
-          {schedule === '2days' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-              {workoutsData.map((workout) => {
-                const isWorkoutA = workout.id === 'A';
-                
-                return (
-                  <Link
-                    key={workout.id}
-                    to={`/workout-${workout.id.toLowerCase()}`}
-                    className={`group relative 
-                      rounded-2xl overflow-hidden
-                      border ${isWorkoutA ? 'border-accent-red/30' : 'border-accent-blue/30'}
-                      shadow-xl shadow-black/30
-                      transition-all duration-500
-                      hover:scale-[1.02] hover:-translate-y-2
-                      ${isWorkoutA ? 'hover:shadow-glow-red' : 'hover:shadow-glow-blue'}
-                      active:scale-95`}
-                  >
-                    <div 
-                      className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {workout3Days.map((workout) => (
+              <Link
+                key={workout.id}
+                to={workout.path}
+                onClick={(e) => handleCardClick(workout.path, e)}
+                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br 
+                  from-secondary-dark/30 to-black/50 border border-white/10 
+                  hover:scale-[1.02] hover:shadow-2xl transition-all duration-500
+                  before:absolute before:inset-0 before:bg-gradient-to-r 
+                  before:from-transparent before:via-white/5 before:to-transparent 
+                  before:translate-x-[-200%] before:hover:translate-x-[200%] 
+                  before:transition-transform before:duration-1000"
+              >
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 
+                  transition-opacity duration-700"
+                  style={{
+                    background: `radial-gradient(circle at 50% 50%, ${workout.gradientFrom}20, transparent 70%)`
+                  }}
+                />
+
+                <div className="relative p-6">
+                  <div className="absolute top-4 right-4">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-white/20 rounded-full blur-md"></div>
+                      <div className="relative px-3 py-1 bg-white/10 backdrop-blur-sm 
+                        rounded-full border border-white/20 text-sm font-bold text-white">
+                        {workout.id === '1' ? 'Treino 1' : workout.id === '2' ? 'Treino 2' : 'Treino 3'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent 
+                      rounded-2xl blur-xl group-hover:blur-2xl transition-all"
+                      style={{ background: `linear-gradient(135deg, ${workout.gradientFrom}40, ${workout.gradientTo}40)` }}
+                    />
+                    <div className="relative w-20 h-20 rounded-2xl flex items-center justify-center
+                      group-hover:scale-110 group-hover:rotate-3 transition-all duration-300"
                       style={{
-                        backgroundImage: `url(${workout.backgroundImage})`,
-                        filter: 'brightness(0.6)'
+                        background: `linear-gradient(135deg, ${workout.gradientFrom}, ${workout.gradientTo})`
+                      }}
+                    >
+                      <i className={`${workout.icon} text-3xl text-white`}></i>
+                    </div>
+                  </div>
+
+                  <h3 className="text-2xl font-bold text-white mb-2 group-hover:translate-x-1 transition-transform">
+                    {workout.title}
+                  </h3>
+                  <p className="text-text-secondary text-sm mb-4">
+                    {workout.description}
+                  </p>
+
+                  <ul className="space-y-2 mb-6">
+                    {workout.stats.map((stat, idx) => (
+                      <li key={idx} className="flex items-center gap-2 text-text-secondary/80 text-sm">
+                        <i className="fas fa-check-circle text-accent-green text-xs"></i>
+                        {stat}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 
+                      translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"
+                      style={{
+                        background: `linear-gradient(90deg, transparent, ${workout.gradientFrom}40, transparent)`
                       }}
                     />
-                    
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent" />
-                    
-                    <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 
-                      transition-opacity duration-500 
-                      bg-gradient-to-br ${isWorkoutA 
-                        ? 'from-accent-red/10 via-transparent to-accent-purple/5' 
-                        : 'from-accent-blue/10 via-transparent to-accent-purple/5'}`} />
-                    
-                    <div className={`absolute top-3 right-3 md:top-4 md:right-4 
-                      w-7 h-7 md:w-10 md:h-10 
-                      rounded-full flex items-center justify-center 
-                      text-white font-black 
-                      text-sm md:text-base z-20
-                      ${isWorkoutA 
-                        ? 'bg-gradient-to-br from-accent-red to-accent-red-light' 
-                        : 'bg-gradient-to-br from-accent-blue to-accent-blue-light'}
-                      border-2 border-white/30 
-                      shadow-lg shadow-black/50
-                      transition-all duration-300
-                      group-hover:scale-110 group-hover:rotate-12
-                      group-hover:shadow-xl group-hover:shadow-black/70
-                      animate-pulse-glow`}>
-                      {workout.id}
-                    </div>
-                    
-                    <div className="relative z-10 p-6 md:p-8 min-h-[320px] flex flex-col justify-end">
-                      <div className="mb-4 md:mb-6">
-                        <h3 className={`text-2xl md:text-3xl 
-                          font-montserrat font-bold mb-2
-                          ${isWorkoutA ? 'text-accent-red' : 'text-accent-blue'}`}>
-                          {workout.name}
-                        </h3>
-                        <p className="text-text-secondary text-sm uppercase tracking-widest 
-                          font-inter font-semibold opacity-90">
-                          {workout.focus}
-                        </p>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-3 mb-6">
-                        <div className={`text-center p-3 rounded-xl backdrop-blur-sm
-                          ${isWorkoutA ? 'bg-accent-red/20' : 'bg-accent-blue/20'}
-                          border ${isWorkoutA ? 'border-accent-red/30' : 'border-accent-blue/30'}
-                          transition-all duration-300 hover:scale-105`}>
-                          <div className="text-white font-bold text-xl">
-                            {workout.totalExercises}
-                          </div>
-                          <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">
-                            Exercícios
-                          </div>
-                        </div>
-                        
-                        <div className={`text-center p-3 rounded-xl backdrop-blur-sm
-                          ${isWorkoutA ? 'bg-accent-red/20' : 'bg-accent-blue/20'}
-                          border ${isWorkoutA ? 'border-accent-red/30' : 'border-accent-blue/30'}
-                          transition-all duration-300 hover:scale-105`}>
-                          <div className="text-white font-bold text-xl">
-                            {workout.totalSets}
-                          </div>
-                          <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">
-                            Séries
-                          </div>
-                        </div>
-                        
-                        <div className={`text-center p-3 rounded-xl backdrop-blur-sm
-                          ${isWorkoutA ? 'bg-accent-red/20' : 'bg-accent-blue/20'}
-                          border ${isWorkoutA ? 'border-accent-red/30' : 'border-accent-blue/30'}
-                          transition-all duration-300 hover:scale-105`}>
-                          <div className="text-white font-bold text-xl">
-                            {workout.duration}
-                          </div>
-                          <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">
-                            Minutos
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between pt-6 
-                        border-t border-white/10">
-                        <span className={`font-montserrat font-bold 
-                          ${isWorkoutA ? 'text-accent-red' : 'text-accent-blue'}`}>
-                          Iniciar Treino
-                        </span>
-                        <div className={`p-2 rounded-full 
-                          ${isWorkoutA ? 'bg-accent-red/20' : 'bg-accent-blue/20'}
-                          transition-all duration-300 
-                          group-hover:translate-x-2 group-hover:scale-110`}>
-                          <i className={`fas fa-arrow-right ${isWorkoutA ? 'text-accent-red' : 'text-accent-blue'}`}></i>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-              {/* Treino 1 */}
-              <Link
-                to="/workout-1"
-                className="group relative rounded-2xl overflow-hidden border border-green-500/30 shadow-xl shadow-black/30 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 hover:shadow-glow-green active:scale-95"
-              >
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage: "url('/images/workouts/treino-a/background.webp')", filter: 'brightness(0.6)' }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent" />
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-green-500/10 via-transparent to-accent-purple/5" />
-                <div className="absolute top-3 right-3 md:top-4 md:right-4 w-7 h-7 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-green-500 to-green-400 flex items-center justify-center text-white font-black text-sm md:text-base z-20 border-2 border-white/30 shadow-lg shadow-black/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
-                  1
-                </div>
-                <div className="relative z-10 p-6 md:p-8 min-h-[320px] flex flex-col justify-end">
-                  <div className="mb-4 md:mb-6">
-                    <h3 className="text-2xl md:text-3xl font-montserrat font-bold mb-2 text-green-400">Treino 1</h3>
-                    <p className="text-text-secondary text-sm uppercase tracking-widest font-inter font-semibold opacity-90">Peito + Ombro + Tríceps + Abdominal + Caminhada</p>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div className="text-center p-3 rounded-xl backdrop-blur-sm bg-green-500/20 border border-green-500/30 transition-all duration-300 hover:scale-105">
-                      <div className="text-white font-bold text-xl">10</div>
-                      <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">Exercícios</div>
-                    </div>
-                    <div className="text-center p-3 rounded-xl backdrop-blur-sm bg-green-500/20 border border-green-500/30 transition-all duration-300 hover:scale-105">
-                      <div className="text-white font-bold text-xl">27</div>
-                      <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">Séries</div>
-                    </div>
-                    <div className="text-center p-3 rounded-xl backdrop-blur-sm bg-green-500/20 border border-green-500/30 transition-all duration-300 hover:scale-105">
-                      <div className="text-white font-bold text-xl">75</div>
-                      <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">Minutos</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                    <span className="font-montserrat font-bold text-green-400">Iniciar Treino</span>
-                    <div className="p-2 rounded-full bg-green-500/20 transition-all duration-300 group-hover:translate-x-2 group-hover:scale-110">
-                      <i className="fas fa-arrow-right text-green-400"></i>
+                    <div className="relative w-full py-3 rounded-xl font-bold
+                      flex items-center justify-center gap-2 group-hover:gap-3
+                      bg-gradient-to-r text-white transition-all duration-300"
+                      style={{
+                        background: `linear-gradient(135deg, ${workout.gradientFrom}, ${workout.gradientTo})`
+                      }}
+                    >
+                      <span>Iniciar Treino</span>
+                      <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </div>
                   </div>
                 </div>
               </Link>
-
-              {/* Treino 2 */}
-              <Link
-                to="/workout-2"
-                className="group relative rounded-2xl overflow-hidden border border-blue-500/30 shadow-xl shadow-black/30 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 hover:shadow-glow-blue active:scale-95"
-              >
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage: "url('/images/workouts/treino-b/background.jpg')", filter: 'brightness(0.6)' }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent" />
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-blue-500/10 via-transparent to-accent-purple/5" />
-                <div className="absolute top-3 right-3 md:top-4 md:right-4 w-7 h-7 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-400 flex items-center justify-center text-white font-black text-sm md:text-base z-20 border-2 border-white/30 shadow-lg shadow-black/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
-                  2
-                </div>
-                <div className="relative z-10 p-6 md:p-8 min-h-[320px] flex flex-col justify-end">
-                  <div className="mb-4 md:mb-6">
-                    <h3 className="text-2xl md:text-3xl font-montserrat font-bold mb-2 text-blue-400">Treino 2</h3>
-                    <p className="text-text-secondary text-sm uppercase tracking-widest font-inter font-semibold opacity-90">Costas + Trapézio + Bíceps + Antebraço + Abdominal + Caminhada</p>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div className="text-center p-3 rounded-xl backdrop-blur-sm bg-blue-500/20 border border-blue-500/30 transition-all duration-300 hover:scale-105">
-                      <div className="text-white font-bold text-xl">11</div>
-                      <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">Exercícios</div>
-                    </div>
-                    <div className="text-center p-3 rounded-xl backdrop-blur-sm bg-blue-500/20 border border-blue-500/30 transition-all duration-300 hover:scale-105">
-                      <div className="text-white font-bold text-xl">29</div>
-                      <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">Séries</div>
-                    </div>
-                    <div className="text-center p-3 rounded-xl backdrop-blur-sm bg-blue-500/20 border border-blue-500/30 transition-all duration-300 hover:scale-105">
-                      <div className="text-white font-bold text-xl">75</div>
-                      <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">Minutos</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                    <span className="font-montserrat font-bold text-blue-400">Iniciar Treino</span>
-                    <div className="p-2 rounded-full bg-blue-500/20 transition-all duration-300 group-hover:translate-x-2 group-hover:scale-110">
-                      <i className="fas fa-arrow-right text-blue-400"></i>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Treino 3 */}
-              <Link
-                to="/workout-3"
-                className="group relative rounded-2xl overflow-hidden border border-purple-500/30 shadow-xl shadow-black/30 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 hover:shadow-glow-purple active:scale-95"
-              >
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage: "url('/images/workouts/treino-a/background.webp')", filter: 'brightness(0.6)' }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-transparent" />
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-purple-500/10 via-transparent to-accent-red/5" />
-                <div className="absolute top-3 right-3 md:top-4 md:right-4 w-7 h-7 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-400 flex items-center justify-center text-white font-black text-sm md:text-base z-20 border-2 border-white/30 shadow-lg shadow-black/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12">
-                  3
-                </div>
-                <div className="relative z-10 p-6 md:p-8 min-h-[320px] flex flex-col justify-end">
-                  <div className="mb-4 md:mb-6">
-                    <h3 className="text-2xl md:text-3xl font-montserrat font-bold mb-2 text-purple-400">Treino 3</h3>
-                    <p className="text-text-secondary text-sm uppercase tracking-widest font-inter font-semibold opacity-90">Pernas (Posterior + Anterior + Panturrilha) + Abdominal</p>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div className="text-center p-3 rounded-xl backdrop-blur-sm bg-purple-500/20 border border-purple-500/30 transition-all duration-300 hover:scale-105">
-                      <div className="text-white font-bold text-xl">11</div>
-                      <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">Exercícios</div>
-                    </div>
-                    <div className="text-center p-3 rounded-xl backdrop-blur-sm bg-purple-500/20 border border-purple-500/30 transition-all duration-300 hover:scale-105">
-                      <div className="text-white font-bold text-xl">35</div>
-                      <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">Séries</div>
-                    </div>
-                    <div className="text-center p-3 rounded-xl backdrop-blur-sm bg-purple-500/20 border border-purple-500/30 transition-all duration-300 hover:scale-105">
-                      <div className="text-white font-bold text-xl">75</div>
-                      <div className="text-text-secondary text-xs mt-1 uppercase tracking-wider">Minutos</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                    <span className="font-montserrat font-bold text-purple-400">Iniciar Treino</span>
-                    <div className="p-2 rounded-full bg-purple-500/20 transition-all duration-300 group-hover:translate-x-2 group-hover:scale-110">
-                      <i className="fas fa-arrow-right text-purple-400"></i>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          )}
+            ))}
+          </div>
         </section>
 
         {/* Seção Treinos Aeróbicos */}
@@ -497,7 +355,6 @@ const AcademiaSelection: React.FC = () => {
               Para <span className="text-accent-green font-semibold">hipertrofia máxima</span>, 
               mantenha o descanso entre 45-60 segundos. Para <span className="text-accent-red font-semibold">força</span>, 
               descanse 90+ segundos. Combine com treinos aeróbicos para melhor condicionamento.
-              Na semana de 3 treinos, aproveite os dias de abdominal e caminhada para recuperação ativa.
             </p>
           </div>
         </div>

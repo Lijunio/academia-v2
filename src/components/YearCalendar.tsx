@@ -41,7 +41,10 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
     
     if (notes.includes('treino a') || details.workoutType === 'A') return 'Treino A';
     if (notes.includes('treino b') || details.workoutType === 'B') return 'Treino B';
-    return 'Treino A';
+    if (notes.includes('treino 1') || details.workoutType === '1') return 'Treino 1';
+    if (notes.includes('treino 2') || details.workoutType === '2') return 'Treino 2';
+    if (notes.includes('treino 3') || details.workoutType === '3') return 'Treino 3';
+    return 'Academia';
   };
 
   const workoutsByDate = workouts.reduce((acc: Record<string, DayData>, workout: Workout) => {
@@ -100,46 +103,39 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
     const variant = getWorkoutVariant(workout);
     
     if (workout.type === 'academia') {
-      if (variant === 'Treino A') {
-        return { 
-          bg: 'bg-blue-600/30',
-          border: 'border-blue-500/50' 
-        };
-      } else {
-        return { 
-          bg: 'bg-red-500/30',
-          border: 'border-red-500/50' 
-        };
-      }
+    if (variant === 'Treino A') {
+      return { bg: 'bg-cyan-500/30', border: 'border-cyan-500/50' }; // Ciano
     }
-    
-    if (workout.type === 'natacao') {
-      return { 
-        bg: 'bg-emerald-600/30',
-        border: 'border-emerald-500/50' 
-      };
+    if (variant === 'Treino B') {
+      return { bg: 'bg-orange-500/30', border: 'border-orange-500/50' }; // Laranja
     }
-    
-    if (workout.type === 'pilates') {
-      return { 
-        bg: 'bg-amber-500/30',
-        border: 'border-amber-500/50' 
-      };
+    if (variant === 'Treino 1') {
+      return { bg: 'bg-red-500/30', border: 'border-red-500/50' }; // Vermelho
     }
-    
-    if (workout.type === 'esteira') {
-      return { 
-        bg: 'bg-orange-500/30',
-        border: 'border-orange-500/50' 
-      };
+    if (variant === 'Treino 2') {
+      return { bg: 'bg-green-500/30', border: 'border-green-500/50' }; // Verde
     }
-    
-    if (workout.type === 'spinning') {
-      return { 
-        bg: 'bg-cyan-500/30',
-        border: 'border-cyan-500/50' 
-      };
+    if (variant === 'Treino 3') {
+      return { bg: 'bg-blue-500/30', border: 'border-blue-500/50' }; // Azul
     }
+    return { bg: 'bg-gray-500/30', border: 'border-gray-500/50' };
+  }
+  
+  if (workout.type === 'natacao') {
+    return { bg: 'bg-yellow-400/40', border: 'border-yellow-400/70' }; // Amarelo
+  }
+  
+  if (workout.type === 'pilates') {
+    return { bg: 'bg-pink-500/30', border: 'border-pink-500/50' }; // Rosa
+  }
+  
+  if (workout.type === 'esteira') {
+    return { bg: 'bg-purple-500/30', border: 'border-purple-500/50' }; // Roxo
+  }
+  
+  if (workout.type === 'spinning') {
+    return { bg: 'bg-white/20', border: 'border-white/30' }; // Branco
+  }
     
     return { 
       bg: 'bg-gray-800/50', 
@@ -193,16 +189,21 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
               let dotColor = 'bg-white/70';
               
               if (workout.type === 'academia') {
-                dotColor = variant === 'Treino A' ? 'bg-blue-300' : 'bg-red-300';
-              } else if (workout.type === 'natacao') {
-                dotColor = 'bg-emerald-300';
-              } else if (workout.type === 'pilates') {
-                dotColor = 'bg-amber-300';
-              } else if (workout.type === 'esteira') {
-                dotColor = 'bg-orange-300';
-              } else if (workout.type === 'spinning') {
-                dotColor = 'bg-cyan-300';
-              }
+              if (variant === 'Treino A') dotColor = 'bg-cyan-400';
+              else if (variant === 'Treino B') dotColor = 'bg-orange-400';
+              else if (variant === 'Treino 1') dotColor = 'bg-red-400';
+              else if (variant === 'Treino 2') dotColor = 'bg-green-400';
+              else if (variant === 'Treino 3') dotColor = 'bg-blue-400';
+              else dotColor = 'bg-gray-400';
+            } else if (workout.type === 'natacao') {
+              dotColor = 'bg-yellow-400';
+            } else if (workout.type === 'pilates') {
+              dotColor = 'bg-pink-400';
+            } else if (workout.type === 'esteira') {
+              dotColor = 'bg-purple-400';
+            } else if (workout.type === 'spinning') {
+              dotColor = 'bg-white/70';
+            }
               
               return (
                 <div key={index} className={`w-1 h-1 rounded-full ${dotColor}`}></div>
@@ -278,37 +279,49 @@ const YearCalendar: React.FC<YearCalendarProps> = ({ workouts, onWorkoutClick })
         {days}
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-4 mt-6 pt-4 
-        border-t border-white/10">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-blue-600/50 border border-blue-500"></div>
-          <span className="text-text-secondary text-xs">Treino A</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-red-500/50 border border-red-500"></div>
-          <span className="text-text-secondary text-xs">Treino B</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-emerald-600/50 border border-emerald-500"></div>
-          <span className="text-text-secondary text-xs">Natação</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-amber-500/50 border border-amber-500"></div>
-          <span className="text-text-secondary text-xs">Pilates</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-orange-500/50 border border-orange-500"></div>
-          <span className="text-text-secondary text-xs">Esteira</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-cyan-500/50 border border-cyan-500"></div>
-          <span className="text-text-secondary text-xs">Spinning</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-gray-700 border border-gray-600"></div>
-          <span className="text-text-secondary text-xs">Sem treino</span>
-        </div>
-      </div>
+// LEGENDA DO CALENDÁRIO
+<div className="flex flex-wrap items-center justify-center gap-3 mt-6 pt-4 border-t border-white/10">
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-cyan-500/50 border border-cyan-500"></div>
+    <span className="text-text-secondary text-xs">Treino A</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-orange-500/50 border border-orange-500"></div>
+    <span className="text-text-secondary text-xs">Treino B</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-red-500/50 border border-red-500"></div>
+    <span className="text-text-secondary text-xs">Treino 1</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-green-500/50 border border-green-500"></div>
+    <span className="text-text-secondary text-xs">Treino 2</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-blue-500/50 border border-blue-500"></div>
+    <span className="text-text-secondary text-xs">Treino 3</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-yellow-400/70 border border-yellow-400"></div>
+    <span className="text-text-secondary text-xs">Natação</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-pink-500/50 border border-pink-500"></div>
+    <span className="text-text-secondary text-xs">Pilates</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-purple-500/50 border border-purple-500"></div>
+    <span className="text-text-secondary text-xs">Esteira</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-white/30 border border-white/50"></div>
+    <span className="text-text-secondary text-xs">Spinning</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-4 h-4 rounded bg-gray-700 border border-gray-600"></div>
+    <span className="text-text-secondary text-xs">Sem treino</span>
+  </div>
+</div>
     </div>
   );
 };

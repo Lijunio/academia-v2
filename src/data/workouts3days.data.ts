@@ -194,64 +194,65 @@ const treino2Exercises: ExerciseBase[] = [
   }
 ];
 
-// ========== TREINO 3: PERNAS (POSTERIOR + ANTERIOR + PANTURRILHA) ==========
+// ========== TREINO 3: PERNAS (CORRIGIDO) ==========
 const treino3Exercises: ExerciseBase[] = [
-  // Posterior primeiro (como solicitado)
+  // ===== GRUPO PERNA POSTERIOR =====
   {
     id: 1,
-    name: "Levantamento terra romeno",
-    sets: "4x 6–8",
-    description: "Posterior + Glúteo - desenvolvimento da cadeia posterior",
-    muscleGroup: "posterior",
-    images: ["/images/workouts/treino-b/levantamentoterra.gif", "/images/workouts/treino-b/stiff.gif"]
-  },
-  {
-    id: 2,
-    name: "Mesa flexora",
-    sets: "3x 10–12",
-    description: "Posterior da coxa - isolamento do posterior",
-    muscleGroup: "posterior",
-    images: ["/images/workouts/treino-b/mesaflexora.webp"]
-  },
-  {
-    id: 3,
-    name: "Cadeira flexora",
-    sets: "3x 10",
-    description: "Posterior da coxa - variação sentado",
-    muscleGroup: "posterior",
-    images: ["/images/workouts/treino-b/cadeiraflexora.gif"]
-  },
-  // Perna Anterior
-  {
-    id: 4,
     name: "Agachamento livre ou hack",
     sets: "4x 6–8",
     description: "Quadríceps + Glúteo - exercício rei para pernas",
-    muscleGroup: "pernas",
+    muscleGroup: "posterior",
     images: ["/images/workouts/treino-a/agachamentolivre.avif", "/images/workouts/treino-a/agachamentohack.webp"]
   },
   {
-    id: 5,
+    id: 2,
     name: "Leg Press 45°",
     sets: "3x 10–12",
     description: "Quadríceps - carga controlada",
-    muscleGroup: "pernas",
+    muscleGroup: "posterior",
     images: ["/images/workouts/treino-a/legpress.webp"]
   },
   {
-    id: 6,
+    id: 3,
     name: "Cadeira extensora",
     sets: "3x 12–15",
     description: "Quadríceps - isolamento perfeito",
-    muscleGroup: "pernas",
+    muscleGroup: "posterior",
     images: ["/images/workouts/treino-a/cadeiraextensora.webp"]
   },
+  // ===== GRUPO PERNA ANTERIOR =====
+  {
+    id: 4,
+    name: "Levantamento terra romeno",
+    sets: "4x 6–8",
+    description: "Posterior + Glúteo - desenvolvimento da cadeia posterior",
+    muscleGroup: "pernas",
+    images: ["/images/workouts/treino-b/levantamentoterra.gif", "/images/workouts/treino-b/stiff.gif"]
+  },
+  {
+    id: 5,
+    name: "Mesa flexora",
+    sets: "3x 10–12",
+    description: "Posterior da coxa - isolamento do posterior",
+    muscleGroup: "pernas",
+    images: ["/images/workouts/treino-b/mesaflexora.webp"]
+  },
+  {
+    id: 6,
+    name: "Cadeira flexora",
+    sets: "3x 10",
+    description: "Posterior da coxa - variação sentado",
+    muscleGroup: "pernas",
+    images: ["/images/workouts/treino-b/cadeiraflexora.gif"]
+  },
+  // ===== GRUPO COMPLEMENTO =====
   {
     id: 7,
     name: "Cadeira adutora",
     sets: "3x 12–15",
     description: "Adutores da coxa - parte interna das coxas",
-    muscleGroup: "pernas",
+    muscleGroup: "complemento",
     images: ["/images/workouts/treino-a/cadeiraadutora.webp"]
   },
   {
@@ -259,34 +260,43 @@ const treino3Exercises: ExerciseBase[] = [
     name: "Cadeira abdutora",
     sets: "3x 12–15",
     description: "Abdutores da coxa - parte externa das coxas",
-    muscleGroup: "pernas",
+    muscleGroup: "complemento",
     images: ["/images/workouts/treino-a/cadeiraabdutora.gif"]
   },
-  // Panturrilha
   {
     id: 9,
-    name: "Panturrilha em pé",
+    name: "Panturrilha (em pé ou sentado)",
     sets: "4x 10–15",
-    description: "Panturrilha (gastrocnêmio) - desenvolvimento das panturrilhas",
-    muscleGroup: "panturrilha",
-    images: ["/images/workouts/treino-b/panturrilha-pe.gif"]
+    description: "Escolha entre panturrilha em pé ou sentada",
+    muscleGroup: "complemento",
+    images: ["/images/workouts/treino-b/panturrilha-pe.gif", "/images/workouts/treino-b/panturrilha-sentada.gif"],
+    hasVariations: true,
+    variations: [
+      { id: 1, name: "Panturrilha em pé", description: "Maior ativação do gastrocnêmio" },
+      { id: 2, name: "Panturrilha sentada", description: "Maior isolamento do sóleo" }
+    ]
   },
   {
     id: 10,
-    name: "Panturrilha sentada",
-    sets: "3x 15–20",
-    description: "Panturrilha (sóleo) - parte inferior das panturrilhas",
-    muscleGroup: "panturrilha",
-    images: ["/images/workouts/treino-b/panturrilha-sentada.gif"]
+    name: "Elevação pélvica (máquina ou chão)",
+    sets: "3x 12–15",
+    description: "Glúteos e core - escolha a variação",
+    muscleGroup: "complemento",
+    images: ["/images/workouts/treino-b/pelvica.gif"],
+    hasVariations: true,
+    variations: [
+      { id: 1, name: "Elevação pélvica máquina", description: "Com carga controlada" },
+      { id: 2, name: "Elevação pélvica no chão", description: "Com peso corporal" }
+    ]
   },
-  // Abdominal (sem peso)
+  // ===== GRUPO ABDOMINAL =====
   {
     id: 11,
     name: "Abdominal",
     sets: "3x 15",
     description: "Fortalecimento do core - não requer registro de peso",
     muscleGroup: "abdominal",
-    images: ["/images/workouts/abdominal.webp"],
+    images: ["/images/workouts/abdominal.jpg"],
     hasVariations: false,
     noWeight: true
   }
@@ -318,11 +328,11 @@ export const workouts3DaysData = {
   workout3: {
     id: '3',
     name: 'Treino 3',
-    focus: 'Pernas (Posterior + Anterior + Panturrilha) + Abdominal',
-    groups: ['posterior', 'pernas', 'panturrilha', 'abdominal'],
+    focus: 'Pernas (Posterior + Anterior + Complemento + Abdominal)',
+    groups: ['posterior', 'pernas', 'complemento', 'abdominal'],
     exercises: treino3Exercises,
     totalExercises: treino3Exercises.length,
-    totalSets: 35,
+    totalSets: 36,
     duration: 75,
     backgroundImage: "/images/workouts/treino-a/background.webp"
   }
