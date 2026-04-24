@@ -164,7 +164,7 @@ const Home: React.FC = () => {
       gradientTo: '#ff6b81',
       path: '/academia',
       description: 'Treinos de musculação com pesos e séries',
-      stats: ['Treino A/B', 'Registro de pesos', 'Controle de séries'],
+      stats: ['Treino A/B/C', 'Registro de pesos', 'Controle de séries'],
       count: stats?.byType.academia || 0
     },
     {

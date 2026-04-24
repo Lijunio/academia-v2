@@ -650,6 +650,9 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
   }, [exercises]);
 
   const sendTelegramReport = useCallback(async (report: EnhancedWorkoutReport): Promise<boolean> => {
+    console.log('📤 [Telegram] Iniciando envio do relatório...');
+    console.log('📤 [Telegram] workoutType:', report.workoutType);
+    
     try {
       const formatDuration = (seconds: number): string => {
         const mins = Math.floor(seconds / 60);
@@ -671,8 +674,19 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
       const totalWeight = completedExercisesData.reduce((sum, ex) => sum + (ex.weight || 0), 0);
       const avgWeight = completedExercisesData.length > 0 ? totalWeight / completedExercisesData.length : 0;
       
+      // Nome do treino para exibição
+      let workoutDisplayName = '';
+      switch(report.workoutType) {
+        case 'A': workoutDisplayName = 'A'; break;
+        case 'B': workoutDisplayName = 'B'; break;
+        case '1': workoutDisplayName = '1'; break;
+        case '2': workoutDisplayName = '2'; break;
+        case '3': workoutDisplayName = '3'; break;
+        default: workoutDisplayName = report.workoutType;
+      }
+      
       let reportMessage = `
-🏋️‍♂️ *RELATÓRIO DE TREINO - ${report.workoutType}* 🏋️‍♂️
+🏋️‍♂️ *RELATÓRIO DE TREINO - ${workoutDisplayName}* 🏋️‍♂️
 
 📅 *Data:* ${formattedDate}
 ⏰ *Hora de início:* ${formattedTime}
@@ -723,46 +737,63 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
 • Aumentar carga gradualmente
 • Manter boa alimentação e hidratação
 
-#EvoluçãoTreinos #${report.workoutType} #Progresso
+#EvoluçãoTreinos #Treino${workoutDisplayName} #Progresso
       `.trim();
       
       const TELEGRAM_BOT_TOKEN = process.env.REACT_APP_TELEGRAM_BOT_TOKEN || '';
       const TELEGRAM_CHAT_ID = process.env.REACT_APP_TELEGRAM_CHAT_ID || '';
       
+      console.log('📤 [Telegram] Token existe?', !!TELEGRAM_BOT_TOKEN);
+      console.log('📤 [Telegram] Chat ID existe?', !!TELEGRAM_CHAT_ID);
+      
       if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-        console.warn('Token ou Chat ID do Telegram não configurados');
+        console.warn('❌ [Telegram] Token ou Chat ID não configurados');
         return false;
       }
       
-      const response = await fetch(
-        `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: TELEGRAM_CHAT_ID,
-            text: reportMessage,
-            parse_mode: 'Markdown',
-            disable_notification: false,
-          }),
-        }
-      );
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+      console.log('📤 [Telegram] Enviando para URL:', url);
       
-      return response.ok;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: reportMessage,
+          parse_mode: 'Markdown',
+          disable_notification: false,
+        }),
+      });
+      
+      const data = await response.json();
+      console.log('📤 [Telegram] Resposta:', data);
+      
+      if (data.ok) {
+        console.log('✅ [Telegram] Relatório enviado com sucesso!');
+        return true;
+      } else {
+        console.error('❌ [Telegram] Erro no envio:', data);
+        return false;
+      }
       
     } catch (error) {
-      console.error('Erro ao enviar relatório para Telegram:', error);
+      console.error('❌ [Telegram] Erro na requisição:', error);
       return false;
     }
   }, []);
 
   const finalizeWorkout = useCallback(async (calories: number, heartRate?: number) => {
+    console.log('🏁 [finalizeWorkout] Iniciando finalização do treino', workoutType);
+    console.log('🏁 [finalizeWorkout] Calories:', calories, 'HeartRate:', heartRate);
+    
     setIsSendingReport(true);
     
     try {
       const duration = workoutStartTimeRef.current 
         ? Math.floor((Date.now() - workoutStartTimeRef.current.getTime()) / 1000)
         : 0;
+      
+      console.log('🏁 [finalizeWorkout] Duração:', duration, 'segundos');
       
       // Atualizar os dados de cardio com as calorias e FC do treino completo
       const updatedExecutionData = { ...executionData };
@@ -801,6 +832,8 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
         sentToTelegram: false
       };
       
+      console.log('🏁 [finalizeWorkout] Relatório criado, enviando para Telegram...');
+      
       localStorage.setItem(`report-${report.id}`, JSON.stringify(report));
       
       const success = await sendTelegramReport(report);
@@ -808,12 +841,15 @@ Peso médio por exercício: ${avgWeight.toFixed(1)} kg
       if (success) {
         report.sentToTelegram = true;
         localStorage.setItem(`report-${report.id}`, JSON.stringify(report));
+        console.log('✅ [finalizeWorkout] Relatório enviado com sucesso ao Telegram!');
+      } else {
+        console.warn('⚠️ [finalizeWorkout] Falha ao enviar relatório ao Telegram');
       }
       
       localStorage.removeItem(`workout-${workoutType}`);
       
     } catch (error) {
-      console.error('Erro ao finalizar treino:', error);
+      console.error('❌ [finalizeWorkout] Erro ao finalizar treino:', error);
     } finally {
       setIsSendingReport(false);
       setShowCaloriesModal(false);

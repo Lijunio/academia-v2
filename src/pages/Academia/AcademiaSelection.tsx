@@ -31,7 +31,7 @@ const AcademiaSelection: React.FC = () => {
   const workout3Days = [
     {
       id: '1',
-      title: 'Treino 1',
+      title: 'Treino A',
       icon: 'fas fa-dumbbell',
       gradientFrom: '#10ac84',
       gradientTo: '#1dd1a1',
@@ -41,7 +41,7 @@ const AcademiaSelection: React.FC = () => {
     },
     {
       id: '2',
-      title: 'Treino 2',
+      title: 'Treino B',
       icon: 'fas fa-dumbbell',
       gradientFrom: '#54a0ff',
       gradientTo: '#5f27cd',
@@ -51,7 +51,7 @@ const AcademiaSelection: React.FC = () => {
     },
     {
       id: '3',
-      title: 'Treino 3',
+      title: 'Treino C',
       icon: 'fas fa-dumbbell',
       gradientFrom: '#9c88ff',
       gradientTo: '#8e44ad',
