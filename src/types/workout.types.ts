@@ -12,7 +12,7 @@ export type MuscleGroup =
   | 'posterior'
   | 'abdominal'
   | 'cardio'
-  | 'complemento'; 
+  | 'complemento';
 
 export interface ExerciseVariation {
   id: number;
@@ -29,8 +29,8 @@ export interface ExerciseBase {
   images: string[];
   hasVariations?: boolean;
   variations?: ExerciseVariation[];
-  noWeight?: boolean;  // Para exercícios como abdominal que não precisam de peso
-  isCardio?: boolean;   // Para caminhada que usa dados de esteira
+  noWeight?: boolean;
+  isCardio?: boolean;
 }
 
 export interface Exercise extends ExerciseBase {
@@ -49,7 +49,6 @@ export interface ExerciseExecution {
   variationName?: string;
   observations?: string;
   completed: boolean;
-  // Para caminhada
   cardioData?: {
     distance: number;
     duration: number;

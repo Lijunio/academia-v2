@@ -196,11 +196,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
   }, [exercises, session, groups, workoutType, executionData]);
 
   /**
-   * FUNÇÃO REMOVIDA - Não envia mais mensagem para WhatsApp
-   */
-  // const sendWhatsAppStartMessage = useCallback(() => { ... }); // REMOVIDO
-
-  /**
    * Encontra o próximo exercício baseado na lista linear
    */
   const getNextAvailableExercise = useCallback((currentExerciseId?: number): string => {
@@ -301,20 +296,6 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
     setShowRest(false);
   }, []);
 
-  /**
-   * Verifica se todos os exercícios foram concluídos e finaliza o treino
-   */
-  const checkAndFinalizeWorkout = useCallback(() => {
-    const allCompleted = exercises.every(ex => ex.completed || ex.skipReason);
-    if (allCompleted) {
-      console.log('🎉 Todos os exercícios concluídos! Finalizando treino...');
-      setSession(prev => ({ ...prev, workoutCompleted: true }));
-      setTimeout(() => setShowCaloriesModal(true), 100);
-      return true;
-    }
-    return false;
-  }, [exercises]);
-
   const completeExercise = useCallback((exerciseId: number) => {
     if (!session.workoutStarted) return;
 
@@ -400,7 +381,7 @@ export const useWorkoutLogic = (workoutType: WorkoutType) => {
   }, []);
 
   /**
-   * CORRIGIDO: Só pede Distância e Duração para caminhada
+   * Só pede Distância e Duração para caminhada
    */
   const saveCardioData = useCallback((data: {
     distance: number;

@@ -1,11 +1,15 @@
-// components/common/WeightRegistrationModal.tsx
+// src/components/common/WeightRegistrationModal.tsx
 import React, { useState, useEffect } from 'react';
 import { Exercise } from '../../types/workout.types';
 
 interface WeightRegistrationModalProps {
   isVisible: boolean;
   exercise: Exercise | null;
-  lastWeight?: number; // Novo: último peso utilizado
+  lastWeight?: number;
+  lastVariation?: string;
+  lastObservation?: string;
+  // ✅ NOVAS PROPS: Pesos por variação específica
+  weightsByVariation?: Record<string, { weight: number; observations?: string }>;
   onSave: (data: {
     weight: number;
     variationId?: number;
@@ -24,30 +28,84 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
   isVisible,
   exercise,
   lastWeight,
+  lastVariation,
+  lastObservation,
+  weightsByVariation,
   onSave,
   onCancel
 }) => {
   const [weight, setWeight] = useState('');
   const [selectedVariation, setSelectedVariation] = useState<number | undefined>();
+  const [selectedVariationName, setSelectedVariationName] = useState<string | undefined>();
   const [observations, setObservations] = useState('');
   
   const quickWeights = [2, 5, 7, 10];
-  
-  // Inicializar com o último peso quando o modal abrir
+  const hasVariations = exercise?.hasVariations && exercise?.variations && exercise.variations.length > 0;
+
+  // Atualizar peso e observação quando a variação selecionada mudar
   useEffect(() => {
-    if (exercise && isVisible) {
-      // Se tiver último peso, usar ele como valor inicial
-      if (lastWeight && lastWeight > 0) {
-        setWeight(lastWeight.toString());
+    if (selectedVariationName && weightsByVariation && weightsByVariation[selectedVariationName]) {
+      const variationData = weightsByVariation[selectedVariationName];
+      if (variationData.weight > 0) {
+        setWeight(variationData.weight.toString());
       } else {
         setWeight('');
       }
-      setSelectedVariation(undefined);
-      setObservations('');
-      
-      // Não focar automaticamente o input
+      if (variationData.observations) {
+        setObservations(variationData.observations);
+      } else {
+        setObservations('');
+      }
     }
-  }, [exercise, isVisible, lastWeight]);
+  }, [selectedVariationName, weightsByVariation]);
+
+  useEffect(() => {
+    if (exercise && isVisible) {
+      // Se já tem uma variação salva, usar o peso dela
+      if (lastVariation && weightsByVariation && weightsByVariation[lastVariation]) {
+        const variationData = weightsByVariation[lastVariation];
+        if (variationData.weight > 0) {
+          setWeight(variationData.weight.toString());
+        } else if (lastWeight && lastWeight > 0) {
+          setWeight(lastWeight.toString());
+        } else {
+          setWeight('');
+        }
+        if (variationData.observations) {
+          setObservations(variationData.observations);
+        } else if (lastObservation) {
+          setObservations(lastObservation);
+        } else {
+          setObservations('');
+        }
+      } else {
+        if (lastWeight && lastWeight > 0) {
+          setWeight(lastWeight.toString());
+        } else {
+          setWeight('');
+        }
+        if (lastObservation) {
+          setObservations(lastObservation);
+        } else {
+          setObservations('');
+        }
+      }
+      
+      if (lastVariation && exercise.variations) {
+        const foundVariation = exercise.variations.find(v => v.name === lastVariation);
+        if (foundVariation) {
+          setSelectedVariation(foundVariation.id);
+          setSelectedVariationName(foundVariation.name);
+        } else {
+          setSelectedVariation(undefined);
+          setSelectedVariationName(undefined);
+        }
+      } else {
+        setSelectedVariation(undefined);
+        setSelectedVariationName(undefined);
+      }
+    }
+  }, [exercise, isVisible, lastWeight, lastVariation, lastObservation, weightsByVariation]);
 
   const addQuickWeight = (quickWeight: number) => {
     const currentWeight = parseFloat(weight) || 0;
@@ -68,13 +126,23 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
   const handleCloseModal = () => {
     setWeight('');
     setSelectedVariation(undefined);
+    setSelectedVariationName(undefined);
     setObservations('');
     onCancel();
+  };
+
+  const handleVariationSelect = (variationId: number, variationName: string) => {
+    setSelectedVariation(variationId);
+    setSelectedVariationName(variationName);
   };
 
   const handleSave = () => {
     const weightNum = parseFloat(weight);
     if (isNaN(weightNum) || weightNum < 0) {
+      return;
+    }
+
+    if (hasVariations && !selectedVariation) {
       return;
     }
 
@@ -85,7 +153,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
     });
   };
 
-  const isValid = weight.trim() !== '' && parseFloat(weight) >= 0;
+  const isValid = weight.trim() !== '' && parseFloat(weight) >= 0 && (!hasVariations || selectedVariation);
 
   if (!isVisible || !exercise) return null;
 
@@ -118,12 +186,21 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
             {exercise.sets} × {exercise.reps}
           </p>
           
-          {/* Mostrar último peso se disponível */}
-          {lastWeight && lastWeight > 0 && (
-            <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-blue-500/20 
-              rounded-full border border-blue-500/30">
-              <i className="fas fa-history text-xs text-blue-400"></i>
-              <span className="text-xs text-blue-300">Último peso: <span className="font-bold">{lastWeight} kg</span></span>
+          {(lastWeight || lastVariation || lastObservation) && (
+            <div className="mt-2 inline-flex flex-col items-center gap-1 px-3 py-1 bg-blue-500/20 
+              rounded-lg border border-blue-500/30">
+              <span className="text-xs text-blue-300 font-medium">Último registro:</span>
+              <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
+                {lastWeight && lastWeight > 0 && (
+                  <span className="text-blue-300">🏋️ {lastWeight} kg</span>
+                )}
+                {lastVariation && (
+                  <span className="text-purple-300">🔄 {lastVariation}</span>
+                )}
+                {lastObservation && (
+                  <span className="text-green-300">📝 {lastObservation.length > 30 ? lastObservation.substring(0, 30) + '...' : lastObservation}</span>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -148,7 +225,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
               type="number"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              placeholder={lastWeight ? lastWeight.toString() : "0.0"}
+              placeholder="0.0"
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 sm:py-4 
                 text-white placeholder-gray-400 focus:outline-none focus:ring-2 
                 focus:ring-blue-500 text-center text-xl sm:text-2xl font-bold
@@ -158,7 +235,6 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
               min="0"
               max="500"
               inputMode="decimal"
-              // Removido o autoFocus
             />
             <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 
               text-gray-400 font-semibold pointer-events-none text-sm sm:text-base">
@@ -167,9 +243,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           </div>
           
           <div className="mt-3 sm:mt-4">
-            <p className="text-text-secondary text-xs sm:text-sm mb-2">
-              Peso rápido:
-            </p>
+            <p className="text-text-secondary text-xs sm:text-sm mb-2">Peso rápido:</p>
             
             <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-2 sm:mb-3">
               {quickWeights.map((quickWeight) => (
@@ -205,39 +279,60 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           </div>
         </div>
 
-        {exercise.hasVariations && exercise.variations && exercise.variations.length > 0 && (
+        {hasVariations && exercise.variations && exercise.variations.length > 0 && (
           <div className="mb-3 sm:mb-4">
             <label className="block text-text-secondary text-xs sm:text-sm mb-2">
-              Variação (opcional)
+              Variação <span className="text-red-400">* (obrigatória)</span>
             </label>
-            <div className="space-y-1.5 sm:space-y-2 max-h-32 sm:max-h-40 overflow-y-auto pr-1">
-              {exercise.variations.map((variation: ExerciseVariation) => (
-                <button
-                  key={variation.id}
-                  onClick={() => setSelectedVariation(
-                    selectedVariation === variation.id ? undefined : variation.id
-                  )}
-                  className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all ${
-                    selectedVariation === variation.id
-                      ? 'bg-gradient-to-r from-blue-600/30 to-blue-700/30 border border-blue-500/50'
-                      : 'bg-white/5 border border-white/10 hover:bg-white/10'
-                  }`}
-                  type="button"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-white text-sm sm:text-base">{variation.name}</span>
-                    {selectedVariation === variation.id && (
-                      <i className="fas fa-check text-blue-400 text-sm sm:text-base"></i>
-                    )}
-                  </div>
-                  {variation.description && (
-                    <p className="text-text-secondary text-xs mt-0.5 sm:mt-1">
-                      {variation.description}
-                    </p>
-                  )}
-                </button>
-              ))}
+            <div className="space-y-1.5 sm:space-y-2 max-h-48 sm:max-h-52 overflow-y-auto pr-1">
+              {exercise.variations.map((variation: ExerciseVariation) => {
+                // Buscar o peso específico desta variação
+                const variationWeightData = weightsByVariation?.[variation.name];
+                const hasCustomWeight = variationWeightData && variationWeightData.weight > 0;
+                
+                return (
+                  <button
+                    key={variation.id}
+                    onClick={() => handleVariationSelect(variation.id, variation.name)}
+                    className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all ${
+                      selectedVariation === variation.id
+                        ? 'bg-gradient-to-r from-blue-600/30 to-blue-700/30 border border-blue-500/50'
+                        : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                    }`}
+                    type="button"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-white text-sm sm:text-base">{variation.name}</span>
+                          {hasCustomWeight && (
+                            <span className="text-xs bg-blue-500/30 text-blue-300 px-2 py-0.5 rounded-full">
+                              🏋️ {variationWeightData.weight} kg
+                            </span>
+                          )}
+                          {variationWeightData?.observations && (
+                            <span className="text-xs bg-green-500/30 text-green-300 px-2 py-0.5 rounded-full">
+                              📝 {variationWeightData.observations.length > 20 
+                                ? variationWeightData.observations.substring(0, 20) + '...' 
+                                : variationWeightData.observations}
+                            </span>
+                          )}
+                        </div>
+                        {variation.description && (
+                          <p className="text-text-secondary text-xs mt-0.5">{variation.description}</p>
+                        )}
+                      </div>
+                      {selectedVariation === variation.id && (
+                        <i className="fas fa-check text-blue-400 text-sm sm:text-base ml-2"></i>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
+            {!selectedVariation && (
+              <p className="text-red-400 text-xs mt-2">⚠️ Selecione a variação realizada</p>
+            )}
           </div>
         )}
 
@@ -284,7 +379,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
             type="button"
           >
             <i className="fas fa-check mr-2"></i>
-            {isValid ? 'Salvar e Continuar' : 'Digite um peso válido'}
+            {isValid ? 'Salvar e Continuar' : hasVariations && !selectedVariation ? 'Selecione a variação' : 'Digite um peso válido'}
           </button>
         </div>
       </div>

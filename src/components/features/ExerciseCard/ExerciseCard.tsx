@@ -20,6 +20,8 @@ interface ExerciseCardProps {
     observations?: string;
   };
   lastWeight?: number;
+  lastVariation?: string;
+  lastObservation?: string;
   cardioData?: {
     distance: number;
     duration: number;
@@ -39,6 +41,8 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
   hasWeightData = false,
   weightData,
   lastWeight,
+  lastVariation,
+  lastObservation,
   cardioData
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -246,13 +250,32 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 {exercise.sets} séries
               </span>
               
-              {/* Mostrar último peso se disponível e exercício não concluído */}
-              {lastWeight && lastWeight > 0 && !localIsCompleted && !isLocked && (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 sm:px-4 sm:py-2
-                  bg-blue-500/20 text-blue-300 rounded-full text-xs sm:text-sm font-medium border border-blue-500/30">
-                  <i className="fas fa-history text-xs"></i>
-                  Último: {lastWeight} kg
-                </span>
+              {/* Último registro completo (peso + variação + observação) */}
+              {!localIsCompleted && !isLocked && (lastWeight || lastVariation || lastObservation) && (
+                <div className="flex flex-wrap items-center gap-1">
+                  <span className="text-xs text-blue-300">Último:</span>
+                  {lastWeight && lastWeight > 0 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1
+                      bg-blue-500/20 text-blue-300 rounded-full text-xs font-medium">
+                      <i className="fas fa-dumbbell text-xs"></i>
+                      {lastWeight} kg
+                    </span>
+                  )}
+                  {lastVariation && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1
+                      bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium">
+                      <i className="fas fa-exchange-alt text-xs"></i>
+                      {lastVariation}
+                    </span>
+                  )}
+                  {lastObservation && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1
+                      bg-green-500/20 text-green-300 rounded-full text-xs font-medium">
+                      <i className="fas fa-comment text-xs"></i>
+                      {lastObservation.length > 20 ? lastObservation.substring(0, 20) + '...' : lastObservation}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
             
@@ -313,7 +336,7 @@ const ExerciseCard: React.FC<ExerciseCardProps> = ({
               </div>
             )}
 
-            {/* Dados Registrados - Para exercícios de cardio (caminhada) - SOMENTE DISTÂNCIA E DURAÇÃO */}
+            {/* Dados Registrados - Para exercícios de cardio */}
             {cardioData && (
               <div className="mt-3 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">

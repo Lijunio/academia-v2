@@ -135,7 +135,6 @@ export const workoutService = {
     return data;
   },
 
-  // ✅ CORRIGIDO: Aceita 'A' | 'B' | '1' | '2' | '3'
   async getLastExerciseWeight(exerciseId: number, workoutType: 'A' | 'B' | '1' | '2' | '3'): Promise<number | null> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -166,7 +165,6 @@ export const workoutService = {
     }
   },
 
-  // ✅ CORRIGIDO: Aceita 'A' | 'B' | '1' | '2' | '3'
   async getExerciseWeightHistory(exerciseId: number, workoutType: 'A' | 'B' | '1' | '2' | '3'): Promise<Array<{ date: Date; weight: number }>> {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -199,6 +197,82 @@ export const workoutService = {
     } catch (error) {
       console.error('Erro ao buscar histórico de pesos:', error);
       return [];
+    }
+  },
+
+  // Buscar último registro completo de um exercício (geral)
+  async getLastExerciseRecord(exerciseId: number, workoutType: '1' | '2' | '3'): Promise<{
+    weight: number;
+    variationName?: string;
+    observations?: string;
+  } | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      
+      const { data, error } = await supabase
+        .from('workouts')
+        .select('details')
+        .eq('type', 'academia')
+        .eq('user_id', user.id)
+        .filter('details->>workoutType', 'eq', workoutType)
+        .order('date', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+
+      for (const workout of data || []) {
+        if (workout.details?.executionData && workout.details.executionData[exerciseId]) {
+          const exec = workout.details.executionData[exerciseId];
+          return {
+            weight: exec.weight || 0,
+            variationName: exec.variationName,
+            observations: exec.observations
+          };
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Erro ao buscar último registro:', error);
+      return null;
+    }
+  },
+
+  // ✅ NOVA FUNÇÃO: Buscar último registro por variação específica
+  async getLastExerciseRecordByVariation(exerciseId: number, variationName: string, workoutType: '1' | '2' | '3'): Promise<{
+    weight: number;
+    observations?: string;
+  } | null> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      
+      const { data, error } = await supabase
+        .from('workouts')
+        .select('details')
+        .eq('type', 'academia')
+        .eq('user_id', user.id)
+        .filter('details->>workoutType', 'eq', workoutType)
+        .order('date', { ascending: false })
+        .limit(30);
+
+      if (error) throw error;
+
+      for (const workout of data || []) {
+        if (workout.details?.executionData && workout.details.executionData[exerciseId]) {
+          const exec = workout.details.executionData[exerciseId];
+          if (exec.variationName === variationName) {
+            return {
+              weight: exec.weight || 0,
+              observations: exec.observations
+            };
+          }
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Erro ao buscar último registro por variação:', error);
+      return null;
     }
   }
 };

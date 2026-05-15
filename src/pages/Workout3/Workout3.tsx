@@ -6,7 +6,7 @@ import RestOverlay from '../../components/features/RestOverlay/RestOverlay';
 import ConfirmModal from '../../components/features/ExerciseCard/ConfirmModal';
 import SmartwatchConfirmModal from '../../components/common/SmartwatchConfirmModal';
 import WeightRegistrationModal from '../../components/common/WeightRegistrationModal';
-import CaloriesInputModal from '../../components/common/CaloriesInputModal';  // ← ADICIONAR ESTA LINHA
+import CaloriesInputModal from '../../components/common/CaloriesInputModal';
 import { Timer } from '../../components/common';
 import { useWorkoutLogic } from '../../hooks/useWorkoutLogic';
 import { workouts3DaysData } from '../../data/workouts3days.data';
@@ -14,6 +14,21 @@ import { workoutService } from '../../services/supabase.service';
 
 interface LastWeightData {
   [exerciseId: number]: number;
+}
+
+interface LastRecordData {
+  weight: number;
+  variationName?: string;
+  observations?: string;
+}
+
+interface WeightsByVariation {
+  [exerciseId: number]: {
+    [variationName: string]: {
+      weight: number;
+      observations?: string;
+    };
+  };
 }
 
 const Workout3: React.FC = () => {
@@ -59,6 +74,8 @@ const Workout3: React.FC = () => {
   const [exerciseOptions, setExerciseOptions] = useState<{ name: string; group: string }[]>([]);
   const [showResetModal, setShowResetModal] = useState(false);
   const [lastWeights, setLastWeights] = useState<LastWeightData>({});
+  const [lastRecords, setLastRecords] = useState<Record<number, LastRecordData>>({});
+  const [weightsByVariation, setWeightsByVariation] = useState<WeightsByVariation>({});
 
   useEffect(() => {
     console.log('📊 Workout3 - Estado atual:', {
@@ -71,20 +88,6 @@ const Workout3: React.FC = () => {
       }
     });
   }, [groups, exercises, session, isInitialized]);
-
-  useEffect(() => {
-    console.log('🚀 Workout3 - Iniciando inicialização...');
-    const workoutData = workouts3DaysData.workout3;
-    
-    if (workoutData && workoutData.exercises.length > 0) {
-      console.log('✅ Workout3 - Dados encontrados:', workoutData.exercises.length, 'exercícios');
-      initializeExercises(workoutData.exercises);
-      setIsInitialized(true);
-      loadLastWeights();
-    } else {
-      console.error('❌ Workout3 - Dados não encontrados!');
-    }
-  }, [initializeExercises]);
 
   const loadLastWeights = useCallback(async () => {
     try {
@@ -105,6 +108,75 @@ const Workout3: React.FC = () => {
       console.error('Erro ao carregar últimos pesos:', error);
     }
   }, []);
+
+  const loadLastRecords = useCallback(async () => {
+    try {
+      const records: Record<number, LastRecordData> = {};
+      const exercisesList = workouts3DaysData.workout3.exercises || [];
+      
+      for (const exercise of exercisesList) {
+        if (exercise.noWeight) continue;
+        const lastRecord = await workoutService.getLastExerciseRecord(exercise.id, '3');
+        if (lastRecord) {
+          records[exercise.id] = lastRecord;
+        }
+      }
+      
+      setLastRecords(records);
+      console.log('📊 Últimos registros carregados:', records);
+    } catch (error) {
+      console.error('Erro ao carregar últimos registros:', error);
+    }
+  }, []);
+
+  const loadWeightsByVariation = useCallback(async () => {
+    try {
+      const weights: WeightsByVariation = {};
+      const exercisesList = workouts3DaysData.workout3.exercises || [];
+      
+      for (const exercise of exercisesList) {
+        if (exercise.noWeight) continue;
+        if (!exercise.hasVariations || !exercise.variations) continue;
+        
+        weights[exercise.id] = {};
+        
+        for (const variation of exercise.variations) {
+          const lastRecord = await workoutService.getLastExerciseRecordByVariation(
+            exercise.id, 
+            variation.name, 
+            '3'
+          );
+          if (lastRecord) {
+            weights[exercise.id][variation.name] = {
+              weight: lastRecord.weight,
+              observations: lastRecord.observations
+            };
+          }
+        }
+      }
+      
+      setWeightsByVariation(weights);
+      console.log('📊 Pesos por variação carregados:', weights);
+    } catch (error) {
+      console.error('Erro ao carregar pesos por variação:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log('🚀 Workout3 - Iniciando inicialização...');
+    const workoutData = workouts3DaysData.workout3;
+    
+    if (workoutData && workoutData.exercises.length > 0) {
+      console.log('✅ Workout3 - Dados encontrados:', workoutData.exercises.length, 'exercícios');
+      initializeExercises(workoutData.exercises);
+      setIsInitialized(true);
+      loadLastWeights();
+      loadLastRecords();
+      loadWeightsByVariation();
+    } else {
+      console.error('❌ Workout3 - Dados não encontrados!');
+    }
+  }, [initializeExercises, loadLastWeights, loadLastRecords, loadWeightsByVariation]);
 
   useEffect(() => {
     if (session.workoutStarted) {
@@ -165,6 +237,8 @@ const Workout3: React.FC = () => {
       });
       
       await loadLastWeights();
+      await loadLastRecords();
+      await loadWeightsByVariation();
       
       navigate('/');
     } catch (error) {
@@ -233,7 +307,7 @@ const Workout3: React.FC = () => {
                   TREINO 3
                 </h1>
                 <p className="text-text-secondary uppercase tracking-wider text-sm font-inter">
-                  Pernas (Posterior + Anterior + Panturrilha) + Abdominal
+                  Pernas (Posterior + Anterior + Complemento) + Abdominal
                 </p>
               </div>
             </div>
@@ -348,6 +422,7 @@ const Workout3: React.FC = () => {
                           const isLocked = isExerciseLocked(exercise.id);
                           const execution = executionData[exercise.id];
                           const lastWeight = !exercise.noWeight ? lastWeights[exercise.id] : undefined;
+                          const lastRecord = lastRecords[exercise.id];
                           
                           return (
                             <ExerciseCard
@@ -368,6 +443,8 @@ const Workout3: React.FC = () => {
                                 observations: execution.observations
                               } : undefined}
                               lastWeight={lastWeight}
+                              lastVariation={lastRecord?.variationName}
+                              lastObservation={lastRecord?.observations}
                             />
                           );
                         })}
@@ -490,6 +567,9 @@ const Workout3: React.FC = () => {
         isVisible={showWeightModal}
         exercise={currentExerciseForWeight}
         lastWeight={currentExerciseForWeight ? lastWeights[currentExerciseForWeight.id] : undefined}
+        lastVariation={currentExerciseForWeight ? lastRecords[currentExerciseForWeight.id]?.variationName : undefined}
+        lastObservation={currentExerciseForWeight ? lastRecords[currentExerciseForWeight.id]?.observations : undefined}
+        weightsByVariation={currentExerciseForWeight ? weightsByVariation[currentExerciseForWeight.id] : undefined}
         onSave={saveWeightRegistration}
         onCancel={closeWeightModal}
       />

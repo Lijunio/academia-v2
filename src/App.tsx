@@ -11,8 +11,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login/Login';
 import Home from './pages/Home/Home';
 import AcademiaSelection from './pages/Academia/AcademiaSelection';
-import WorkoutA from './pages/WorkoutA/WorkoutA';
-import WorkoutB from './pages/WorkoutB/WorkoutB';
 import Workout1 from './pages/Workout1/Workout1';
 import Workout2 from './pages/Workout2/Workout2';
 import Workout3 from './pages/Workout3/Workout3';
@@ -41,19 +39,7 @@ function App() {
               <AcademiaSelection />
             </ProtectedRoute>
           } />
-          
-          {/* Treinos de 2 dias */}
-          <Route path="/workout-a" element={
-            <ProtectedRoute>
-              <WorkoutA />
-            </ProtectedRoute>
-          } />
-          <Route path="/workout-b" element={
-            <ProtectedRoute>
-              <WorkoutB />
-            </ProtectedRoute>
-          } />
-          
+                 
           {/* Treinos de 3 dias */}
           <Route path="/workout-1" element={
             <ProtectedRoute>

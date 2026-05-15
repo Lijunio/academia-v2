@@ -17,6 +17,21 @@ interface LastWeightData {
   [exerciseId: number]: number;
 }
 
+interface LastRecordData {
+  weight: number;
+  variationName?: string;
+  observations?: string;
+}
+
+interface WeightsByVariation {
+  [exerciseId: number]: {
+    [variationName: string]: {
+      weight: number;
+      observations?: string;
+    };
+  };
+}
+
 const Workout2: React.FC = () => {
   const navigate = useNavigate();
   
@@ -64,6 +79,8 @@ const Workout2: React.FC = () => {
   const [exerciseOptions, setExerciseOptions] = useState<{ name: string; group: string }[]>([]);
   const [showResetModal, setShowResetModal] = useState(false);
   const [lastWeights, setLastWeights] = useState<LastWeightData>({});
+  const [lastRecords, setLastRecords] = useState<Record<number, LastRecordData>>({});
+  const [weightsByVariation, setWeightsByVariation] = useState<WeightsByVariation>({});
 
   useEffect(() => {
     console.log('📊 Workout2 - Estado atual:', {
@@ -76,20 +93,6 @@ const Workout2: React.FC = () => {
       }
     });
   }, [groups, exercises, session, isInitialized]);
-
-  useEffect(() => {
-    console.log('🚀 Workout2 - Iniciando inicialização...');
-    const workoutData = workouts3DaysData.workout2;
-    
-    if (workoutData && workoutData.exercises.length > 0) {
-      console.log('✅ Workout2 - Dados encontrados:', workoutData.exercises.length, 'exercícios');
-      initializeExercises(workoutData.exercises);
-      setIsInitialized(true);
-      loadLastWeights();
-    } else {
-      console.error('❌ Workout2 - Dados não encontrados!');
-    }
-  }, [initializeExercises]);
 
   const loadLastWeights = useCallback(async () => {
     try {
@@ -110,6 +113,75 @@ const Workout2: React.FC = () => {
       console.error('Erro ao carregar últimos pesos:', error);
     }
   }, []);
+
+  const loadLastRecords = useCallback(async () => {
+    try {
+      const records: Record<number, LastRecordData> = {};
+      const exercisesList = workouts3DaysData.workout2.exercises || [];
+      
+      for (const exercise of exercisesList) {
+        if (exercise.noWeight || exercise.isCardio) continue;
+        const lastRecord = await workoutService.getLastExerciseRecord(exercise.id, '2');
+        if (lastRecord) {
+          records[exercise.id] = lastRecord;
+        }
+      }
+      
+      setLastRecords(records);
+      console.log('📊 Últimos registros carregados:', records);
+    } catch (error) {
+      console.error('Erro ao carregar últimos registros:', error);
+    }
+  }, []);
+
+  const loadWeightsByVariation = useCallback(async () => {
+    try {
+      const weights: WeightsByVariation = {};
+      const exercisesList = workouts3DaysData.workout2.exercises || [];
+      
+      for (const exercise of exercisesList) {
+        if (exercise.noWeight || exercise.isCardio) continue;
+        if (!exercise.hasVariations || !exercise.variations) continue;
+        
+        weights[exercise.id] = {};
+        
+        for (const variation of exercise.variations) {
+          const lastRecord = await workoutService.getLastExerciseRecordByVariation(
+            exercise.id, 
+            variation.name, 
+            '2'
+          );
+          if (lastRecord) {
+            weights[exercise.id][variation.name] = {
+              weight: lastRecord.weight,
+              observations: lastRecord.observations
+            };
+          }
+        }
+      }
+      
+      setWeightsByVariation(weights);
+      console.log('📊 Pesos por variação carregados:', weights);
+    } catch (error) {
+      console.error('Erro ao carregar pesos por variação:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log('🚀 Workout2 - Iniciando inicialização...');
+    const workoutData = workouts3DaysData.workout2;
+    
+    if (workoutData && workoutData.exercises.length > 0) {
+      console.log('✅ Workout2 - Dados encontrados:', workoutData.exercises.length, 'exercícios');
+      initializeExercises(workoutData.exercises);
+      setIsInitialized(true);
+      loadLastWeights();
+      loadLastRecords();
+      loadWeightsByVariation();
+    } else {
+      console.error('❌ Workout2 - Dados não encontrados!');
+    }
+  }, [initializeExercises, loadLastWeights, loadLastRecords, loadWeightsByVariation]);
 
   useEffect(() => {
     if (session.workoutStarted) {
@@ -170,6 +242,8 @@ const Workout2: React.FC = () => {
       });
       
       await loadLastWeights();
+      await loadLastRecords();
+      await loadWeightsByVariation();
       
       navigate('/');
     } catch (error) {
@@ -353,8 +427,8 @@ const Workout2: React.FC = () => {
                           const isLocked = isExerciseLocked(exercise.id);
                           const execution = executionData[exercise.id];
                           const lastWeight = !exercise.noWeight && !exercise.isCardio ? lastWeights[exercise.id] : undefined;
+                          const lastRecord = lastRecords[exercise.id];
                           
-                          // Extrair cardioData se existir
                           const cardioData = execution?.cardioData;
                           
                           return (
@@ -376,6 +450,8 @@ const Workout2: React.FC = () => {
                                 observations: execution.observations
                               } : undefined}
                               lastWeight={lastWeight}
+                              lastVariation={lastRecord?.variationName}
+                              lastObservation={lastRecord?.observations}
                               cardioData={cardioData}
                             />
                           );
@@ -499,6 +575,9 @@ const Workout2: React.FC = () => {
         isVisible={showWeightModal}
         exercise={currentExerciseForWeight}
         lastWeight={currentExerciseForWeight ? lastWeights[currentExerciseForWeight.id] : undefined}
+        lastVariation={currentExerciseForWeight ? lastRecords[currentExerciseForWeight.id]?.variationName : undefined}
+        lastObservation={currentExerciseForWeight ? lastRecords[currentExerciseForWeight.id]?.observations : undefined}
+        weightsByVariation={currentExerciseForWeight ? weightsByVariation[currentExerciseForWeight.id] : undefined}
         onSave={saveWeightRegistration}
         onCancel={closeWeightModal}
       />
