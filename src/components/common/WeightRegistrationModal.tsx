@@ -154,39 +154,41 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
   if (!isVisible || !exercise) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      {/* ✅ Adicionado max-h-[90vh] e flex flex-col para controle de altura */}
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      {/* Container principal - altura responsiva */}
       <div className="bg-gradient-to-br from-secondary-dark to-black rounded-2xl 
-        p-6 max-w-md w-full border border-white/10 relative max-h-[90vh] flex flex-col">
+        w-full max-w-md border border-white/10 relative flex flex-col
+        h-[98vh] sm:h-auto sm:max-h-[90vh]">
         
+        {/* Botão fechar - SEMPRE VISÍVEL */}
         <button
           onClick={handleCloseModal}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/10 
             hover:bg-white/20 transition-colors flex items-center justify-center
-            text-white hover:text-gray-300 z-10"
+            text-white hover:text-gray-300 z-20"
           title="Voltar (exercício ficará pendente)"
           type="button"
         >
           <i className="fas fa-times text-sm"></i>
         </button>
         
-        {/* ✅ Header - NÃO scrolla */}
-        <div className="flex-shrink-0">
-          <div className="text-center mb-4 sm:mb-6 pt-2">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-br 
+        {/* Header - FIXO NO TOPO */}
+        <div className="flex-shrink-0 px-4 sm:px-6 pt-6 pb-2">
+          <div className="text-center">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-3 rounded-full bg-gradient-to-br 
               from-orange-500 to-red-500 flex items-center justify-center">
               <i className="fas fa-dumbbell text-xl sm:text-2xl text-white"></i>
             </div>
             
-            <h3 className="text-lg sm:text-xl font-bold text-white mb-1 sm:mb-2">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
               {exercise.name}
             </h3>
-            <p className="text-text-secondary text-xs sm:text-sm mb-1">
-              {exercise.sets} × {exercise.reps}
+            <p className="text-text-secondary text-xs sm:text-sm">
+              {exercise.sets} × {exercise.reps || 10}
             </p>
             
             {(lastWeight || lastVariation || lastObservation) && (
-              <div className="mt-2 inline-flex flex-col items-center gap-1 px-3 py-1 bg-blue-500/20 
+              <div className="mt-2 inline-flex flex-col items-center gap-1 px-3 py-1.5 bg-blue-500/20 
                 rounded-lg border border-blue-500/30">
                 <span className="text-xs text-blue-300 font-medium">Último registro:</span>
                 <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
@@ -197,7 +199,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
                     <span className="text-purple-300">🔄 {lastVariation}</span>
                   )}
                   {lastObservation && (
-                    <span className="text-green-300">📝 {lastObservation.length > 30 ? lastObservation.substring(0, 30) + '...' : lastObservation}</span>
+                    <span className="text-green-300">📝 {lastObservation.length > 25 ? lastObservation.substring(0, 25) + '...' : lastObservation}</span>
                   )}
                 </div>
               </div>
@@ -205,16 +207,17 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           </div>
         </div>
 
-        {/* ✅ Conteúdo - COM SCROLL! */}
-        <div className="flex-1 overflow-y-auto px-1 space-y-4" style={{ maxHeight: 'calc(90vh - 280px)' }}>
-          <div className="mb-4">
+        {/* CONTEÚDO ROLÁVEL - O CORAÇÃO DA CORREÇÃO */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 space-y-5" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {/* Campo de Peso */}
+          <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-text-secondary text-xs sm:text-sm">
                 Peso (kg) <span className="text-red-400">*</span>
               </label>
               <button
                 onClick={clearWeight}
-                className="text-xs text-gray-400 hover:text-white transition-colors px-2 py-1"
+                className="text-xs text-gray-400 hover:text-white transition-colors"
                 type="button"
               >
                 <i className="fas fa-times mr-1"></i>
@@ -228,9 +231,9 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="0.0"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 sm:py-4 
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 
                   text-white placeholder-gray-400 focus:outline-none focus:ring-2 
-                  focus:ring-blue-500 text-center text-xl sm:text-2xl font-bold
+                  focus:ring-blue-500 text-center text-xl font-bold
                   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none 
                   [&::-webkit-inner-spin-button]:appearance-none"
                 step="0.5"
@@ -238,24 +241,24 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
                 max="500"
                 inputMode="decimal"
               />
-              <div className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 
-                text-gray-400 font-semibold pointer-events-none text-sm sm:text-base">
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 
+                text-gray-400 font-semibold pointer-events-none text-sm">
                 kg
               </div>
             </div>
             
-            <div className="mt-3 sm:mt-4">
-              <p className="text-text-secondary text-xs sm:text-sm mb-2">Peso rápido:</p>
+            <div className="mt-4">
+              <p className="text-text-secondary text-xs mb-2">Peso rápido:</p>
               
-              <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+              <div className="grid grid-cols-4 gap-2 mb-2">
                 {quickWeights.map((quickWeight) => (
                   <button
                     key={quickWeight}
                     onClick={() => addQuickWeight(quickWeight)}
                     onMouseDown={(e) => e.preventDefault()}
                     className="bg-gradient-to-br from-blue-600 to-blue-700 
-                      text-white rounded-lg py-2 sm:py-2.5 hover:opacity-90 transition-all 
-                      active:scale-95 font-medium text-xs sm:text-sm"
+                      text-white rounded-lg py-2 hover:opacity-90 transition-all 
+                      active:scale-95 font-medium text-sm"
                     type="button"
                   >
                     +{quickWeight}
@@ -263,15 +266,15 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
                 ))}
               </div>
               
-              <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-4 sm:mb-6">
+              <div className="grid grid-cols-4 gap-2">
                 {quickWeights.map((quickWeight) => (
                   <button
                     key={`minus-${quickWeight}`}
                     onClick={() => removeQuickWeight(quickWeight)}
                     onMouseDown={(e) => e.preventDefault()}
                     className="bg-gradient-to-br from-red-600 to-red-700 
-                      text-white rounded-lg py-2 sm:py-2.5 hover:opacity-90 transition-all 
-                      active:scale-95 font-medium text-xs sm:text-sm"
+                      text-white rounded-lg py-2 hover:opacity-90 transition-all 
+                      active:scale-95 font-medium text-sm"
                     type="button"
                   >
                     -{quickWeight}
@@ -281,13 +284,13 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
             </div>
           </div>
 
+          {/* Variações */}
           {hasVariations && exercise.variations && exercise.variations.length > 0 && (
-            <div className="mb-3 sm:mb-4">
-              <label className="block text-text-secondary text-xs sm:text-sm mb-2">
+            <div>
+              <label className="block text-text-secondary text-xs mb-2">
                 Variação <span className="text-red-400">* (obrigatória)</span>
               </label>
-              {/* ✅ Scroll vertical para variações */}
-              <div className="space-y-1.5 sm:space-y-2 max-h-48 sm:max-h-52 overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-52 overflow-y-auto pr-1" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {exercise.variations.map((variation: ExerciseVariation) => {
                   const variationWeightData = weightsByVariation?.[variation.name];
                   const hasCustomWeight = variationWeightData && variationWeightData.weight > 0;
@@ -296,7 +299,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
                     <button
                       key={variation.id}
                       onClick={() => handleVariationSelect(variation.id, variation.name)}
-                      className={`w-full text-left px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all ${
+                      className={`w-full text-left px-3 py-2.5 rounded-lg transition-all ${
                         selectedVariation === variation.id
                           ? 'bg-gradient-to-r from-blue-600/30 to-blue-700/30 border border-blue-500/50'
                           : 'bg-white/5 border border-white/10 hover:bg-white/10'
@@ -306,7 +309,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-white text-sm sm:text-base">{variation.name}</span>
+                            <span className="text-white text-sm font-medium">{variation.name}</span>
                             {hasCustomWeight && (
                               <span className="text-xs bg-blue-500/30 text-blue-300 px-2 py-0.5 rounded-full">
                                 🏋️ {variationWeightData.weight} kg
@@ -314,18 +317,18 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
                             )}
                             {variationWeightData?.observations && (
                               <span className="text-xs bg-green-500/30 text-green-300 px-2 py-0.5 rounded-full">
-                                📝 {variationWeightData.observations.length > 20 
-                                  ? variationWeightData.observations.substring(0, 20) + '...' 
+                                📝 {variationWeightData.observations.length > 15 
+                                  ? variationWeightData.observations.substring(0, 15) + '...' 
                                   : variationWeightData.observations}
                               </span>
                             )}
                           </div>
                           {variation.description && (
-                            <p className="text-text-secondary text-xs mt-0.5">{variation.description}</p>
+                            <p className="text-text-secondary text-xs mt-1">{variation.description}</p>
                           )}
                         </div>
                         {selectedVariation === variation.id && (
-                          <i className="fas fa-check text-blue-400 text-sm sm:text-base ml-2"></i>
+                          <i className="fas fa-check text-blue-400 text-sm ml-2 flex-shrink-0"></i>
                         )}
                       </div>
                     </button>
@@ -338,17 +341,18 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
             </div>
           )}
 
-          <div className="mb-4 sm:mb-6">
-            <label className="block text-text-secondary text-xs sm:text-sm mb-2">
+          {/* Observações */}
+          <div>
+            <label className="block text-text-secondary text-xs mb-2">
               Observações (opcional)
             </label>
             <textarea
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
               placeholder="Ex: Fácil, Pode aumentar, etc."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 sm:px-4 py-2 sm:py-3 
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 
                 text-white placeholder-gray-400 focus:outline-none focus:ring-2 
-                focus:ring-blue-500 resize-none h-20 sm:h-24 text-sm sm:text-base"
+                focus:ring-blue-500 resize-none h-20 text-sm"
               maxLength={200}
             />
             <div className="flex justify-between items-center mt-1">
@@ -358,7 +362,7 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
               {observations.length > 0 && (
                 <button
                   onClick={() => setObservations('')}
-                  className="text-xs text-gray-400 hover:text-white transition-colors px-2 py-1"
+                  className="text-xs text-gray-400 hover:text-white transition-colors"
                   type="button"
                 >
                   <i className="fas fa-times mr-1"></i>
@@ -369,13 +373,13 @@ const WeightRegistrationModal: React.FC<WeightRegistrationModalProps> = ({
           </div>
         </div>
 
-        {/* ✅ Botões - NÃO scrolla, fica fixo no final */}
-        <div className="flex-shrink-0 mt-4">
+        {/* BOTÃO SALVAR - FIXO NO FINAL */}
+        <div className="flex-shrink-0 p-4 sm:p-6 pt-2 border-t border-white/10">
           <button
             onClick={handleSave}
             disabled={!isValid}
-            className={`w-full py-3 sm:py-4 font-bold rounded-xl transition-all 
-              hover:scale-[1.02] active:scale-[0.98] text-sm sm:text-lg ${
+            className={`w-full py-3 font-bold rounded-xl transition-all 
+              active:scale-[0.98] text-base ${
                 isValid
                   ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:opacity-90'
                   : 'bg-gray-700 text-gray-400 cursor-not-allowed'
